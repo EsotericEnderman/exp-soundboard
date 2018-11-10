@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox minHeight="610.0" minWidth="490.0" prefHeight="610.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox minHeight="610.0" minWidth="490.0" prefHeight="610.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menuController">
    <children>
       <MenuBar VBox.vgrow="NEVER">
          <menus>

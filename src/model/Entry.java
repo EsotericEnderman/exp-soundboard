@@ -1,12 +1,24 @@
 package model;
 
 public class Entry {
-	
-	//private File soundFile;
+
+	private SoundFile soundFile;
 	private int[] keyNumbers;
 
-	public Entry() {
-		// TODO Auto-generated constructor stub
+	public Entry(SoundFile file, int[] keys) {
+		soundFile = file;
+		keyNumbers = keys;
+	}
+
+	public SoundFile getFile() {
+		return soundFile;
+	}
+
+	public boolean checkKeys(int[] matches) {
+		for (int i = 0; i < matches.length; i++) {
+			
+		}
+		return false;
 	}
 
 }

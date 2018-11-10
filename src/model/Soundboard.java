@@ -10,5 +10,13 @@ public class Soundboard {
 	public Soundboard() {
 		entries = new ArrayList<Entry>();
 	}
+	
+	public void addEntry(Entry entry) {
+		entries.add(entry);
+	}
+	
+	public void removeEntry(Entry entry) {
+		entries.remove(entry);
+	}
 
 }

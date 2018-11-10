@@ -22,24 +22,26 @@ public class GlobalKeyListenerTest implements NativeKeyListener {
 		
 		GlobalScreen.addNativeKeyListener(new GlobalKeyListenerTest());
 	}
-
-	public GlobalKeyListenerTest() {
-		
+	
+	public String keyToReadable(NativeKeyEvent nativeEvent) {
+		String param = nativeEvent.paramString();
+		String[] params = param.split(",");
+		return null;
 	}
 
 	@Override
 	public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
-		System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(nativeEvent.getKeyCode()));
+		System.out.print(keyToReadable(nativeEvent));
 	}
 	
 	@Override
 	public void nativeKeyReleased(NativeKeyEvent nativeEvent) {
-		System.out.println("Key Released: " + NativeKeyEvent.getKeyText(nativeEvent.getKeyCode()));
+		//System.out.println("Key Released: " + NativeKeyEvent.getKeyText(nativeEvent.getKeyCode()));
 	}
 	
 	@Override
 	public void nativeKeyTyped(NativeKeyEvent nativeEvent) {
-		System.out.println("Key Typed: " + NativeKeyEvent.getKeyText(nativeEvent.getKeyCode()));
+		//System.out.println("Key Typed: " + NativeKeyEvent.getKeyText(nativeEvent.getKeyCode()));
 	}
 
 }
