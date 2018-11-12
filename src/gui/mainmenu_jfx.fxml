@@ -20,30 +20,30 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox minHeight="610.0" minWidth="490.0" prefHeight="610.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menuController">
+<VBox minHeight="610.0" minWidth="490.0" prefHeight="610.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MenuController">
    <children>
       <MenuBar VBox.vgrow="NEVER">
          <menus>
             <Menu mnemonicParsing="false" text="File">
                <items>
-                  <MenuItem mnemonicParsing="false" text="New" />
-                  <MenuItem mnemonicParsing="false" text="Open…" />
+                  <MenuItem fx:id="newMenuButton" mnemonicParsing="false" text="New" />
+                  <MenuItem fx:id="openMenuButton" mnemonicParsing="false" text="Open…" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Close" />
-                  <MenuItem mnemonicParsing="false" text="Save" />
-                  <MenuItem mnemonicParsing="false" text="Save As…" />
+                  <MenuItem fx:id="closeMenuButton" mnemonicParsing="false" text="Close" />
+                  <MenuItem fx:id="saveMenuButton" mnemonicParsing="false" text="Save" />
+                  <MenuItem fx:id="saveAsMenuButton" mnemonicParsing="false" text="Save As…" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Github Page" />
+                  <MenuItem fx:id="webpageMenuButton" mnemonicParsing="false" text="Github Page" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Quit" />
+                  <MenuItem fx:id="quitMenuButton" mnemonicParsing="false" text="Quit" />
                </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Option">
                <items>
-                  <MenuItem mnemonicParsing="false" text="Settings" />
-                  <MenuItem mnemonicParsing="false" text="Audio Levels" />
+                  <MenuItem fx:id="settingsMenuButton" mnemonicParsing="false" text="Settings" />
+                  <MenuItem fx:id="levelsMenuButton" mnemonicParsing="false" text="Audio Levels" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" text="Audio Converter" />
+                  <MenuItem fx:id="converterMenuButton" mnemonicParsing="false" text="Audio Converter" />
                </items>
             </Menu>
          </menus>
@@ -70,21 +70,21 @@
                            <left>
                               <FlowPane hgap="5.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <Button mnemonicParsing="false" prefWidth="50.0" text="Add">
+                                    <Button fx:id="addButton" mnemonicParsing="false" prefWidth="50.0" text="Add">
                                        <FlowPane.margin>
                                           <Insets />
                                        </FlowPane.margin>
                                     </Button>
-                                    <Button mnemonicParsing="false" prefWidth="70.0" text="Remove" />
-                                    <Button mnemonicParsing="false" prefWidth="50.0" text="Edit" />
+                                    <Button fx:id="removeButton" mnemonicParsing="false" prefWidth="70.0" text="Remove" />
+                                    <Button fx:id="editButton" mnemonicParsing="false" prefWidth="50.0" text="Edit" />
                                  </children>
                               </FlowPane>
                            </left>
                            <right>
                               <FlowPane alignment="TOP_RIGHT" hgap="5.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <Button mnemonicParsing="false" prefWidth="55.0" text="Play" />
-                                    <Button mnemonicParsing="false" prefWidth="70.0" text="Stop All" />
+                                    <Button fx:id="playButton" mnemonicParsing="false" prefWidth="55.0" text="Play" />
+                                    <Button fx:id="stopButton" mnemonicParsing="false" prefWidth="70.0" text="Stop All" />
                                  </children>
                               </FlowPane>
                            </right>
@@ -93,7 +93,7 @@
                         <Label text="2nd Output (e.g. virtual audio cable &quot;input&quot;)(optional)" GridPane.rowIndex="3" />
                         <BorderPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
                            <right>
-                              <CheckBox mnemonicParsing="false" text="Use" BorderPane.alignment="CENTER">
+                              <CheckBox fx:id="secondarySpeakerCheck" mnemonicParsing="false" text="Use" BorderPane.alignment="CENTER">
                                  <padding>
                                     <Insets right="5.0" />
                                  </padding>
@@ -102,7 +102,7 @@
                            <center>
                               <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <ComboBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <ComboBox fx:id="secondarySpeakerCombo" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                                  <padding>
                                     <Insets right="10.0" />
@@ -112,20 +112,20 @@
                         </BorderPane>
                         <AnchorPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
                            <children>
-                              <ComboBox prefWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <ComboBox fx:id="primarySpeakerCombo" prefWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
                         <Separator prefWidth="200.0" GridPane.rowIndex="5" />
                         <BorderPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="6">
                            <left>
-                              <CheckBox mnemonicParsing="false" text="Use Mic Injector (see Option -&gt; Settings)" BorderPane.alignment="CENTER">
+                              <CheckBox fx:id="injectorCheck" mnemonicParsing="false" text="Use Mic Injector (see Option -&gt; Settings)" BorderPane.alignment="CENTER">
                                  <padding>
                                     <Insets left="5.0" />
                                  </padding>
                               </CheckBox>
                            </left>
                            <right>
-                              <CheckBox mnemonicParsing="false" text="Auto-hold PTT key(s)" BorderPane.alignment="CENTER">
+                              <CheckBox fx:id="pttHoldCheck" mnemonicParsing="false" text="Auto-hold PTT key(s)" BorderPane.alignment="CENTER">
                                  <padding>
                                     <Insets right="5.0" />
                                  </padding>
@@ -143,7 +143,7 @@
          <top>
             <AnchorPane BorderPane.alignment="CENTER">
                <children>
-                  <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <TableView fx:id="EntryTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <columns>
                         <TableColumn prefWidth="75.0" text="Sound Clip" />
                         <TableColumn prefWidth="75.0" text="Hotkeys" />
