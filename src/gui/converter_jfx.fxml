@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<Pane minHeight="195.0" minWidth="470.0" prefHeight="195.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="converterController">
+<Pane minHeight="195.0" minWidth="470.0" prefHeight="195.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ConverterController">
    <children>
       <AnchorPane prefHeight="195.0" prefWidth="470.0">
          <children>

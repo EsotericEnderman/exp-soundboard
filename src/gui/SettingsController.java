@@ -8,44 +8,65 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 
 public class SettingsController {
-	
+
 	@FXML
-    private TextField stopAllField;
+	private TextField stopAllField;
 
-    @FXML
-    private TextField playbackComboField;
+	@FXML
+	private TextField playbackComboField;
 
-    @FXML
-    private Spinner<?> playbackMultField;
+	@FXML
+	private Spinner<?> playbackMultField;
 
-    @FXML
-    private TextField speedIncField;
+	@FXML
+	private TextField speedIncField;
 
-    @FXML
-    private TextField speedDecField;
+	@FXML
+	private TextField speedDecField;
 
-    @FXML
-    private TextField pushToTalkField;
+	@FXML
+	private TextField pushToTalkField;
 
-    @FXML
-    private CheckBox overlapSameCheck;
+	@FXML
+	private CheckBox overlapSameCheck;
 
-    @FXML
-    private TextField overlapSameField;
+	@FXML
+	private TextField overlapSameField;
 
-    @FXML
-    private ComboBox<?> microphoneCombo;
+	@FXML
+	private ComboBox<?> microphoneCombo;
 
-    @FXML
-    private ComboBox<?> audioCableCombo;
+	@FXML
+	private ComboBox<?> audioCableCombo;
 
-    @FXML
-    private CheckBox updateCheckBox;
+	@FXML
+	private CheckBox updateCheckBox;
 
-    @FXML
-    private Button websiteButton;
+	@FXML
+	private Button websiteButton;
 
-    @FXML
-    private Button updateCheckButton;
+	@FXML
+	private Button updateCheckButton;
+
+	public SettingsController() {
+		// TODO Auto-generated constructor stub
+	}
+
+	@FXML
+	void initialize() {
+		assert stopAllField != null : "fx:id=\"stopAllField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert playbackComboField != null : "fx:id=\"playbackComboField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert playbackMultField != null : "fx:id=\"playbackMultField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert speedIncField != null : "fx:id=\"speedIncField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert speedDecField != null : "fx:id=\"speedDecField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert pushToTalkField != null : "fx:id=\"pushToTalkField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert overlapSameCheck != null : "fx:id=\"overlapSameCheck\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert overlapSameField != null : "fx:id=\"overlapSameField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert microphoneCombo != null : "fx:id=\"microphoneCombo\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert audioCableCombo != null : "fx:id=\"audioCableCombo\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert updateCheckBox != null : "fx:id=\"updateCheckBox\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert websiteButton != null : "fx:id=\"websiteButton\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+		assert updateCheckButton != null : "fx:id=\"updateCheckButton\" was not injected: check your FXML file 'settings_jfx.fxml'.";
+	}
 
 }
