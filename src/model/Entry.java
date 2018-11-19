@@ -15,9 +15,7 @@ public class Entry {
 	}
 
 	public boolean checkKeys(int[] matches) {
-		for (int i = 0; i < matches.length; i++) {
-			
-		}
+		// check all of the required keys are down
 		return false;
 	}
 

@@ -9,7 +9,8 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-public class SoundFile {
+public class SoundFile { // TODO possibly remove overuse of stop and close, the clip object probably
+							// holds some data, doesn't need to be reset so often
 
 	private AudioInputStream audioInputStream;
 	private File soundFile;
@@ -21,6 +22,10 @@ public class SoundFile {
 		audioInputStream = AudioSystem.getAudioInputStream(soundFile);
 		clip = AudioSystem.getClip();
 		clip.open(audioInputStream);
+	}
+
+	public final File getFile() {
+		return soundFile;
 	}
 
 	public void play() {

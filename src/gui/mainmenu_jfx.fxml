@@ -70,21 +70,21 @@
                            <left>
                               <FlowPane hgap="5.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <Button fx:id="addButton" mnemonicParsing="false" prefWidth="50.0" text="Add">
+                                    <Button fx:id="addButton" mnemonicParsing="false" onAction="#onAddPressed" prefWidth="50.0" text="Add">
                                        <FlowPane.margin>
                                           <Insets />
                                        </FlowPane.margin>
                                     </Button>
-                                    <Button fx:id="removeButton" mnemonicParsing="false" prefWidth="70.0" text="Remove" />
-                                    <Button fx:id="editButton" mnemonicParsing="false" prefWidth="50.0" text="Edit" />
+                                    <Button fx:id="removeButton" mnemonicParsing="false" onAction="#onRemovePressed" prefWidth="70.0" text="Remove" />
+                                    <Button fx:id="editButton" mnemonicParsing="false" onAction="#onEditPressed" prefWidth="50.0" text="Edit" />
                                  </children>
                               </FlowPane>
                            </left>
                            <right>
                               <FlowPane alignment="TOP_RIGHT" hgap="5.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <Button fx:id="playButton" mnemonicParsing="false" prefWidth="55.0" text="Play" />
-                                    <Button fx:id="stopButton" mnemonicParsing="false" prefWidth="70.0" text="Stop All" />
+                                    <Button fx:id="playButton" mnemonicParsing="false" onAction="#onPlayPressed" prefWidth="55.0" text="Play" />
+                                    <Button fx:id="stopButton" mnemonicParsing="false" onAction="#onStopPressed" prefWidth="70.0" text="Stop All" />
                                  </children>
                               </FlowPane>
                            </right>
@@ -143,7 +143,7 @@
          <top>
             <AnchorPane BorderPane.alignment="CENTER">
                <children>
-                  <TableView fx:id="EntryTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <TableView fx:id="entryTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <columns>
                         <TableColumn prefWidth="75.0" text="Sound Clip" />
                         <TableColumn prefWidth="75.0" text="Hotkeys" />

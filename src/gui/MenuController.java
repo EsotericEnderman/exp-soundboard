@@ -1,7 +1,5 @@
 package gui;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -72,14 +70,14 @@ public class MenuController {
 	private CheckBox pttHoldCheck;
 
 	@FXML
-	private TableView<?> EntryTable;
+	private TableView<?> entryTable;
 
 	public MenuController() {
 		// TODO Auto-generated constructor stub
 	}
 
 	@FXML
-	void initialize() {
+	public void initialize() {
 		assert newMenuButton != null : "fx:id=\"newMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert openMenuButton != null : "fx:id=\"openMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert closeMenuButton != null : "fx:id=\"closeMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
@@ -100,8 +98,64 @@ public class MenuController {
 		assert primarySpeakerCombo != null : "fx:id=\"primarySpeakerCombo\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert injectorCheck != null : "fx:id=\"injectorCheck\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert pttHoldCheck != null : "fx:id=\"pttHoldCheck\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
-		assert EntryTable != null : "fx:id=\"EntryTable\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
+		assert entryTable != null : "fx:id=\"EntryTable\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 
 	}
+	
+	public void onAddPressed() {
+		// TODO open add entry menu
+	}
+	
+	public void onRemovePressed() {
+		// TODO poll for table selected, notify model if so
+	}
+	
+	public void onEditPressed() {
+		// TODO open edit entry menu
+	}
+	
+	public void onPlayPressed() {
+		// TODO poll for selected, tell audio man to play
+	}
 
+	public void onStopPressed() {
+		// TODO tell audio man to stop, regardless of playing audio
+	}
+	
+	public void onNewMenuPressed() {
+		// TODO check for unsaved, reset model, 
+	}
+	
+	public void onOpenMenuPressed() {
+		// TODO open file picker, send to file parser
+	}
+	
+	public void onSaveMenuPressed() {
+		// TODO open file picker, send destination to file parser
+	}
+	
+	public void onSaveAsMenuPressed() {
+		
+	}
+	
+	public void onWebpageMenuPressed() {
+		
+	}
+	
+	public void onQuitMenuPressed() {
+		
+	}
+	
+	public void onSettingsMenuPressed() {
+		
+	}
+	
+	public void onLevelsMenuPressed() {
+		
+	}
+	
+	public void onConverterMenuPressed() {
+		
+	}
+	
 }

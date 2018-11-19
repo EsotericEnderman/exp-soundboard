@@ -1,7 +1,5 @@
 package gui;
 
-import java.net.URL;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -22,38 +20,39 @@ public class Soundboard extends Application {
 	public ConverterController converterController;
 
 	public static void main(String[] args) {
-		launch(args);
+		launch(Soundboard.class, args);
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(Soundboard.class.getResource("mainmenu_jfx.fxml"));
+		loader.setLocation(getClass().getResource("mainmenu_jfx.fxml"));
 		mainMenu = loader.<VBox>load();
 		menuController = loader.<MenuController>getController();
-		menuController.initialize();
 
 		loader = new FXMLLoader();
-		loader.setLocation(Soundboard.class.getResource("settings_jfx.fxml"));
+		loader.setLocation(getClass().getResource("settings_jfx.fxml"));
 		settings = loader.<VBox>load();
 		settingsController = loader.<SettingsController>getController();
-		settingsController.initialize();
 
 		loader = new FXMLLoader();
-		loader.setLocation(Soundboard.class.getResource("entrymenu_jfx.fxml"));
+		loader.setLocation(getClass().getResource("entrymenu_jfx.fxml"));
 		entryMenu = loader.<VBox>load();
 		entryController = loader.<EntryController>getController();
-		entryController.initialize();
 
 		loader = new FXMLLoader();
-		loader.setLocation(Soundboard.class.getResource("converter_jfx.fxml"));
+		loader.setLocation(getClass().getResource("converter_jfx.fxml"));
 		converter = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
-		converterController.initialize();
 
 		Scene scene = new Scene(mainMenu);
 		primaryStage.setScene(scene);
 		primaryStage.show();
+
+		menuController.initialize();
+		settingsController.initialize();
+		entryController.initialize();
+		converterController.initialize();
 	}
 
 }
