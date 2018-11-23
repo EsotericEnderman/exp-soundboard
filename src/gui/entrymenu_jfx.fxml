@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="170.0" prefWidth="525.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.EntryController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="170.0" prefWidth="525.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.EntryController">
    <children>
       <AnchorPane prefHeight="170.0" prefWidth="525.0">
          <children>
@@ -33,7 +33,7 @@
                   <FlowPane prefHeight="200.0" prefWidth="200.0">
                      <children>
                         <Label text="Sound clip:" />
-                        <Button fx:id="selectButton" mnemonicParsing="false" prefWidth="60.0" text="Select">
+                        <Button fx:id="selectButton" mnemonicParsing="false" onAction="#onSelectClicked" prefWidth="60.0" text="Select">
                            <FlowPane.margin>
                               <Insets left="7.0" />
                            </FlowPane.margin>
@@ -43,13 +43,13 @@
                   <Label fx:id="selectionText" text="None selected" GridPane.rowIndex="1" />
                   <Separator prefWidth="200.0" GridPane.rowIndex="2" />
                   <Label text="HotKeys:" GridPane.rowIndex="3" />
-                  <TextField fx:id="hotkeyField" GridPane.rowIndex="4" />
+                  <TextField fx:id="hotkeyField" editable="false" onMouseClicked="#onFieldClicked" GridPane.rowIndex="4" />
                   <BorderPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="5">
                      <left>
                         <Label text="*Right-click to clear hotkeys" BorderPane.alignment="CENTER" />
                      </left>
                      <right>
-                        <Button fx:id="doneButton" mnemonicParsing="false" prefWidth="55.0" text="Done" BorderPane.alignment="CENTER" />
+                        <Button fx:id="doneButton" mnemonicParsing="false" onAction="#onDonePressed" prefWidth="55.0" text="Done" BorderPane.alignment="CENTER" />
                      </right>
                   </BorderPane>
                </children>

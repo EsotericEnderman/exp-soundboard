@@ -1,5 +1,9 @@
 package gui;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -8,76 +12,91 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableView;
 
 public class MenuController {
+	
+	private Soundboard parent;
 
-	@FXML
-	private MenuItem newMenuButton;
+	@FXML // ResourceBundle that was given to the FXMLLoader
+	private ResourceBundle resources;
 
-	@FXML
-	private MenuItem openMenuButton;
+	@FXML // URL location of the FXML file that was given to the FXMLLoader
+	private URL location;
 
-	@FXML
-	private MenuItem closeMenuButton;
+	// --- 1st Menu Items --- //
 
-	@FXML
-	private MenuItem saveMenuButton;
+	@FXML // fx:id="newMenuButton"
+	private MenuItem newMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private MenuItem saveAsMenuButton;
+	@FXML // fx:id="openMenuButton"
+	private MenuItem openMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private MenuItem webpageMenuButton;
+	@FXML // fx:id="closeMenuButton"
+	private MenuItem closeMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private MenuItem quitMenuButton;
+	@FXML // fx:id="saveMenuButton"
+	private MenuItem saveMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private MenuItem settingsMenuButton;
+	@FXML // fx:id="saveAsMenuButton"
+	private MenuItem saveAsMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private MenuItem levelsMenuButton;
+	@FXML // fx:id="webpageMenuButton"
+	private MenuItem webpageMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private MenuItem converterMenuButton;
+	@FXML // fx:id="quitMenuButton"
+	private MenuItem quitMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private Button addButton;
+	// --- 2nd Menu Items --- //
 
-	@FXML
-	private Button removeButton;
+	@FXML // fx:id="settingsMenuButton"
+	private MenuItem settingsMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private Button editButton;
+	@FXML // fx:id="levelsMenuButton"
+	private MenuItem levelsMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private Button playButton;
+	@FXML // fx:id="converterMenuButton"
+	private MenuItem converterMenuButton; // Value injected by FXMLLoader
 
-	@FXML
-	private Button stopButton;
+	// --- Control Buttons --- //
 
-	@FXML
-	private CheckBox secondarySpeakerCheck;
+	@FXML // fx:id="addButton"
+	private Button addButton; // Value injected by FXMLLoader
 
-	@FXML
-	private ComboBox<?> secondarySpeakerCombo;
+	@FXML // fx:id="removeButton"
+	private Button removeButton; // Value injected by FXMLLoader
 
-	@FXML
-	private ComboBox<?> primarySpeakerCombo;
+	@FXML // fx:id="editButton"
+	private Button editButton; // Value injected by FXMLLoader
 
-	@FXML
-	private CheckBox injectorCheck;
+	@FXML // fx:id="playButton"
+	private Button playButton; // Value injected by FXMLLoader
 
-	@FXML
-	private CheckBox pttHoldCheck;
+	@FXML // fx:id="stopButton"
+	private Button stopButton; // Value injected by FXMLLoader
 
-	@FXML
-	private TableView<?> entryTable;
+	// --- Other items --- //
+
+	@FXML // fx:id="secondarySpeakerCheck"
+	private CheckBox secondarySpeakerCheck; // Value injected by FXMLLoader
+
+	@FXML // fx:id="secondarySpeakerCombo"
+	private ComboBox<?> secondarySpeakerCombo; // Value injected by FXMLLoader
+
+	@FXML // fx:id="primarySpeakerCombo"
+	private ComboBox<?> primarySpeakerCombo; // Value injected by FXMLLoader
+
+	@FXML // fx:id="injectorCheck"
+	private CheckBox injectorCheck; // Value injected by FXMLLoader
+
+	@FXML // fx:id="pttHoldCheck"
+	private CheckBox pttHoldCheck; // Value injected by FXMLLoader
+
+	@FXML // fx:id="entryTable"
+	private TableView<?> entryTable; // Value injected by FXMLLoader
 
 	public MenuController() {
-		// TODO Auto-generated constructor stub
 	}
 
-	@FXML
-	public void initialize() {
+	@FXML // This method is called by the FXMLLoader when initialization is complete
+	public void initialize(Soundboard parent) {
 		assert newMenuButton != null : "fx:id=\"newMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert openMenuButton != null : "fx:id=\"openMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert closeMenuButton != null : "fx:id=\"closeMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
@@ -100,62 +119,84 @@ public class MenuController {
 		assert pttHoldCheck != null : "fx:id=\"pttHoldCheck\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert entryTable != null : "fx:id=\"EntryTable\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 
-	}
-	
-	public void onAddPressed() {
-		// TODO open add entry menu
-	}
-	
-	public void onRemovePressed() {
-		// TODO poll for table selected, notify model if so
-	}
-	
-	public void onEditPressed() {
-		// TODO open edit entry menu
-	}
-	
-	public void onPlayPressed() {
-		// TODO poll for selected, tell audio man to play
+		this.parent = parent;
 	}
 
-	public void onStopPressed() {
-		// TODO tell audio man to stop, regardless of playing audio
+	@FXML
+	void onAddPressed(ActionEvent event) {
+		EntryModel selected = (EntryModel) entryTable.getSelectionModel().getSelectedItem();
+		parent.entryController.start(selected.getEntry());
 	}
-	
-	public void onNewMenuPressed() {
-		// TODO check for unsaved, reset model, 
+
+	@FXML
+	void onEditPressed(ActionEvent event) {
+
 	}
-	
-	public void onOpenMenuPressed() {
+
+	@FXML
+	void onPlayPressed(ActionEvent event) {
+
+	}
+
+	@FXML
+	void onRemovePressed(ActionEvent event) {
+
+	}
+
+	@FXML
+	void onStopPressed(ActionEvent event) {
+
+	}
+
+	@FXML
+	void onNewMenuPressed(ActionEvent event) {
+		// TODO check for unsaved, reset model,
+	}
+
+	@FXML
+	void onOpenMenuPressed(ActionEvent event) {
 		// TODO open file picker, send to file parser
 	}
-	
-	public void onSaveMenuPressed() {
+
+	@FXML
+	void onCloseMenuPressed(ActionEvent event) {
+		// TODO poll if working file has been saved, if so ask user before, then close
+		// everything
+	}
+
+	@FXML
+	void onSaveMenuPressed(ActionEvent event) {
 		// TODO open file picker, send destination to file parser
 	}
-	
-	public void onSaveAsMenuPressed() {
-		
+
+	@FXML
+	void onSaveAsMenuPressed(ActionEvent event) {
+
 	}
-	
-	public void onWebpageMenuPressed() {
-		
+
+	@FXML
+	void onWebpageMenuPressed(ActionEvent event) {
+
 	}
-	
-	public void onQuitMenuPressed() {
-		
+
+	@FXML
+	void onQuitMenuPressed(ActionEvent event) {
+
 	}
-	
-	public void onSettingsMenuPressed() {
-		
+
+	@FXML
+	void onSettingsMenuPressed(ActionEvent event) {
+
 	}
-	
-	public void onLevelsMenuPressed() {
-		
+
+	@FXML
+	void onLevelsMenuPressed(ActionEvent event) {
+
 	}
-	
-	public void onConverterMenuPressed() {
-		
+
+	@FXML
+	void onConverterMenuPressed(ActionEvent event) {
+
 	}
-	
+
 }

@@ -31,7 +31,9 @@ public class GlobalKeyListenerTest implements NativeKeyListener {
 
 	@Override
 	public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
-		System.out.print(keyToReadable(nativeEvent));
+		System.out.println(NativeKeyEvent.getKeyText(nativeEvent.getKeyCode()));
+		System.out.println(NativeKeyEvent.getModifiersText(nativeEvent.getModifiers()));
+		System.out.println();
 	}
 	
 	@Override

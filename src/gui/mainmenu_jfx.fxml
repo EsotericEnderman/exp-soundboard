@@ -20,30 +20,30 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox minHeight="610.0" minWidth="490.0" prefHeight="610.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MenuController">
+<VBox minHeight="610.0" minWidth="490.0" prefHeight="610.0" prefWidth="490.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MenuController">
    <children>
       <MenuBar VBox.vgrow="NEVER">
          <menus>
             <Menu mnemonicParsing="false" text="File">
                <items>
-                  <MenuItem fx:id="newMenuButton" mnemonicParsing="false" text="New" />
-                  <MenuItem fx:id="openMenuButton" mnemonicParsing="false" text="Open…" />
+                  <MenuItem fx:id="newMenuButton" mnemonicParsing="false" onAction="#onNewMenuPressed" text="New" />
+                  <MenuItem fx:id="openMenuButton" mnemonicParsing="false" onAction="#onOpenMenuPressed" text="Open…" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="closeMenuButton" mnemonicParsing="false" text="Close" />
-                  <MenuItem fx:id="saveMenuButton" mnemonicParsing="false" text="Save" />
-                  <MenuItem fx:id="saveAsMenuButton" mnemonicParsing="false" text="Save As…" />
+                  <MenuItem fx:id="closeMenuButton" mnemonicParsing="false" onAction="#onCloseMenuPressed" text="Close" />
+                  <MenuItem fx:id="saveMenuButton" mnemonicParsing="false" onAction="#onSaveMenuPressed" text="Save" />
+                  <MenuItem fx:id="saveAsMenuButton" mnemonicParsing="false" onAction="#onSaveAsMenuPressed" text="Save As…" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="webpageMenuButton" mnemonicParsing="false" text="Github Page" />
+                  <MenuItem fx:id="webpageMenuButton" mnemonicParsing="false" onAction="#onWebpageMenuPressed" text="Github Page" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="quitMenuButton" mnemonicParsing="false" text="Quit" />
+                  <MenuItem fx:id="quitMenuButton" mnemonicParsing="false" onAction="#onQuitMenuPressed" text="Quit" />
                </items>
             </Menu>
             <Menu mnemonicParsing="false" text="Option">
                <items>
-                  <MenuItem fx:id="settingsMenuButton" mnemonicParsing="false" text="Settings" />
-                  <MenuItem fx:id="levelsMenuButton" mnemonicParsing="false" text="Audio Levels" />
+                  <MenuItem fx:id="settingsMenuButton" mnemonicParsing="false" onAction="#onSettingsMenuPressed" text="Settings" />
+                  <MenuItem fx:id="levelsMenuButton" mnemonicParsing="false" onAction="#onLevelsMenuPressed" text="Audio Levels" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="converterMenuButton" mnemonicParsing="false" text="Audio Converter" />
+                  <MenuItem fx:id="converterMenuButton" mnemonicParsing="false" onAction="#onConverterMenuPressed" text="Audio Converter" />
                </items>
             </Menu>
          </menus>

@@ -1,20 +1,34 @@
 package model;
 
+import java.io.File;
+
 public class Entry {
 
-	private SoundFile soundFile;
-	private int[] keyNumbers;
+	private File file;
+	private KeyCombination keys;
 
-	public Entry(SoundFile file, int[] keys) {
-		soundFile = file;
-		keyNumbers = keys;
+	public Entry(File file, KeyCombination keys) {
+		this.file = file;
+		this.keys = keys;
 	}
 
-	public SoundFile getFile() {
-		return soundFile;
+	public File getFile() {
+		return file;
+	}
+	
+	public void setFile(File newFile) {
+		file = newFile;
+	}
+	
+	public KeyCombination getKeys() {
+		return keys;
+	}
+	
+	public void setKets(KeyCombination newKeys) {
+		keys = newKeys;
 	}
 
-	public boolean checkKeys(int[] matches) {
+	public boolean checkKeys(KeyCombination matches) {
 		// check all of the required keys are down
 		return false;
 	}

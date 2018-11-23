@@ -9,9 +9,19 @@ import javafx.stage.Stage;
 
 public class Soundboard extends Application {
 
+	public Stage menuStage;
+	public Stage settingsStage;
+	public Stage entryStage;
+	public Stage converterStage;
+
+	public Scene mainScene;
+	public Scene settingsScene;
+	public Scene entryScene;
+	public Scene converterScene;
+
 	public Pane mainMenu;
-	public Pane entryMenu;
 	public Pane settings;
+	public Pane entryMenu;
 	public Pane converter;
 
 	public MenuController menuController;
@@ -20,11 +30,13 @@ public class Soundboard extends Application {
 	public ConverterController converterController;
 
 	public static void main(String[] args) {
-		launch(Soundboard.class, args);
+		Application.launch(Soundboard.class, args);
 	}
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void init() throws Exception {
+		super.init();
+
 		FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("mainmenu_jfx.fxml"));
 		mainMenu = loader.<VBox>load();
@@ -44,15 +56,37 @@ public class Soundboard extends Application {
 		loader.setLocation(getClass().getResource("converter_jfx.fxml"));
 		converter = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
+	}
 
-		Scene scene = new Scene(mainMenu);
-		primaryStage.setScene(scene);
-		primaryStage.show();
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		mainScene = new Scene(mainMenu);
+		settingsScene = new Scene(settings);
+		entryScene = new Scene(entryMenu);
+		converterScene = new Scene(converter);
+		
+		menuStage = primaryStage;
+		menuStage.setScene(mainScene);
+		menuStage.show();
+		
+		settingsStage = new Stage();
+		settingsStage.setScene(settingsScene);
 
-		menuController.initialize();
+		entryStage = new Stage();
+		entryStage.setScene(entryScene);
+
+		converterStage = new Stage();
+		converterStage.setScene(converterScene);
+		
+		menuController.initialize(this);
 		settingsController.initialize();
-		entryController.initialize();
+		entryController.initialize(this, entryScene, entryStage);
 		converterController.initialize();
+	}
+
+	@Override
+	public void stop() throws Exception {
+		super.stop();
 	}
 
 }
