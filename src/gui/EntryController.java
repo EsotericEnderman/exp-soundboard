@@ -19,6 +19,7 @@ import model.Entry;
 public class EntryController {
 	
 	private static final String defaultSelect = "None Selected";
+	private static final String defaultPress = "Press any key or key Combo...";
 
 	private Stage window;
 	private Scene self;
@@ -49,9 +50,12 @@ public class EntryController {
 		// TODO Auto-generated constructor stub
 	}
 
-	public void start(Entry starter) {
+	public void start(EntryModel starter) {
 		if (starter != null) {
 			// grab values from the entry, put them into the gui components
+			Entry data = starter.getEntry();
+			selectionText.setText(data.getFile().getAbsolutePath());
+			hotkeyField.setText(data.toString());
 		} else {
 			selectionText.setText(defaultSelect);
 			hotkeyField.setText("");
@@ -65,6 +69,7 @@ public class EntryController {
 		assert selectionText != null : "fx:id=\"selectionText\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert hotkeyField != null : "fx:id=\"hotkeyField\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert doneButton != null : "fx:id=\"doneButton\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
+		hotkeyField.setContextMenu(null);
 
 		this.parent = parent;
 		this.self = self;
@@ -81,6 +86,21 @@ public class EntryController {
 	@FXML
 	void onFieldClicked(MouseEvent event) {
 		// color field to indicate listening, start listening for mouse input
+		if (event.isPrimaryButtonDown()) {
+			hotkeyField.setStyle("-fx-control-inner-background: cyan;");
+			hotkeyField.setText(defaultPress);
+			parent.listener.listenOn(hotkeyField);
+			// TODO give output for key listener
+		} else if (event.isSecondaryButtonDown()) {
+			parent.listener.stopListening();
+			hotkeyField.setStyle("-fx-control-inner-background: white;");
+			if (hotkeyField.getText() == defaultPress) {
+				hotkeyField.setText("");
+			}
+			// TODO remove output from key listener
+		} else {
+			
+		}
 	}
 
 	@FXML
@@ -91,6 +111,7 @@ public class EntryController {
 				new ExtensionFilter("All Files", "*.*"));
 		File selectedFile = chooser.showOpenDialog(window);
 		if (selectedFile != null) {
+			selectionText.setText(selectedFile.getAbsolutePath());
 			newFile = selectedFile;
 			System.out.println(selectedFile.getAbsolutePath());
 		}

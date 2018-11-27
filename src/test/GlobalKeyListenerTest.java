@@ -1,5 +1,6 @@
 package test;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 import org.jnativehook.GlobalScreen;
@@ -11,6 +12,9 @@ import com.sun.istack.internal.logging.Logger;
 
 public class GlobalKeyListenerTest implements NativeKeyListener {
 	
+	private static ArrayList<Integer> keys;
+	private static ArrayList<Integer> mods;
+	
 	public static void main(String[] args) {
 		try {
 			GlobalScreen.registerNativeHook();
@@ -20,6 +24,8 @@ public class GlobalKeyListenerTest implements NativeKeyListener {
 			nhe.printStackTrace();
 		}
 		
+		keys = new ArrayList<Integer>();
+		mods = new ArrayList<Integer>();
 		GlobalScreen.addNativeKeyListener(new GlobalKeyListenerTest());
 	}
 	
@@ -31,9 +37,12 @@ public class GlobalKeyListenerTest implements NativeKeyListener {
 
 	@Override
 	public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
+		keys.clear();
+		keys.add(nativeEvent.getKeyCode());
+		mods.add(nativeEvent.getModifiers());
 		System.out.println(NativeKeyEvent.getKeyText(nativeEvent.getKeyCode()));
 		System.out.println(NativeKeyEvent.getModifiersText(nativeEvent.getModifiers()));
-		System.out.println();
+		System.out.println(nativeEvent.paramString());
 	}
 	
 	@Override

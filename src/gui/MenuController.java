@@ -3,16 +3,25 @@ package gui;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 
-public class MenuController {
-	
+public class MenuController { // TODO make abstract controller superclass
+	// TODO close entire program when this window is closed
+
+	private static ObservableList<EntryModel> entries = FXCollections.observableArrayList(
+			new EntryModel("fileone.mp3", "Shift + Numpad 0"), new EntryModel("boom.wav", "7"),
+			new EntryModel("countdown.mp3", "Ctrl + Alt + Delete"));
+
 	private Soundboard parent;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
@@ -90,13 +99,19 @@ public class MenuController {
 	private CheckBox pttHoldCheck; // Value injected by FXMLLoader
 
 	@FXML // fx:id="entryTable"
-	private TableView<?> entryTable; // Value injected by FXMLLoader
+	private TableView<EntryModel> entryTable; // Value injected by FXMLLoader
+
+	@FXML // fx:id="clipColumn"
+	private TableColumn<EntryModel, String> clipColumn; // Value injected by FXMLLoader
+
+	@FXML // fx:id="hotkeyColumn"
+	private TableColumn<EntryModel, String> hotkeyColumn; // Value injected by FXMLLoader
 
 	public MenuController() {
 	}
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
-	public void initialize(Soundboard parent) {
+	void initialize(Soundboard parent) {
 		assert newMenuButton != null : "fx:id=\"newMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert openMenuButton != null : "fx:id=\"openMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert closeMenuButton != null : "fx:id=\"closeMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
@@ -120,12 +135,15 @@ public class MenuController {
 		assert entryTable != null : "fx:id=\"EntryTable\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 
 		this.parent = parent;
+		clipColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("clipName"));
+		hotkeyColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("hotkey"));
+		entryTable.setItems(entries);
 	}
 
 	@FXML
 	void onAddPressed(ActionEvent event) {
 		EntryModel selected = (EntryModel) entryTable.getSelectionModel().getSelectedItem();
-		parent.entryController.start(selected.getEntry());
+		parent.entryController.start(selected);
 	}
 
 	@FXML
@@ -197,6 +215,10 @@ public class MenuController {
 	@FXML
 	void onConverterMenuPressed(ActionEvent event) {
 
+	}
+	
+	public EntryModel getSelected() {
+		return null; // TODO grab selected item from table
 	}
 
 }

@@ -145,8 +145,8 @@
                <children>
                   <TableView fx:id="entryTable" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <columns>
-                        <TableColumn prefWidth="75.0" text="Sound Clip" />
-                        <TableColumn prefWidth="75.0" text="Hotkeys" />
+                        <TableColumn fx:id="clipColumn" prefWidth="75.0" text="Sound Clip" />
+                        <TableColumn fx:id="hotkeyColumn" prefWidth="75.0" text="Hotkeys" />
                      </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

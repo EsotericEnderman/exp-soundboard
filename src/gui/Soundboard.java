@@ -6,23 +6,28 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.KeyboardListener;
 
 public class Soundboard extends Application {
+	
+	public KeyboardListener listener;
+	
+	// --- GUI Fields --- //
 
-	public Stage menuStage;
-	public Stage settingsStage;
-	public Stage entryStage;
-	public Stage converterStage;
+	private Stage menuStage;
+	private Stage settingsStage;
+	private Stage entryStage;
+	private Stage converterStage;
 
-	public Scene mainScene;
-	public Scene settingsScene;
-	public Scene entryScene;
-	public Scene converterScene;
+	private Scene mainScene;
+	private Scene settingsScene;
+	private Scene entryScene;
+	private Scene converterScene;
 
-	public Pane mainMenu;
-	public Pane settings;
-	public Pane entryMenu;
-	public Pane converter;
+	private Pane mainMenu;
+	private Pane settings;
+	private Pane entryMenu;
+	private Pane converter;
 
 	public MenuController menuController;
 	public SettingsController settingsController;
@@ -56,6 +61,8 @@ public class Soundboard extends Application {
 		loader.setLocation(getClass().getResource("converter_jfx.fxml"));
 		converter = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
+		
+		listener = new KeyboardListener();
 	}
 
 	@Override
@@ -64,11 +71,11 @@ public class Soundboard extends Application {
 		settingsScene = new Scene(settings);
 		entryScene = new Scene(entryMenu);
 		converterScene = new Scene(converter);
-		
+
 		menuStage = primaryStage;
 		menuStage.setScene(mainScene);
 		menuStage.show();
-		
+
 		settingsStage = new Stage();
 		settingsStage.setScene(settingsScene);
 
@@ -77,7 +84,7 @@ public class Soundboard extends Application {
 
 		converterStage = new Stage();
 		converterStage.setScene(converterScene);
-		
+
 		menuController.initialize(this);
 		settingsController.initialize();
 		entryController.initialize(this, entryScene, entryStage);

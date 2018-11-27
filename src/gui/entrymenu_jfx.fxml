@@ -43,7 +43,7 @@
                   <Label fx:id="selectionText" text="None selected" GridPane.rowIndex="1" />
                   <Separator prefWidth="200.0" GridPane.rowIndex="2" />
                   <Label text="HotKeys:" GridPane.rowIndex="3" />
-                  <TextField fx:id="hotkeyField" editable="false" onMouseClicked="#onFieldClicked" GridPane.rowIndex="4" />
+                  <TextField fx:id="hotkeyField" editable="false" onMouseClicked="#onFieldClicked" onMousePressed="#onFieldClicked" onMouseReleased="#onFieldClicked" GridPane.rowIndex="4" />
                   <BorderPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="5">
                      <left>
                         <Label text="*Right-click to clear hotkeys" BorderPane.alignment="CENTER" />
