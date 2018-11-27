@@ -1,17 +1,24 @@
 package gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.AudioMaster;
+import model.Entry;
 import model.KeyboardListener;
 
 public class Soundboard extends Application {
-	
+
 	public KeyboardListener listener;
-	
+	public AudioMaster audio;
+	public List<Entry> entries;
+
 	// --- GUI Fields --- //
 
 	private Stage menuStage;
@@ -61,8 +68,11 @@ public class Soundboard extends Application {
 		loader.setLocation(getClass().getResource("converter_jfx.fxml"));
 		converter = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
-		
+
+		KeyboardListener.start();
 		listener = new KeyboardListener();
+		entries = new ArrayList<Entry>();
+		audio = new AudioMaster();
 	}
 
 	@Override
@@ -87,12 +97,13 @@ public class Soundboard extends Application {
 
 		menuController.initialize(this);
 		settingsController.initialize();
-		entryController.initialize(this, entryScene, entryStage);
+		entryController.initialize(this, entryStage);
 		converterController.initialize();
 	}
 
 	@Override
 	public void stop() throws Exception {
+		KeyboardListener.stop();
 		super.stop();
 	}
 

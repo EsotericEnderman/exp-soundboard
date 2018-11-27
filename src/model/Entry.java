@@ -18,16 +18,8 @@ public class Entry {
 		return file;
 	}
 
-	public void setFile(File newFile) {
-		file = newFile;
-	}
-
 	public NativeKeyEvent getCombo() {
 		return combo;
-	}
-
-	public void setCombo(NativeKeyEvent combo) {
-		this.combo = combo;
 	}
 
 	public boolean checkCombo(NativeKeyEvent match) {
@@ -36,8 +28,17 @@ public class Entry {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return super.toString();
+		return JNativeUtil.asReadable(combo) + " = " + file.getAbsolutePath();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (this.file == ((Entry) obj).file) && (this.combo.paramString() == ((Entry) obj).combo.paramString());
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return new Entry(file, combo);
 	}
 
 }

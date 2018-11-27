@@ -20,4 +20,10 @@ public class AudioMaster {
 		files.add(newFile);
 	}
 
+	public void stopAll() {
+		for (SoundFile sound : files) {
+			sound.stop();
+		}
+	}
+
 }

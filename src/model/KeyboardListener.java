@@ -1,7 +1,5 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import org.jnativehook.GlobalScreen;
@@ -14,22 +12,25 @@ import com.sun.istack.internal.logging.Logger;
 import javafx.scene.control.TextInputControl;
 
 public class KeyboardListener implements NativeKeyListener {
-	
-	public static String asReadable(NativeKeyEvent nativeEvent) {
-		return nativeEvent.paramString();
-	}
 
 	private TextInputControl display;
-	private List<NativeKeyEvent> keys;
+	private NativeKeyEvent combo;
+	
+	public static void start() throws NativeHookException {
+		GlobalScreen.registerNativeHook();
+		Logger.getLogger(GlobalScreen.class).setLevel(Level.OFF);
+	}
+	
+	public static void stop() throws NativeHookException {
+		GlobalScreen.unregisterNativeHook();
+	}
 
 	public KeyboardListener() throws NativeHookException {
-		GlobalScreen.registerNativeHook();
+		if (GlobalScreen.isNativeHookRegistered()) {
 		GlobalScreen.addNativeKeyListener(this);
-
-		Logger nativeLogger = Logger.getLogger(GlobalScreen.class);
-		nativeLogger.setLevel(Level.OFF);
-
-		keys = new ArrayList<NativeKeyEvent>();
+		} else {
+			throw new NativeHookException("Native hook has not been registered!");
+		}
 	}
 
 	public void listenOn(TextInputControl output) {
@@ -48,9 +49,9 @@ public class KeyboardListener implements NativeKeyListener {
 	@Override
 	public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
 		if (display != null) {
-			keys.clear();
-			keys.add(nativeEvent);
-			display.setText(asReadable(nativeEvent));
+			combo = null;
+			combo = nativeEvent;
+			display.setText(JNativeUtil.asReadable(nativeEvent));
 		}
 	}
 
@@ -58,11 +59,9 @@ public class KeyboardListener implements NativeKeyListener {
 	public void nativeKeyReleased(NativeKeyEvent nativeEvent) {
 		// do nothing
 	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		GlobalScreen.unregisterNativeHook();
+	
+	public NativeKeyEvent getCombo() {
+		return combo;
 	}
 
 }

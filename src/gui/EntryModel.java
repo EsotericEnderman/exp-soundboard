@@ -2,6 +2,8 @@ package gui;
 
 import javafx.beans.property.SimpleStringProperty;
 import model.Entry;
+import model.JNativeUtil;
+import model.KeyboardListener;
 
 public class EntryModel {
 
@@ -9,15 +11,9 @@ public class EntryModel {
 	private final SimpleStringProperty hotkey;
 	private final Entry entry;
 
-	public EntryModel(String clipName, String hotkey) {
-		this.clipName = new SimpleStringProperty(clipName);
-		this.hotkey = new SimpleStringProperty(hotkey);
-		entry = null; // TODO find an entry with the given specs
-	}
-
 	public EntryModel(Entry model) {
 		this.clipName = new SimpleStringProperty(model.getFile().getName());
-		this.hotkey = new SimpleStringProperty(); // TODO add a util that translates a keycode into usable text
+		this.hotkey = new SimpleStringProperty(JNativeUtil.asReadable(model.getCombo()));
 		this.entry = model;
 	}
 
@@ -25,16 +21,8 @@ public class EntryModel {
 		return clipName.get();
 	}
 
-	public void setClipName(String newValue) {
-		clipName.set(newValue);
-	}
-
 	public String getHotkey() {
 		return hotkey.get();
-	}
-
-	public void setHotKey(String newValue) {
-		hotkey.set(newValue);
 	}
 
 	public Entry getEntry() {

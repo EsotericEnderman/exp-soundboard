@@ -1,7 +1,11 @@
 package gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,15 +18,14 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import model.Entry;
 
 public class MenuController { // TODO make abstract controller superclass
 	// TODO close entire program when this window is closed
 
-	private static ObservableList<EntryModel> entries = FXCollections.observableArrayList(
-			new EntryModel("fileone.mp3", "Shift + Numpad 0"), new EntryModel("boom.wav", "7"),
-			new EntryModel("countdown.mp3", "Ctrl + Alt + Delete"));
-
 	private Soundboard parent;
+	
+	private ObservableList<EntryModel> tableList;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -107,9 +110,6 @@ public class MenuController { // TODO make abstract controller superclass
 	@FXML // fx:id="hotkeyColumn"
 	private TableColumn<EntryModel, String> hotkeyColumn; // Value injected by FXMLLoader
 
-	public MenuController() {
-	}
-
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize(Soundboard parent) {
 		assert newMenuButton != null : "fx:id=\"newMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
@@ -137,33 +137,44 @@ public class MenuController { // TODO make abstract controller superclass
 		this.parent = parent;
 		clipColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("clipName"));
 		hotkeyColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("hotkey"));
-		entryTable.setItems(entries);
+		
+		tableList = FXCollections.observableArrayList();
+		entryTable.setItems(tableList);
 	}
 
 	@FXML
 	void onAddPressed(ActionEvent event) {
-		EntryModel selected = (EntryModel) entryTable.getSelectionModel().getSelectedItem();
-		parent.entryController.start(selected);
+		parent.entryController.start();
 	}
 
 	@FXML
 	void onEditPressed(ActionEvent event) {
-
+		parent.entryController.start(getSelectedEntry());
 	}
 
 	@FXML
 	void onPlayPressed(ActionEvent event) {
-
+		EntryModel selected = getSelectedEntry();
+		if (selected != null) {
+			try {
+				parent.audio.play(selected.getEntry());
+			} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@FXML
 	void onRemovePressed(ActionEvent event) {
-
+		EntryModel selected = getSelectedEntry();
+		if (selected != null) {
+			removeEntry(selected);
+		}
 	}
 
 	@FXML
 	void onStopPressed(ActionEvent event) {
-
+		parent.audio.stopAll();
 	}
 
 	@FXML
@@ -217,8 +228,20 @@ public class MenuController { // TODO make abstract controller superclass
 
 	}
 	
-	public EntryModel getSelected() {
-		return null; // TODO grab selected item from table
+	public void addEntry(EntryModel entry) {
+		tableList.add(entry);
+	}
+	
+	public void removeEntry(int index) {
+		tableList.remove(index);
+	}
+	
+	public void removeEntry(EntryModel entry) {
+		tableList.remove(entry);
+	}
+	
+	public EntryModel getSelectedEntry() {
+		return entryTable.getSelectionModel().getSelectedItem();
 	}
 
 }
