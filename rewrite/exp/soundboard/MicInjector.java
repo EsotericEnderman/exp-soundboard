@@ -197,7 +197,7 @@ public class MicInjector extends Thread {
 	}
 
 	public static String[] getMixerNames(DataLine.Info lineInfo) {
-		ArrayList<String> mixerNames = new ArrayList();
+		ArrayList<String> mixerNames = new ArrayList<String>();
 		Mixer.Info[] info = AudioSystem.getMixerInfo();
 		Mixer.Info[] arrayOfInfo1;
 		int j = (arrayOfInfo1 = info).length;
