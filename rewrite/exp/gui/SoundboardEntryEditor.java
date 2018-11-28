@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.LayoutStyle;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.filechooser.FileFilter;
 import org.jnativehook.GlobalScreen;
@@ -46,7 +47,7 @@ public class SoundboardEntryEditor extends JFrame {
 	public SoundboardEntryEditor(SoundboardFrame soundboardframe) {
 		this.soundboardframe = soundboardframe;
 		this.soundboard = SoundboardFrame.soundboard;
-		this.inputGetter = new NativeKeyInputGetter(null);
+		this.inputGetter = new NativeKeyInputGetter();// new NativeKeyInputGetter(null);
 
 		setDefaultCloseOperation(2);
 		setTitle("Soundboard Entry Editor");
@@ -61,8 +62,10 @@ public class SoundboardEntryEditor extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser filechooser = Utils.getFileChooser();
 				filechooser.setMultiSelectionEnabled(true);
-				filechooser
-						.setFileFilter(new SoundboardEntryEditor.AudioClipFileFilter(SoundboardEntryEditor.this, null));
+				filechooser.setFileFilter(
+						// new SoundboardEntryEditor.AudioClipFileFilter(SoundboardEntryEditor.this,
+						// null));
+						new SoundboardEntryEditor.AudioClipFileFilter());
 				int session = filechooser.showDialog(null, "Select");
 				if (session == 0) {
 					File[] selected = filechooser.getSelectedFiles();
@@ -96,11 +99,13 @@ public class SoundboardEntryEditor extends JFrame {
 			public void mousePressed(MouseEvent e) {
 				if (e.getButton() == 1) {
 					SoundboardEntryEditor.this.keysTextField.setBackground(Color.CYAN);
-					GlobalScreen.getInstance().addNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
+					//GlobalScreen.getInstance().addNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
+					GlobalScreen.addNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
 					SoundboardEntryEditor.this.inputGetter.clearPressedKeys();
 				} else if (e.getButton() == 3) {
 					SoundboardEntryEditor.this.keysTextField.setBackground(Color.WHITE);
-					GlobalScreen.getInstance().removeNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
+					//GlobalScreen.getInstance().removeNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
+					GlobalScreen.removeNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
 					SoundboardEntryEditor.this.inputGetter.clearPressedKeys();
 					SoundboardEntryEditor.this.keyNums = new int[0];
 					SoundboardEntryEditor.this.keysTextField.setText("none");
@@ -152,7 +157,8 @@ public class SoundboardEntryEditor extends JFrame {
 		getContentPane().addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				SoundboardEntryEditor.this.keysTextField.setBackground(Color.WHITE);
-				GlobalScreen.getInstance().removeNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
+				//GlobalScreen.getInstance().removeNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
+				GlobalScreen.removeNativeKeyListener(SoundboardEntryEditor.this.inputGetter);
 			}
 		});
 		pack();
@@ -198,13 +204,14 @@ public class SoundboardEntryEditor extends JFrame {
 
 	public void dispose() {
 		super.dispose();
-		GlobalScreen.getInstance().removeNativeKeyListener(this.inputGetter);
+		//GlobalScreen.getInstance().removeNativeKeyListener(this.inputGetter);
+		GlobalScreen.removeNativeKeyListener(this.inputGetter);
 	}
 
 	private class NativeKeyInputGetter implements NativeKeyListener {
 		int pressedKeys = 0;
-		ArrayList<Integer> pressedKeyNums = new ArrayList();
-		ArrayList<String> pressedKeyNames = new ArrayList();
+		ArrayList<Integer> pressedKeyNums = new ArrayList<Integer>();
+		ArrayList<String> pressedKeyNames = new ArrayList<String>();
 
 		private NativeKeyInputGetter() {
 		}

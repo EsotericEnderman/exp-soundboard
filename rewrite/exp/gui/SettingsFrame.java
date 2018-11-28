@@ -81,12 +81,13 @@ public class SettingsFrame extends JFrame {
 		});
 		setResizable(false);
 
-		this.stopKeyInputGetter = new StopKeyNativeKeyInputGetter(null);
-		this.slowKeyInputGetter = new ModSpeedKeyNativeKeyInputGetter(null);
-		this.incKeyInputGetter = new IncKeyNativeKeyInputGetter(null);
-		this.decKeyInputGetter = new DecKeyNativeKeyInputGetter(null);
-		this.pttKeysInputGetter = new PttKeysNativeKeyInputGetter(null);
-		this.fOverlapKeyInputGetter = new OverlapSwitchNativeKeyInputGetter(null);
+		this.stopKeyInputGetter = new StopKeyNativeKeyInputGetter();// new StopKeyNativeKeyInputGetter(null);
+		this.slowKeyInputGetter = new ModSpeedKeyNativeKeyInputGetter();// new ModSpeedKeyNativeKeyInputGetter(null);
+		this.incKeyInputGetter = new IncKeyNativeKeyInputGetter();// new IncKeyNativeKeyInputGetter(null);
+		this.decKeyInputGetter = new DecKeyNativeKeyInputGetter();// new DecKeyNativeKeyInputGetter(null);
+		this.pttKeysInputGetter = new PttKeysNativeKeyInputGetter();// new PttKeysNativeKeyInputGetter(null);
+		this.fOverlapKeyInputGetter = new OverlapSwitchNativeKeyInputGetter();
+		// new OverlapSwitchNativeKeyInputGetter(null);
 
 		setDefaultCloseOperation(2);
 		setTitle("Settings");
@@ -97,7 +98,8 @@ public class SettingsFrame extends JFrame {
 		this.stopAllTextField = new JTextField();
 		this.stopAllTextField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent arg0) {
-				GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.stopKeyInputGetter);
+				// GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.stopKeyInputGetter);
+				GlobalScreen.removeNativeKeyListener(SettingsFrame.this.stopKeyInputGetter);
 				SettingsFrame.this.stopAllTextField.setBackground(Color.WHITE);
 			}
 		});
@@ -105,7 +107,8 @@ public class SettingsFrame extends JFrame {
 		this.stopAllTextField.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent arg0) {
 				SettingsFrame.this.stopAllTextField.setBackground(Color.CYAN);
-				GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.stopKeyInputGetter);
+				// GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.stopKeyInputGetter);
+				GlobalScreen.addNativeKeyListener(SettingsFrame.this.stopKeyInputGetter);
 			}
 		});
 		this.stopAllTextField.setColumns(10);
@@ -172,7 +175,8 @@ public class SettingsFrame extends JFrame {
 		this.slowKeyTextField = new JTextField();
 		this.slowKeyTextField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
-				GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.slowKeyInputGetter);
+				// GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.slowKeyInputGetter);
+				GlobalScreen.removeNativeKeyListener(SettingsFrame.this.slowKeyInputGetter);
 				SettingsFrame.this.slowKeyTextField.setBackground(Color.WHITE);
 			}
 		});
@@ -180,7 +184,8 @@ public class SettingsFrame extends JFrame {
 		this.slowKeyTextField.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent arg0) {
 				SettingsFrame.this.slowKeyTextField.setBackground(Color.CYAN);
-				GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.slowKeyInputGetter);
+				// GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.slowKeyInputGetter);
+				GlobalScreen.addNativeKeyListener(SettingsFrame.this.slowKeyInputGetter);
 			}
 		});
 		this.slowKeyTextField.setColumns(10);
@@ -207,13 +212,15 @@ public class SettingsFrame extends JFrame {
 		this.incModSpeedHotKeyTextField = new JTextField();
 		this.incModSpeedHotKeyTextField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent arg0) {
-				GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.incKeyInputGetter);
+				// GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.incKeyInputGetter);
+				GlobalScreen.removeNativeKeyListener(SettingsFrame.this.incKeyInputGetter);
 				SettingsFrame.this.incModSpeedHotKeyTextField.setBackground(Color.WHITE);
 			}
 		});
 		this.incModSpeedHotKeyTextField.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent arg0) {
-				GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.incKeyInputGetter);
+				// GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.incKeyInputGetter);
+				GlobalScreen.addNativeKeyListener(SettingsFrame.this.incKeyInputGetter);
 				SettingsFrame.this.incModSpeedHotKeyTextField.setBackground(Color.CYAN);
 			}
 		});
@@ -224,12 +231,14 @@ public class SettingsFrame extends JFrame {
 		this.decModSpeedHotKeyTextField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				SettingsFrame.this.decModSpeedHotKeyTextField.setBackground(Color.WHITE);
-				GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.decKeyInputGetter);
+				// GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.decKeyInputGetter);
+				GlobalScreen.removeNativeKeyListener(SettingsFrame.this.decKeyInputGetter);
 			}
 		});
 		this.decModSpeedHotKeyTextField.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
-				GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.decKeyInputGetter);
+				// GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.decKeyInputGetter);
+				GlobalScreen.addNativeKeyListener(SettingsFrame.this.decKeyInputGetter);
 				SettingsFrame.this.decModSpeedHotKeyTextField.setBackground(Color.CYAN);
 			}
 		});
@@ -247,7 +256,7 @@ public class SettingsFrame extends JFrame {
 		this.pttKeysTextField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent arg0) {
 				SettingsFrame.this.pttKeysTextField.setBackground(Color.WHITE);
-				SettingsFrame.PttKeysNativeKeyInputGetter.access$1(SettingsFrame.this.pttKeysInputGetter);
+				//SettingsFrame.PttKeysNativeKeyInputGetter.access$1(SettingsFrame.this.pttKeysInputGetter);
 				SettingsFrame.this.pttKeysTextField.removeKeyListener(SettingsFrame.this.pttKeysInputGetter);
 			}
 		});
@@ -283,7 +292,8 @@ public class SettingsFrame extends JFrame {
 			this.micComboBox.addItem(input);
 		}
 		j = (arrayOfString1 = outputMixers).length;
-		for (i = 0; i < j; i++) {
+		// for (i = 0; i < j; i++) {
+		for (int i = 0; i < j; i++) {
 			String output = arrayOfString1[i];
 			this.vacComboBox.addItem(output);
 		}
@@ -328,14 +338,16 @@ public class SettingsFrame extends JFrame {
 		this.fOverlapHotkeyTextField.setColumns(10);
 		this.fOverlapHotkeyTextField.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
-				GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.fOverlapKeyInputGetter);
+				// GlobalScreen.getInstance().addNativeKeyListener(SettingsFrame.this.fOverlapKeyInputGetter);
+				GlobalScreen.addNativeKeyListener(SettingsFrame.this.fOverlapKeyInputGetter);
 				SettingsFrame.this.fOverlapHotkeyTextField.setBackground(Color.CYAN);
 			}
 		});
 		this.fOverlapHotkeyTextField.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				SettingsFrame.this.fOverlapHotkeyTextField.setBackground(Color.WHITE);
-				GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.fOverlapKeyInputGetter);
+				// GlobalScreen.getInstance().removeNativeKeyListener(SettingsFrame.this.fOverlapKeyInputGetter);
+				GlobalScreen.removeNativeKeyListener(SettingsFrame.this.fOverlapKeyInputGetter);
 			}
 		});
 		this.fOverlapHotkeyTextField.setText(NativeKeyEvent.getKeyText(Utils.getOverlapSwitchKey()));
@@ -384,11 +396,15 @@ public class SettingsFrame extends JFrame {
 
 	public void dispose() {
 		super.dispose();
-		GlobalScreen gs = GlobalScreen.getInstance();
-		gs.removeNativeKeyListener(this.slowKeyInputGetter);
-		gs.removeNativeKeyListener(this.stopKeyInputGetter);
-		gs.removeNativeKeyListener(this.incKeyInputGetter);
-		gs.removeNativeKeyListener(this.decKeyInputGetter);
+		// GlobalScreen gs = GlobalScreen.getInstance();
+		// gs.removeNativeKeyListener(this.slowKeyInputGetter);
+		// gs.removeNativeKeyListener(this.stopKeyInputGetter);
+		// gs.removeNativeKeyListener(this.incKeyInputGetter);
+		// gs.removeNativeKeyListener(this.decKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.slowKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.stopKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.incKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.decKeyInputGetter);
 		this.pttKeysTextField.removeKeyListener(this.pttKeysInputGetter);
 		instance = null;
 	}
@@ -574,12 +590,17 @@ public class SettingsFrame extends JFrame {
 		this.fOverlapHotkeyTextField.setBackground(Color.WHITE);
 		this.pttKeysTextField.setBackground(Color.WHITE);
 		this.pttKeysInputGetter.clearPressedKeys();
-		GlobalScreen gs = GlobalScreen.getInstance();
-		gs.removeNativeKeyListener(this.stopKeyInputGetter);
-		gs.removeNativeKeyListener(this.slowKeyInputGetter);
-		gs.removeNativeKeyListener(this.incKeyInputGetter);
-		gs.removeNativeKeyListener(this.decKeyInputGetter);
-		gs.removeNativeKeyListener(this.fOverlapKeyInputGetter);
+		// GlobalScreen gs = GlobalScreen.getInstance();
+		// gs.removeNativeKeyListener(this.stopKeyInputGetter);
+		// gs.removeNativeKeyListener(this.slowKeyInputGetter);
+		// gs.removeNativeKeyListener(this.incKeyInputGetter);
+		// gs.removeNativeKeyListener(this.decKeyInputGetter);
+		// gs.removeNativeKeyListener(this.fOverlapKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.stopKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.slowKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.incKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.decKeyInputGetter);
+		GlobalScreen.removeNativeKeyListener(this.fOverlapKeyInputGetter);
 		this.pttKeysTextField.removeKeyListener(this.pttKeysInputGetter);
 	}
 }
