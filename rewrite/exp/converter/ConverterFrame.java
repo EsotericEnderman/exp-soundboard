@@ -198,16 +198,22 @@ public class ConverterFrame extends JFrame {
 			if (this.mp3RadioButton.isSelected()) {
 				if (this.inputfiles.length > 1) {
 					AudioConverter.batchConvertToMP3(this.inputfiles, this.outputfile,
-							new ConvertProgressListener(null));
+							// new ConvertProgressListener(null));
+							new ConvertProgressListener());
 				} else {
-					AudioConverter.convertToMP3(this.inputfiles[0], this.outputfile, new ConvertProgressListener(null));
+					AudioConverter.convertToMP3(this.inputfiles[0], this.outputfile,
+							// new ConvertProgressListener(null));
+							new ConvertProgressListener());
 				}
 			} else if (this.wavRadioButton.isSelected()) {
 				if (this.inputfiles.length > 1) {
 					AudioConverter.batchConvertToWAV(this.inputfiles, this.outputfile,
-							new ConvertProgressListener(null));
+							// new ConvertProgressListener(null));
+							new ConvertProgressListener());
 				} else {
-					AudioConverter.convertToWAV(this.inputfiles[0], this.outputfile, new ConvertProgressListener(null));
+					AudioConverter.convertToWAV(this.inputfiles[0], this.outputfile,
+							// new ConvertProgressListener(null));
+							new ConvertProgressListener());
 				}
 			}
 			this.convertButton.setEnabled(false);

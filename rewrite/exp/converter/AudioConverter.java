@@ -21,7 +21,8 @@ public class AudioConverter {
 		new Thread(new Runnable() {
 			public void run() {
 				File[] arrayOfFile;
-				int j = (arrayOfFile = AudioConverter.this).length;
+				// int j = (arrayOfFile = AudioConverter.this).length;
+				int j = (arrayOfFile = inputfiles).length;
 				for (int i = 0; i < j; i++) {
 					File input = arrayOfFile[i];
 					File output = AudioConverter.getAbsoluteForOutputExtensionAndFolder(input, outputfolder, ".mp3");
@@ -39,7 +40,8 @@ public class AudioConverter {
 		new Thread(new Runnable() {
 			public void run() {
 				File[] arrayOfFile;
-				int j = (arrayOfFile = AudioConverter.this).length;
+				// int j = (arrayOfFile = AudioConverter.this).length;
+				int j = (arrayOfFile = inputfiles).length;
 				for (int i = 0; i < j; i++) {
 					File input = arrayOfFile[i];
 					File output = AudioConverter.getAbsoluteForOutputExtensionAndFolder(input, outputfolder, ".wav");
@@ -55,7 +57,8 @@ public class AudioConverter {
 	public static void convertToMP3(File inputfile, final File outputfile, final EncoderProgressListener listener) {
 		new Thread(new Runnable() {
 			public void run() {
-				AudioConverter.mp3(AudioConverter.this, outputfile, listener);
+				// AudioConverter.mp3(AudioConverter.this, outputfile, listener);
+				AudioConverter.mp3(inputfile, outputfile, listener);
 			}
 		})
 
@@ -65,7 +68,8 @@ public class AudioConverter {
 	public static void convertToWAV(File inputfile, final File outputfile, final EncoderProgressListener listener) {
 		new Thread(new Runnable() {
 			public void run() {
-				AudioConverter.wav(AudioConverter.this, outputfile, listener);
+				// AudioConverter.wav(AudioConverter.this, outputfile, listener);
+				AudioConverter.wav(inputfile, outputfile, listener);
 			}
 		})
 

@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jnativehook"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/gson"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jave"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/miglayout"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
