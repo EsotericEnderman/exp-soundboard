@@ -1,6 +1,7 @@
 package model;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class AudioMaster {
 
@@ -23,86 +25,22 @@ public class AudioMaster {
 	private List<Entry> registeredEntries;
 
 	private ThreadGroup audioThreadGroup;
-	private List<PlayThread> audioThreads;
+	private List<Thread> audioThreads;
 
 	public AudioMaster() {
 		registeredEntries = new ArrayList<Entry>();
+		// populate combo boxes with 
 	}
 
-	public void register(Entry entry) {
-		try {
-			File sound = entry.getFile();
-			AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(sound);
-			AudioFormat format = fileFormat.getFormat();
-			
-			if (sound.exists() && sound.canRead()) {
-				SourceDataLine primarySpeaker;
-				SourceDataLine secondarySpeaker;
-				
-				DataLine.Info info = new DataLine.Info(SourceDataLine.class, format, standardBufferSize);
-				primarySpeaker = (SourceDataLine) primaryOutput.getLine(info);
-				secondarySpeaker = (SourceDataLine) primaryOutput.getLine(info);
-			}
-		} catch (Exception e) {
-
-		}
-	}
-
-	public void play(Entry entry) {
-
+	public void play(Entry entry) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+		SoundFile file = new SoundFile(entry.getFile());
 	}
 
 	public void stopAll() {
+		// TODO Auto-generated method stub
+		
 	}
-
-}
-
-class PlayThread extends Thread {
-
-	private File soundFile;
-
-	public PlayThread(File soundFile) {
-		super();
-		init(soundFile);
-	}
-
-	public PlayThread(Runnable target) {
-		super(target);
-		// TODO Auto-generated constructor stub
-	}
-
-	public PlayThread(String name) {
-		super(name);
-		// TODO Auto-generated constructor stub
-	}
-
-	public PlayThread(ThreadGroup group, Runnable target) {
-		super(group, target);
-		// TODO Auto-generated constructor stub
-	}
-
-	public PlayThread(ThreadGroup group, String name) {
-		super(group, name);
-		// TODO Auto-generated constructor stub
-	}
-
-	public PlayThread(Runnable target, String name) {
-		super(target, name);
-		// TODO Auto-generated constructor stub
-	}
-
-	public PlayThread(ThreadGroup group, Runnable target, String name) {
-		super(group, target, name);
-		// TODO Auto-generated constructor stub
-	}
-
-	public PlayThread(ThreadGroup group, Runnable target, String name, long stackSize) {
-		super(group, target, name, stackSize);
-		// TODO Auto-generated constructor stub
-	}
-
-	private void init(File soundFile) {
-		this.soundFile = soundFile;
-	}
+	
+	
 
 }

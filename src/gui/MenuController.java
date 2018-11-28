@@ -2,9 +2,14 @@ package gui;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import javafx.collections.FXCollections;
@@ -14,10 +19,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
 import model.Entry;
 
 public class MenuController { // TODO make abstract controller superclass
@@ -26,6 +34,7 @@ public class MenuController { // TODO make abstract controller superclass
 	private Soundboard parent;
 	
 	private ObservableList<EntryModel> tableList;
+	private ObservableList<AudioDeviceModel> audioList;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -90,10 +99,10 @@ public class MenuController { // TODO make abstract controller superclass
 	private CheckBox secondarySpeakerCheck; // Value injected by FXMLLoader
 
 	@FXML // fx:id="secondarySpeakerCombo"
-	private ComboBox<?> secondarySpeakerCombo; // Value injected by FXMLLoader
+	private ComboBox<AudioDeviceModel> secondarySpeakerCombo; // Value injected by FXMLLoader
 
 	@FXML // fx:id="primarySpeakerCombo"
-	private ComboBox<?> primarySpeakerCombo; // Value injected by FXMLLoader
+	private ComboBox<AudioDeviceModel> primarySpeakerCombo; // Value injected by FXMLLoader
 
 	@FXML // fx:id="injectorCheck"
 	private CheckBox injectorCheck; // Value injected by FXMLLoader
@@ -140,6 +149,17 @@ public class MenuController { // TODO make abstract controller superclass
 		
 		tableList = FXCollections.observableArrayList();
 		entryTable.setItems(tableList);
+		
+		Mixer.Info[] audios = AudioSystem.getMixerInfo();
+		List<AudioDeviceModel> devices = new ArrayList<AudioDeviceModel>();
+		for (int i = 0; i < audios.length; i++) {
+			devices.add(new AudioDeviceModel(audios[i]));
+		}
+		
+		audioList = FXCollections.observableArrayList(devices);
+		primarySpeakerCombo.setItems(audioList);
+		secondarySpeakerCombo.setItems(audioList);
+		
 	}
 
 	@FXML
