@@ -9,6 +9,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+@Deprecated
 public class SoundFile { // TODO possibly remove overuse of stop and close, the clip object probably
 							// holds some data, doesn't need to be reset so often
 
@@ -56,9 +57,11 @@ public class SoundFile { // TODO possibly remove overuse of stop and close, the 
 		clip.close();
 	}
 
-	public void jump(long location) {
+	public void jump(long location) throws IllegalArgumentException {
 		if (location > 0 && location < clip.getMicrosecondLength()) {
 			clip.setMicrosecondPosition(location);
+		} else {
+			throw new IllegalArgumentException("Jump position is outside scope of sound file!");
 		}
 	}
 
