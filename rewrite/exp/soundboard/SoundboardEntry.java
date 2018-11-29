@@ -43,25 +43,35 @@ public class SoundboardEntry {
 		return false;
 	}
 
-	public int matchesHowManyPressed(ArrayList<Integer> pressedKeys)
-   {
-     int matches = 0;
-     int j; int i; for (Iterator localIterator = pressedKeys.iterator(); localIterator.hasNext(); 
-         i < j)
-     {
-       int key = ((Integer)localIterator.next()).intValue();
-       int[] arrayOfInt; j = (arrayOfInt = this.activationKeysNumbers).length;i = 0; continue;int hotkey = arrayOfInt[i];
-       if (key == hotkey) {
-         matches++;
-       }
-       i++;
-     }
-     
- 
- 
- 
-     return matches;
-   }
+	/*
+	 * public int matchesHowManyPressed(ArrayList<Integer> pressedKeys) { int
+	 * matches = 0; int j; int i; for (Iterator localIterator =
+	 * pressedKeys.iterator(); localIterator.hasNext(); i < j) { int key =
+	 * ((Integer)localIterator.next()).intValue(); int[] arrayOfInt; j = (arrayOfInt
+	 * = this.activationKeysNumbers).length;i = 0; continue;int hotkey =
+	 * arrayOfInt[i]; if (key == hotkey) { matches++; } i++; }
+	 * 
+	 * 
+	 * 
+	 * 
+	 * return matches; }
+	 */
+
+	public int matchesHowManyPressed(ArrayList<Integer> pressedKeys) {
+		int matches = 0;
+		for (int i = 0; i < pressedKeys.size(); i++) {
+			int[] arrayOfInt;
+			int len = (arrayOfInt = this.activationKeysNumbers).length;
+			int key = pressedKeys.get(i).intValue();
+			if (i < len) {
+				int hotkey = arrayOfInt[i];
+				if (key == hotkey) {
+					matches++;
+				}
+			}
+		}
+		return matches;
+	}
 
 	public void play(AudioManager audio, boolean moddedspeed) {
 		File file = toFile();

@@ -128,7 +128,7 @@ public class Soundboard {
 				int[] arrayOfInt;
 				j = (arrayOfInt = entry.getActivationKeys()).length;
 				i = 0;
-				continue;
+				//continue;
 				int actKey = arrayOfInt[i];
 				key = NativeKeyEvent.getKeyText(actKey).toLowerCase();
 				for (Integer number : pttkeys) {

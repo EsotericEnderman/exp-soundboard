@@ -36,7 +36,7 @@ public class UpdateChecker implements Runnable {
 			try {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					String line;
+					// String line;
 					if (!changelogFound) {
 						if (line.startsWith("CHANGELOG")) {
 							changelogFound = true;
@@ -84,7 +84,7 @@ public class UpdateChecker implements Runnable {
 			try {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					String line;
+					// String line;
 					if (!changelogFound) {
 						if (line.startsWith("CHANGELOG")) {
 							changelogFound = true;

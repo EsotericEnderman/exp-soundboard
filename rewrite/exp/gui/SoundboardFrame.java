@@ -408,7 +408,7 @@ public class SoundboardFrame extends JFrame {
 		pack();
 		this.thisFrameInstance = this;
 		macroListener = new GlobalKeyMacroListener(this);
-		//GlobalScreen.getInstance().addNativeKeyListener(macroListener);
+		// GlobalScreen.getInstance().addNativeKeyListener(macroListener);
 		GlobalScreen.addNativeKeyListener(macroListener);
 		setLocationRelativeTo(null);
 		loadPrefs();
@@ -452,7 +452,7 @@ public class SoundboardFrame extends JFrame {
 	private void fileOpen() {
 		Utils.stopAllClips();
 		saveReminder();
-		//filechooser.setFileFilter(new JsonFileFilter(null));
+		// filechooser.setFileFilter(new JsonFileFilter(null));
 		filechooser.setFileFilter(new JsonFileFilter());
 		int session = filechooser.showOpenDialog(null);
 		if (session == 0) {
@@ -471,7 +471,7 @@ public class SoundboardFrame extends JFrame {
 
 	private void fileSaveAs() {
 		JFileChooser fc = new JFileChooser();
-		//fc.setFileFilter(new JsonFileFilter(null));
+		// fc.setFileFilter(new JsonFileFilter(null));
 		fc.setFileFilter(new JsonFileFilter());
 		if (this.currentSoundboardFile != null) {
 			fc.setSelectedFile(this.currentSoundboardFile);
