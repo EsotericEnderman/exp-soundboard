@@ -481,58 +481,58 @@ public class Utils {
 			this.playing = false;
 		}
 
-		private void playSoundClip(File file, SourceDataLine primarySpeaker, SourceDataLine secondarySpeaker)
-     {
-       Utils.PLAYALL = true;
-       AudioInputStream clip = null;
-       AudioFormat clipformat = null;
-       try {
-         clip = AudioSystem.getAudioInputStream(file);
-         clipformat = clip.getFormat();
-         if (!clipformat.equals(Utils.format)) {
-           clip = AudioSystem.getAudioInputStream(Utils.format, clip);
-         }
-       } catch (UnsupportedAudioFileException e) {
-         e.printStackTrace();
-         JOptionPane.showMessageDialog(null, file.getName() + " uses an unsupported format.", "Unsupported Format", 0);
-       } catch (IOException e) {
-         e.printStackTrace();
-       }
-       if (clip != null) {
-         Utils.incrementCurrentClipCount();
-         byte[] buffer = new byte['ࠀ']; // TODO: fix character
-         int bytesRead = 0;
-         while ((this.playing) && (Utils.PLAYALL)) {
-           try {
-             bytesRead = clip.read(buffer, 0, 2048);
-           } catch (IOException e) {
-             e.printStackTrace();
-           }
-           Utils.checkAndUseAutoPPThold();
-           if (bytesRead > 0) {
-             primarySpeaker.write(buffer, 0, bytesRead);
-             if (secondarySpeaker != null) {
-               secondarySpeaker.write(buffer, 0, bytesRead);
-             }
-           }
-           if (bytesRead < 2048) {
-             this.playing = false;
-           }
-         }
-         Utils.decrementCurrentClipCount();
-         Utils.checkAndReleaseHeldPPTKeys();
-       }
-       if (clip != null) {
-         try {
-           clip.close();
-         } catch (IOException e) {
-           e.printStackTrace();
-         }
-       }
-       primarySpeaker.close();
-       if (secondarySpeaker != null) {
-         secondarySpeaker.close();
-       }
-     }
+		private void playSoundClip(File file, SourceDataLine primarySpeaker, SourceDataLine secondarySpeaker) {
+			Utils.PLAYALL = true;
+			AudioInputStream clip = null;
+			AudioFormat clipformat = null;
+			try {
+				clip = AudioSystem.getAudioInputStream(file);
+				clipformat = clip.getFormat();
+				if (!clipformat.equals(Utils.format)) {
+					clip = AudioSystem.getAudioInputStream(Utils.format, clip);
+				}
+			} catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, file.getName() + " uses an unsupported format.",
+						"Unsupported Format", 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (clip != null) {
+				Utils.incrementCurrentClipCount();
+				byte[] buffer = new byte[2048]; // TODO: fix character
+				int bytesRead = 0;
+				while ((this.playing) && (Utils.PLAYALL)) {
+					try {
+						bytesRead = clip.read(buffer, 0, 2048);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					Utils.checkAndUseAutoPPThold();
+					if (bytesRead > 0) {
+						primarySpeaker.write(buffer, 0, bytesRead);
+						if (secondarySpeaker != null) {
+							secondarySpeaker.write(buffer, 0, bytesRead);
+						}
+					}
+					if (bytesRead < 2048) {
+						this.playing = false;
+					}
+				}
+				Utils.decrementCurrentClipCount();
+				Utils.checkAndReleaseHeldPPTKeys();
+			}
+			if (clip != null) {
+				try {
+					clip.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			primarySpeaker.close();
+			if (secondarySpeaker != null) {
+				secondarySpeaker.close();
+			}
+		}
 	}
 }

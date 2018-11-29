@@ -45,12 +45,11 @@ public class MicInjector extends Thread {
 	private long nextDrift;
 	private final long driftinterval = 1800000L;
 
-	MicInjector()
-   {
-     this.inputBuffer = new byte['Ȁ']; // TODO: fix character
-     this.inputLineName = "none selected";
-     this.outputLineName = "none selected";
-   }
+	MicInjector() {
+		this.inputBuffer = new byte[512]; // TODO: fix character
+		this.inputLineName = "none selected";
+		this.outputLineName = "none selected";
+	}
 
 	public synchronized void setInputMixer(String mixerName) {
 		String[] mixers = getMixerNames(targetDataLineInfo);
@@ -216,33 +215,31 @@ public class MicInjector extends Thread {
 		return (String[]) mixerNames.toArray(returnarray);
 	}
 
-	private static float findLevel(byte[] buffer)
-   {
-     double dB = 0.0D;
-     for (int i = 0; i < buffer.length; i++) {
-       dB = 20.0D * Math.log10(Math.abs(buffer[i] / 32767.0D));
-       if ((dB == Double.NEGATIVE_INFINITY) || (dB == NaN.0D)) { // TODO: fix this value
-         dB = -90.0D;
-       }
-     }
-     float level = (float)dB + 91.0F;
-     return level;
-   }
+	private static float findLevel(byte[] buffer) {
+		double dB = 0.0D;
+		for (int i = 0; i < buffer.length; i++) {
+			dB = 20.0D * Math.log10(Math.abs(buffer[i] / 32767.0D));
+			if ((dB == Double.NEGATIVE_INFINITY) || (dB == Double.NaN)) { // (dB == NaN.0D)) { // TODO: fix this value
+				dB = -90.0D;
+			}
+		}
+		float level = (float) dB + 91.0F;
+		return level;
+	}
 
-	public static float getdB(byte[] buffer)
-   {
-     double dB = 0.0D;
-     short[] shortArray = new short[buffer.length / 2];
-     ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortArray);
-     for (int i = 0; i < shortArray.length; i++) {
-       dB = 20.0D * Math.log10(Math.abs(shortArray[i] / 32767.0D));
-       if ((dB == Double.NEGATIVE_INFINITY) || (dB == NaN.0D)) { // TODO: fix this value
-         dB = -90.0D;
-       }
-     }
-     float level = (float)dB + 91.0F;
-     return level;
-   }
+	public static float getdB(byte[] buffer) {
+		double dB = 0.0D;
+		short[] shortArray = new short[buffer.length / 2];
+		ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortArray);
+		for (int i = 0; i < shortArray.length; i++) {
+			dB = 20.0D * Math.log10(Math.abs(shortArray[i] / 32767.0D));
+			if ((dB == Double.NEGATIVE_INFINITY) || (dB == Double.NaN)) { // (dB == NaN.0D)) { // TODO: fix this value
+				dB = -90.0D;
+			}
+		}
+		float level = (float) dB + 91.0F;
+		return level;
+	}
 
 	@Deprecated
 	public static short[] byteToShortArray(byte[] byteArray) {
