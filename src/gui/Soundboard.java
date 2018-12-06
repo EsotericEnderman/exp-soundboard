@@ -2,6 +2,12 @@ package gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+
+import com.sun.istack.internal.logging.Logger;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -11,11 +17,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.AudioMaster;
 import model.Entry;
-import model.KeyboardListener;
+import model.FeedbackListener;
 
 public class Soundboard extends Application {
 
-	public KeyboardListener listener;
 	public AudioMaster audio;
 	public List<Entry> entries;
 
@@ -48,6 +53,10 @@ public class Soundboard extends Application {
 	@Override
 	public void init() throws Exception {
 		super.init();
+		
+		startNativeKey();
+		entries = new ArrayList<Entry>();
+		audio = new AudioMaster();
 
 		FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("mainmenu_jfx.fxml"));
@@ -68,11 +77,6 @@ public class Soundboard extends Application {
 		loader.setLocation(getClass().getResource("converter_jfx.fxml"));
 		converter = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
-
-		KeyboardListener.start();
-		listener = new KeyboardListener();
-		entries = new ArrayList<Entry>();
-		audio = new AudioMaster();
 	}
 
 	@Override
@@ -103,8 +107,25 @@ public class Soundboard extends Application {
 
 	@Override
 	public void stop() throws Exception {
-		KeyboardListener.stop();
+		stopNativeKey();
 		super.stop();
+	}
+	
+	public static void startNativeKey() throws NativeHookException {
+		if (!GlobalScreen.isNativeHookRegistered()) {
+			GlobalScreen.registerNativeHook();
+			Logger.getLogger(GlobalScreen.class).setLevel(Level.OFF);
+		} else {
+
+		}
+	}
+	
+	public static void stopNativeKey() throws NativeHookException {
+		if (GlobalScreen.isNativeHookRegistered()) {
+			GlobalScreen.unregisterNativeHook();
+		} else {
+
+		}
 	}
 
 }

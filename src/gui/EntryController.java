@@ -4,12 +4,15 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -17,21 +20,26 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import model.Entry;
-import model.KeyboardListener;
+import model.FeedbackListener;
 
 public class EntryController {
-	
+
 	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
 	private static final String emptyHotkey = "";
 
+	private static final ExtensionFilter standard_audio = new ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac");
+	private static final ExtensionFilter all_files = new ExtensionFilter("All Files", "*.*");
+
+	private FeedbackListener listener;
+
 	private Stage window;
 	private Soundboard parent;
 	private FileChooser chooser;
-	
+
 	private File workFile;
 	private NativeKeyEvent nativeEvent;
-	
+
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
 
@@ -52,19 +60,23 @@ public class EntryController {
 
 	public void start(EntryModel starter) {
 		if (starter != null) {
+			hotkeyField.setStyle("-fx-control-inner-background: white;");
 			selectionText.setText(starter.getEntry().getFile().getAbsolutePath());
 			hotkeyField.setText(starter.getHotkey());
-			workFile = starter.getEntry().getFile();
 			nativeEvent = starter.getEntry().getCombo();
+			workFile = starter.getEntry().getFile();
 			window.show();
+		} else {
+			start();
 		}
 	}
-	
+
 	public void start() {
+		hotkeyField.setStyle("-fx-control-inner-background: white;");
 		selectionText.setText(defaultSelect);
 		hotkeyField.setText(emptyHotkey);
-		workFile = null;
 		nativeEvent = null;
+		workFile = null;
 		window.show();
 	}
 
@@ -79,46 +91,80 @@ public class EntryController {
 		this.window = window;
 		chooser = new FileChooser();
 		chooser.setTitle("Choose Audio File");
-		chooser.getExtensionFilters().addAll(new ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac"),
-				new ExtensionFilter("All Files", "*.*"));
+		chooser.getExtensionFilters().addAll(standard_audio, all_files);
+
+		try {
+			listener = new FeedbackListener();
+		} catch (NativeHookException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML
 	void onDonePressed(ActionEvent event) { // TODO make flags to signify the user set file and keycombo correctly
-		if (workFile != null && nativeEvent != null) {
-			parent.menuController.addEntry(new EntryModel(new Entry(workFile, nativeEvent)));
-			window.close();
-		}
+		stop();
 	}
 
 	@FXML
 	void onFieldClicked(MouseEvent event) {
 		if (event.isPrimaryButtonDown()) {
-			hotkeyField.setStyle("-fx-control-inner-background: cyan;");
-			hotkeyField.setText(defaultPress);
-			
-			parent.listener.listenOn(hotkeyField);
+			startListening();
 		} else if (event.isSecondaryButtonDown()) {
-			parent.listener.stopListening();
-			hotkeyField.setStyle("-fx-control-inner-background: white;");
-			
-			if (hotkeyField.getText() == defaultPress) {
-				hotkeyField.setText(emptyHotkey);
-			} else {
-				nativeEvent = parent.listener.getCombo();
-			}
-		} else {
-			
+			stopListening();
 		}
 	}
 
 	@FXML
 	void onSelectClicked(ActionEvent event) {
+		grabFile();
+	}
+
+	public String getHotkeyText() {
+		return hotkeyField.getText();
+	}
+
+	public void setHotkeyText(String text) {
+		hotkeyField.setText(text);
+	}
+
+	public NativeKeyEvent getCombo() {
+		return nativeEvent;
+	}
+
+	public void setCombo(NativeKeyEvent nativeEvent) {
+		this.nativeEvent = nativeEvent;
+	}
+
+	public void startListening() {
+		hotkeyField.setStyle("-fx-control-inner-background: cyan;");
+		hotkeyField.setText(defaultPress);
+		listener.listenOn(this);
+	}
+
+	public void stopListening() {
+		hotkeyField.setStyle("-fx-control-inner-background: white;");
+		if (hotkeyField.getText() == defaultPress) {
+			hotkeyField.setText(emptyHotkey);
+		}
+		listener.stopListening();
+	}
+
+	private void grabFile() {
 		File selectedFile = chooser.showOpenDialog(window);
 		if (selectedFile != null) {
 			selectionText.setText(selectedFile.getAbsolutePath());
 			workFile = selectedFile;
 		}
 	}
-	
+
+	public void stop() {
+		if (workFile != null && nativeEvent != null) {
+			stopListening();
+			parent.menuController.addEntry(new EntryModel(new Entry(workFile, nativeEvent)));
+			window.close();
+		} else {
+			new Alert(AlertType.ERROR, "Not all fields have been filled!", ButtonType.OK).showAndWait();
+		}
+	}
+
 }

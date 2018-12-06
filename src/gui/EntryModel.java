@@ -3,7 +3,7 @@ package gui;
 import javafx.beans.property.SimpleStringProperty;
 import model.Entry;
 import model.JNativeUtil;
-import model.KeyboardListener;
+import model.FeedbackListener;
 
 public class EntryModel {
 
