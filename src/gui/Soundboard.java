@@ -17,7 +17,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.AudioMaster;
 import model.Entry;
-import model.FeedbackListener;
 
 public class Soundboard extends Application {
 
@@ -31,7 +30,7 @@ public class Soundboard extends Application {
 	private Stage entryStage;
 	private Stage converterStage;
 
-	private Scene mainScene;
+	private Scene menuScene;
 	private Scene settingsScene;
 	private Scene entryScene;
 	private Scene converterScene;
@@ -41,10 +40,12 @@ public class Soundboard extends Application {
 	private Pane entryMenu;
 	private Pane converter;
 
-	public MenuController menuController;
-	public SettingsController settingsController;
-	public EntryController entryController;
-	public ConverterController converterController;
+	// --- Controllers --- //
+
+	MenuController menuController;
+	EntryController entryController;
+	SettingsController settingsController;
+	ConverterController converterController;
 
 	public static void main(String[] args) {
 		Application.launch(Soundboard.class, args);
@@ -53,10 +54,10 @@ public class Soundboard extends Application {
 	@Override
 	public void init() throws Exception {
 		super.init();
-		
 		startNativeKey();
+
 		entries = new ArrayList<Entry>();
-		audio = new AudioMaster();
+		audio = new AudioMaster(2);
 
 		FXMLLoader loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("mainmenu_jfx.fxml"));
@@ -81,50 +82,49 @@ public class Soundboard extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		mainScene = new Scene(mainMenu);
+		menuScene = new Scene(mainMenu);
 		settingsScene = new Scene(settings);
 		entryScene = new Scene(entryMenu);
 		converterScene = new Scene(converter);
 
 		menuStage = primaryStage;
-		menuStage.setScene(mainScene);
+		menuStage.setScene(menuScene);
+		menuController.preload(this, menuStage, menuScene);
 		menuStage.show();
 
 		settingsStage = new Stage();
 		settingsStage.setScene(settingsScene);
+		settingsController.preload(this,settingsStage, settingsScene);
 
 		entryStage = new Stage();
 		entryStage.setScene(entryScene);
+		entryController.preload(this, entryStage, entryScene);
 
 		converterStage = new Stage();
 		converterStage.setScene(converterScene);
-
-		menuController.initialize(this);
-		settingsController.initialize();
-		entryController.initialize(this, entryStage);
-		converterController.initialize();
+		converterController.preload(this, converterStage, converterScene);
 	}
 
 	@Override
 	public void stop() throws Exception {
-		stopNativeKey();
 		super.stop();
+		stopNativeKey();
 	}
-	
+
 	public static void startNativeKey() throws NativeHookException {
 		if (!GlobalScreen.isNativeHookRegistered()) {
 			GlobalScreen.registerNativeHook();
 			Logger.getLogger(GlobalScreen.class).setLevel(Level.OFF);
 		} else {
-
+			throw new NativeHookException("Native hook already started!");
 		}
 	}
-	
+
 	public static void stopNativeKey() throws NativeHookException {
 		if (GlobalScreen.isNativeHookRegistered()) {
 			GlobalScreen.unregisterNativeHook();
 		} else {
-
+			throw new NativeHookException("Native hook already started!");
 		}
 	}
 

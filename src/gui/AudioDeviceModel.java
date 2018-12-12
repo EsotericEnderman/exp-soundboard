@@ -21,10 +21,5 @@ public class AudioDeviceModel {
 	public Mixer.Info getInfo() {
 		return info;
 	}
-	
-	@Override
-	public String toString() {
-		return info.getName();
-	}
 
 }

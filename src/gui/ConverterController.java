@@ -1,11 +1,13 @@
 package gui;
 
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 
-public class ConverterController {
+public class ConverterController extends GuiController {
 
 	@FXML
 	private Button inputSelectButton;
@@ -33,10 +35,6 @@ public class ConverterController {
 
 	@FXML
 	private Label inputText;
-
-	public ConverterController() {
-		// TODO Auto-generated constructor stub
-	}
 
 	@FXML
 	void initialize() {

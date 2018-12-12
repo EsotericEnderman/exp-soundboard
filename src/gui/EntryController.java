@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.scene.Scene;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
@@ -22,7 +23,7 @@ import javafx.stage.Stage;
 import model.Entry;
 import model.FeedbackListener;
 
-public class EntryController {
+public class EntryController extends GuiController {
 
 	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
@@ -32,19 +33,17 @@ public class EntryController {
 	private static final ExtensionFilter all_files = new ExtensionFilter("All Files", "*.*");
 
 	private FeedbackListener listener;
-
-	private Stage window;
-	private Soundboard parent;
-	private FileChooser chooser;
-
-	private File workFile;
 	private NativeKeyEvent nativeEvent;
+	private FileChooser chooser;
+	private File workFile;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
 
 	@FXML // URL location of the FXML file that was given to the FXMLLoader
 	private URL location;
+
+	// --- GUI Objects --- //
 
 	@FXML // fx:id="selectButton"
 	private Button selectButton; // Value injected by FXMLLoader
@@ -58,37 +57,13 @@ public class EntryController {
 	@FXML // fx:id="doneButton"
 	private Button doneButton; // Value injected by FXMLLoader
 
-	public void start(EntryModel starter) {
-		if (starter != null) {
-			hotkeyField.setStyle("-fx-control-inner-background: white;");
-			selectionText.setText(starter.getEntry().getFile().getAbsolutePath());
-			hotkeyField.setText(starter.getHotkey());
-			nativeEvent = starter.getEntry().getCombo();
-			workFile = starter.getEntry().getFile();
-			window.show();
-		} else {
-			start();
-		}
-	}
-
-	public void start() {
-		hotkeyField.setStyle("-fx-control-inner-background: white;");
-		selectionText.setText(defaultSelect);
-		hotkeyField.setText(emptyHotkey);
-		nativeEvent = null;
-		workFile = null;
-		window.show();
-	}
-
 	@FXML // This method is called by the FXMLLoader when initialization is complete
-	void initialize(Soundboard parent, Stage window) {
+	void initialize() {
 		assert selectButton != null : "fx:id=\"selectButton\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert selectionText != null : "fx:id=\"selectionText\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert hotkeyField != null : "fx:id=\"hotkeyField\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert doneButton != null : "fx:id=\"doneButton\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 
-		this.parent = parent;
-		this.window = window;
 		chooser = new FileChooser();
 		chooser.setTitle("Choose Audio File");
 		chooser.getExtensionFilters().addAll(standard_audio, all_files);
@@ -150,10 +125,42 @@ public class EntryController {
 	}
 
 	private void grabFile() {
-		File selectedFile = chooser.showOpenDialog(window);
+		File selectedFile = chooser.showOpenDialog(stage);
 		if (selectedFile != null) {
 			selectionText.setText(selectedFile.getAbsolutePath());
 			workFile = selectedFile;
+		}
+	}
+
+	public void start(EntryModel starter) {
+		if (starter != null) {
+			hotkeyField.setStyle("-fx-control-inner-background: white;");
+			selectionText.setText(starter.getEntry().getFile().getAbsolutePath());
+			hotkeyField.setText(starter.getHotkey());
+			nativeEvent = starter.getEntry().getCombo();
+			workFile = starter.getEntry().getFile();
+			stage.show();
+		} else {
+			start();
+		}
+	}
+
+	public void start() {
+		hotkeyField.setStyle("-fx-control-inner-background: white;");
+		selectionText.setText(defaultSelect);
+		hotkeyField.setText(emptyHotkey);
+		nativeEvent = null;
+		workFile = null;
+		stage.show();
+	}
+
+	public void stop(EntryModel ender) {
+		if (ender != null) {
+			stopListening();
+			parent.menuController.addEntry(ender);
+			stage.close();
+		} else {
+			new Alert(AlertType.ERROR, "Model argument is null!", ButtonType.OK).showAndWait();
 		}
 	}
 
@@ -161,7 +168,7 @@ public class EntryController {
 		if (workFile != null && nativeEvent != null) {
 			stopListening();
 			parent.menuController.addEntry(new EntryModel(new Entry(workFile, nativeEvent)));
-			window.close();
+			stage.close();
 		} else {
 			new Alert(AlertType.ERROR, "Not all fields have been filled!", ButtonType.OK).showAndWait();
 		}

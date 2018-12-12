@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
+import javax.sound.sampled.Mixer.Info;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import javafx.collections.FXCollections;
@@ -25,14 +26,13 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import model.Entry;
 
-public class MenuController { // TODO make abstract controller superclass
-	// TODO close entire program when this window is closed
+public class MenuController extends GuiController {
 
-	private Soundboard parent;
-	
 	private ObservableList<EntryModel> tableList;
 	private ObservableList<AudioDeviceModel> audioList;
 
@@ -76,7 +76,7 @@ public class MenuController { // TODO make abstract controller superclass
 	@FXML // fx:id="converterMenuButton"
 	private MenuItem converterMenuButton; // Value injected by FXMLLoader
 
-	// --- Control Buttons --- //
+	// --- Entry/Audio Control Buttons --- //
 
 	@FXML // fx:id="addButton"
 	private Button addButton; // Value injected by FXMLLoader
@@ -120,7 +120,7 @@ public class MenuController { // TODO make abstract controller superclass
 	private TableColumn<EntryModel, String> hotkeyColumn; // Value injected by FXMLLoader
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
-	void initialize(Soundboard parent) {
+	void initialize() {
 		assert newMenuButton != null : "fx:id=\"newMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert openMenuButton != null : "fx:id=\"openMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert closeMenuButton != null : "fx:id=\"closeMenuButton\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
@@ -143,23 +143,29 @@ public class MenuController { // TODO make abstract controller superclass
 		assert pttHoldCheck != null : "fx:id=\"pttHoldCheck\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert entryTable != null : "fx:id=\"EntryTable\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 
-		this.parent = parent;
 		clipColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("clipName"));
 		hotkeyColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("hotkey"));
-		
+
 		tableList = FXCollections.observableArrayList();
 		entryTable.setItems(tableList);
-		
+
 		Mixer.Info[] audios = AudioSystem.getMixerInfo();
 		List<AudioDeviceModel> devices = new ArrayList<AudioDeviceModel>();
 		for (int i = 0; i < audios.length; i++) {
+			if (!audios[i].toString().startsWith("Port"))
 			devices.add(new AudioDeviceModel(audios[i]));
 		}
-		
+
 		audioList = FXCollections.observableArrayList(devices);
+		AudioModelConverter cellFactory = new AudioModelConverter();
+
 		primarySpeakerCombo.setItems(audioList);
+		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
+		primarySpeakerCombo.setCellFactory(cellFactory);
+
 		secondarySpeakerCombo.setItems(audioList);
-		
+		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
+		secondarySpeakerCombo.setCellFactory(cellFactory);
 	}
 
 	@FXML
@@ -174,14 +180,7 @@ public class MenuController { // TODO make abstract controller superclass
 
 	@FXML
 	void onPlayPressed(ActionEvent event) {
-		EntryModel selected = getSelectedEntry();
-		if (selected != null) {
-			try {
-				parent.audio.play(selected.getEntry());
-			} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-				e.printStackTrace();
-			}
-		}
+		playSelected();
 	}
 
 	@FXML
@@ -215,53 +214,85 @@ public class MenuController { // TODO make abstract controller superclass
 
 	@FXML
 	void onSaveMenuPressed(ActionEvent event) {
-		// TODO open file picker, send destination to file parser
+		// TODO send saved destination to file parser
 	}
 
 	@FXML
 	void onSaveAsMenuPressed(ActionEvent event) {
-
+		// TODO open file picker, send destination to file parser
 	}
 
 	@FXML
 	void onWebpageMenuPressed(ActionEvent event) {
-
+		// TODO ask system to open browser on github page link
 	}
 
 	@FXML
 	void onQuitMenuPressed(ActionEvent event) {
-
+		// TODO check if setup changed, ask for user confirmation if changed, otherwise close
 	}
 
 	@FXML
 	void onSettingsMenuPressed(ActionEvent event) {
-
+		// TODO open settings menu
 	}
 
 	@FXML
 	void onLevelsMenuPressed(ActionEvent event) {
-
+		// TODO open levels menu, start live updating values to audio master
 	}
 
 	@FXML
 	void onConverterMenuPressed(ActionEvent event) {
-
+		// TODO open converter menu
 	}
-	
+
 	public void addEntry(EntryModel entry) {
 		tableList.add(entry);
 	}
-	
+
 	public void removeEntry(int index) {
 		tableList.remove(index);
 	}
-	
+
 	public void removeEntry(EntryModel entry) {
 		tableList.remove(entry);
 	}
-	
+
 	public EntryModel getSelectedEntry() {
 		return entryTable.getSelectionModel().getSelectedItem();
+	}
+
+	public void playSelected() {
+		EntryModel selected = getSelectedEntry();
+		if (selected != null) {
+			try {
+				parent.audio.play(selected.getEntry());
+			} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+}
+
+class AudioModelConverter implements Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> {
+
+	@Override
+	public ListCell<AudioDeviceModel> call(ListView<AudioDeviceModel> param) {
+		return new ListCell<AudioDeviceModel>() {
+
+			@Override
+			protected void updateItem(AudioDeviceModel item, boolean empty) {
+				super.updateItem(item, empty);
+				if (item == null || empty) {
+					setGraphic(null);
+				} else {
+					setText(item.getInfo().toString());
+				}
+			}
+
+		};
 	}
 
 }

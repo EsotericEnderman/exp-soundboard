@@ -1,13 +1,18 @@
 package gui;
 
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
-public class SettingsController {
+public class SettingsController extends GuiController {
+
+
+	// --- GUI Objects --- //
 
 	@FXML
 	private TextField stopAllField;
@@ -47,10 +52,6 @@ public class SettingsController {
 
 	@FXML
 	private Button updateCheckButton;
-
-	public SettingsController() {
-		// TODO Auto-generated constructor stub
-	}
 
 	@FXML
 	void initialize() {

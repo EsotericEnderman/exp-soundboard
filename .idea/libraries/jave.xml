@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="jave">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Java Libraries/jave/jave-1.0.2/jave-1.0.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://$USER_HOME$/Java Libraries/jave/jave-1.0.2/doc" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$USER_HOME$/Java Libraries/jave/jave-1.0.2-src" />
+    </SOURCES>
+  </library>
+</component>
