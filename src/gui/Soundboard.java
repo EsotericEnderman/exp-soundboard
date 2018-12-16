@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import javafx.stage.Modality;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
@@ -94,14 +95,20 @@ public class Soundboard extends Application {
 
 		settingsStage = new Stage();
 		settingsStage.setScene(settingsScene);
+		settingsStage.initOwner(menuStage);
+		settingsStage.initModality(Modality.WINDOW_MODAL);
 		settingsController.preload(this,settingsStage, settingsScene);
 
 		entryStage = new Stage();
 		entryStage.setScene(entryScene);
+		entryStage.initOwner(menuStage);
+		entryStage.initModality(Modality.WINDOW_MODAL);
 		entryController.preload(this, entryStage, entryScene);
 
 		converterStage = new Stage();
 		converterStage.setScene(converterScene);
+		converterStage.initOwner(menuStage);
+		converterStage.initModality(Modality.WINDOW_MODAL);
 		converterController.preload(this, converterStage, converterScene);
 	}
 

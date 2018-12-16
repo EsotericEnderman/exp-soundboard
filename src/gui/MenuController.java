@@ -3,35 +3,28 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
-import javax.sound.sampled.Mixer.Info;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import javafx.util.Callback;
-import model.Entry;
 
 public class MenuController extends GuiController {
+
+	private static final int[] singleIndices = {0};
+	private static final int[] doubleIndices = {0, 1};
 
 	private ObservableList<EntryModel> tableList;
 	private ObservableList<AudioDeviceModel> audioList;
@@ -152,20 +145,53 @@ public class MenuController extends GuiController {
 		Mixer.Info[] audios = AudioSystem.getMixerInfo();
 		List<AudioDeviceModel> devices = new ArrayList<AudioDeviceModel>();
 		for (int i = 0; i < audios.length; i++) {
-			if (!audios[i].toString().startsWith("Port"))
-			devices.add(new AudioDeviceModel(audios[i]));
+			if (AudioSystem.getMixer(audios[i]).getSourceLineInfo().length > 0)
+				devices.add(new AudioDeviceModel(audios[i]));
 		}
 
 		audioList = FXCollections.observableArrayList(devices);
-		AudioModelConverter cellFactory = new AudioModelConverter();
+		Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> cellFactory = new Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>>() {
+			@Override
+			public ListCell<AudioDeviceModel> call(ListView<AudioDeviceModel> param) {
+				return new ListCell<AudioDeviceModel>() {
+					@Override
+					protected void updateItem(AudioDeviceModel item, boolean empty) {
+						super.updateItem(item, empty);
+						if (item == null || empty) {
+							setGraphic(null);
+						} else {
+							setText(item.getName());
+						}
+					}
+
+				};
+			}
+		};
 
 		primarySpeakerCombo.setItems(audioList);
 		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		primarySpeakerCombo.setCellFactory(cellFactory);
+		primarySpeakerCombo.getSelectionModel().select(0); // select the first option, as to prevent the program starting with null devices selected
+		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
+			@Override
+			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
+				parent.audio.setOutput(0, getPrimarySelect().getInfo());
+			}
+		});
 
 		secondarySpeakerCombo.setItems(audioList);
 		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		secondarySpeakerCombo.setCellFactory(cellFactory);
+		secondarySpeakerCombo.getSelectionModel().select(0); // same as other select, this must be done before the listener to prevent race condition erros
+		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
+			@Override
+			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
+				parent.audio.setOutput(1, getSecondarySelect().getInfo());
+			}
+		});
+
+
+
 	}
 
 	@FXML
@@ -174,7 +200,7 @@ public class MenuController extends GuiController {
 	}
 
 	@FXML
-	void onEditPressed(ActionEvent event) {
+	void onEditPressed(ActionEvent event) { // TODO potentially change this to outside function
 		parent.entryController.start(getSelectedEntry());
 	}
 
@@ -185,9 +211,8 @@ public class MenuController extends GuiController {
 
 	@FXML
 	void onRemovePressed(ActionEvent event) {
-		EntryModel selected = getSelectedEntry();
-		if (selected != null) {
-			removeEntry(selected);
+		if (!removeSelected()) {
+			// TODO play error sound, user has no selected entry
 		}
 	}
 
@@ -263,36 +288,46 @@ public class MenuController extends GuiController {
 		return entryTable.getSelectionModel().getSelectedItem();
 	}
 
-	public void playSelected() {
-		EntryModel selected = getSelectedEntry();
-		if (selected != null) {
-			try {
-				parent.audio.play(selected.getEntry());
-			} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-				e.printStackTrace();
-			}
+	public AudioDeviceModel getPrimarySelect() {
+		return primarySpeakerCombo.getValue();
+	}
+
+	public AudioDeviceModel getSecondarySelect() {
+		return secondarySpeakerCombo.getValue();
+	}
+
+	public boolean secondaryChecked() {
+		return secondarySpeakerCheck.isSelected();
+	}
+
+	public void play(EntryModel entry) {
+		try {
+			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
+			parent.audio.play(entry.getEntry().getFile(), (secondaryChecked() ? new int[]{0, 1} : new int[]{0}));
+		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
+			e.printStackTrace();
+			new Alert(Alert.AlertType.ERROR, "Error playing audio file: " + e.getMessage(), ButtonType.OK).showAndWait();
 		}
 	}
 
-}
+	public boolean playSelected() {
+		EntryModel selected = getSelectedEntry();
+		if (selected != null) {
+			play(selected);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-class AudioModelConverter implements Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> {
-
-	@Override
-	public ListCell<AudioDeviceModel> call(ListView<AudioDeviceModel> param) {
-		return new ListCell<AudioDeviceModel>() {
-
-			@Override
-			protected void updateItem(AudioDeviceModel item, boolean empty) {
-				super.updateItem(item, empty);
-				if (item == null || empty) {
-					setGraphic(null);
-				} else {
-					setText(item.getInfo().toString());
-				}
-			}
-
-		};
+	public boolean removeSelected() {
+		EntryModel selected = getSelectedEntry();
+		if (selected != null) {
+			removeEntry(selected);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }

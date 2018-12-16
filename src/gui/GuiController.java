@@ -9,7 +9,7 @@ public abstract class GuiController {
     protected Stage stage;
     protected Scene scene;
 
-    void preload(Soundboard parent, Stage window, Scene scene) {
+    void preload(Soundboard parent, Stage stage, Scene scene) {
         this.parent = parent;
         this.stage = stage;
         this.scene = scene;

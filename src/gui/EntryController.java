@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.scene.Scene;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
@@ -19,7 +18,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.stage.Stage;
 import model.Entry;
 import model.FeedbackListener;
 
@@ -58,7 +56,7 @@ public class EntryController extends GuiController {
 	private Button doneButton; // Value injected by FXMLLoader
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
-	void initialize() {
+	void initialize() throws NativeHookException {
 		assert selectButton != null : "fx:id=\"selectButton\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert selectionText != null : "fx:id=\"selectionText\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert hotkeyField != null : "fx:id=\"hotkeyField\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
@@ -68,11 +66,7 @@ public class EntryController extends GuiController {
 		chooser.setTitle("Choose Audio File");
 		chooser.getExtensionFilters().addAll(standard_audio, all_files);
 
-		try {
-			listener = new FeedbackListener();
-		} catch (NativeHookException e) {
-			e.printStackTrace();
-		}
+		listener = new FeedbackListener();
 	}
 
 	@FXML
