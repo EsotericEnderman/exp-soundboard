@@ -2,10 +2,11 @@ package model;
 
 import java.awt.Toolkit;
 
+import javafx.scene.input.KeyEvent;
 import org.jnativehook.NativeInputEvent;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
-public class JNativeUtil {
+public class KeyUtil {
 
 	public static final String spacer = " + ";
 
@@ -73,7 +74,7 @@ public class JNativeUtil {
 		}
 
 		if (param.length() > 0) {
-			// Remove the trailing '+'.
+			// Remove trailing spacer.
 			for (int i = 0; i < spacer.length(); i++) {
 				param.deleteCharAt(param.length() - 1);
 			}
@@ -96,5 +97,34 @@ public class JNativeUtil {
 		} else {
 			return keyCode;
 		}
+	}
+
+	public static String asReadable(KeyEvent event) {
+		StringBuilder str = new StringBuilder(100);
+
+		if (event.isMetaDown()) {
+			// The windows button
+			str.append("Win" + spacer);
+		}
+
+		if (event.isControlDown()) {
+			str.append("Ctrl" + spacer);
+		}
+
+		if (event.isShiftDown()) {
+			str.append("Shift" + spacer);
+		}
+
+		if (event.isAltDown()) {
+			str.append("Alt" + spacer);
+		}
+
+		if (event.isShortcutDown()) {
+			str.append("Short" + spacer);
+		}
+
+		str.append(event.getCharacter().toUpperCase());
+
+		return str.toString();
 	}
 }

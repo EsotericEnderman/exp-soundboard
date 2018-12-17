@@ -28,7 +28,7 @@ public class Entry {
 
 	@Override
 	public String toString() {
-		return JNativeUtil.asReadable(combo) + " = " + file.getAbsolutePath();
+		return KeyUtil.asReadable(combo) + " = " + file.getAbsolutePath();
 	}
 
 	@Override

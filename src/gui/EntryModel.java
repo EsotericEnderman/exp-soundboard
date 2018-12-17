@@ -2,8 +2,7 @@ package gui;
 
 import javafx.beans.property.SimpleStringProperty;
 import model.Entry;
-import model.JNativeUtil;
-import model.FeedbackListener;
+import model.KeyUtil;
 
 public class EntryModel {
 
@@ -13,7 +12,7 @@ public class EntryModel {
 
 	public EntryModel(Entry model) {
 		this.clipName = new SimpleStringProperty(model.getFile().getName());
-		this.hotkey = new SimpleStringProperty(JNativeUtil.asReadable(model.getCombo()));
+		this.hotkey = new SimpleStringProperty(KeyUtil.asReadable(model.getCombo()));
 		this.entry = model;
 	}
 

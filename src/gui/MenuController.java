@@ -303,7 +303,7 @@ public class MenuController extends GuiController {
 	public void play(EntryModel entry) {
 		try {
 			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
-			parent.audio.play(entry.getEntry().getFile(), (secondaryChecked() ? new int[]{0, 1} : new int[]{0}));
+			parent.audio.play(entry.getEntry().getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
 		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
 			e.printStackTrace();
 			new Alert(Alert.AlertType.ERROR, "Error playing audio file: " + e.getMessage(), ButtonType.OK).showAndWait();
@@ -329,5 +329,9 @@ public class MenuController extends GuiController {
 			return false;
 		}
 	}
+
+	public void reset() {
+	    tableList.clear();
+    }
 
 }

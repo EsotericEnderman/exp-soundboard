@@ -22,7 +22,6 @@ import model.Entry;
 public class Soundboard extends Application {
 
 	public AudioMaster audio;
-	public List<Entry> entries;
 
 	// --- GUI Fields --- //
 
@@ -57,7 +56,6 @@ public class Soundboard extends Application {
 		super.init();
 		startNativeKey();
 
-		entries = new ArrayList<Entry>();
 		audio = new AudioMaster(2);
 
 		FXMLLoader loader = new FXMLLoader();

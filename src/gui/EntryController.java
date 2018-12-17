@@ -4,6 +4,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.scene.input.KeyEvent;
+import model.KeyUtil;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
@@ -19,18 +21,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import model.Entry;
-import model.FeedbackListener;
+import model.EntryListener;
 
 public class EntryController extends GuiController {
 
 	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
-	private static final String emptyHotkey = "";
+    private static final String emptyHotkey = "";
 
 	private static final ExtensionFilter standard_audio = new ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac");
 	private static final ExtensionFilter all_files = new ExtensionFilter("All Files", "*.*");
 
-	private FeedbackListener listener;
+	private EntryListener listener;
 	private NativeKeyEvent nativeEvent;
 	private FileChooser chooser;
 	private File workFile;
@@ -66,7 +68,7 @@ public class EntryController extends GuiController {
 		chooser.setTitle("Choose Audio File");
 		chooser.getExtensionFilters().addAll(standard_audio, all_files);
 
-		listener = new FeedbackListener();
+		listener = new EntryListener();
 	}
 
 	@FXML
@@ -81,6 +83,11 @@ public class EntryController extends GuiController {
 		} else if (event.isSecondaryButtonDown()) {
 			stopListening();
 		}
+	}
+
+	@FXML
+	void onFieldPressed(KeyEvent event) {
+		System.out.println(KeyUtil.asReadable(event));
 	}
 
 	@FXML
