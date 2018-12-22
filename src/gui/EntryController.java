@@ -4,7 +4,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Stage;
 import model.KeyUtil;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -58,17 +60,11 @@ public class EntryController extends GuiController {
 	private Button doneButton; // Value injected by FXMLLoader
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
-	void initialize() throws NativeHookException {
+	void initialize() {
 		assert selectButton != null : "fx:id=\"selectButton\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert selectionText != null : "fx:id=\"selectionText\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert hotkeyField != null : "fx:id=\"hotkeyField\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
 		assert doneButton != null : "fx:id=\"doneButton\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
-
-		chooser = new FileChooser();
-		chooser.setTitle("Choose Audio File");
-		chooser.getExtensionFilters().addAll(standard_audio, all_files);
-
-		listener = new EntryListener();
 	}
 
 	@FXML
@@ -95,7 +91,23 @@ public class EntryController extends GuiController {
 		grabFile();
 	}
 
-	public String getHotkeyText() {
+    @Override
+    void preload(Soundboard parent, Stage stage, Scene scene) {
+        super.preload(parent, stage, scene);
+
+        chooser = new FileChooser();
+        chooser.setTitle("Choose Audio File");
+        chooser.getExtensionFilters().addAll(standard_audio, all_files);
+
+        try {
+            listener = new EntryListener();
+        } catch (NativeHookException nhe) {
+            nhe.printStackTrace();
+            parent.throwBlockingError(nhe.getMessage());
+        }
+    }
+
+    public String getHotkeyText() {
 		return hotkeyField.getText();
 	}
 
@@ -158,20 +170,20 @@ public class EntryController extends GuiController {
 	public void stop(EntryModel ender) {
 		if (ender != null) {
 			stopListening();
-			parent.menuController.addEntry(ender);
+			parent.menu().addEntry(ender);
 			stage.close();
 		} else {
-			new Alert(AlertType.ERROR, "Model argument is null!", ButtonType.OK).showAndWait();
+            parent.throwBlockingError("Model argument is null!");
 		}
 	}
 
 	public void stop() {
 		if (workFile != null && nativeEvent != null) {
 			stopListening();
-			parent.menuController.addEntry(new EntryModel(new Entry(workFile, nativeEvent)));
+			parent.menu().addEntry(new EntryModel(new Entry(workFile, nativeEvent)));
 			stage.close();
 		} else {
-			new Alert(AlertType.ERROR, "Not all fields have been filled!", ButtonType.OK).showAndWait();
+		    parent.throwBlockingError("Not all fields have been filled!");
 		}
 	}
 

@@ -143,6 +143,14 @@ public class SettingsController extends GuiController {
 
 	}
 
+	public void start() {
+		// grab settings from in-code settings file, should be loaded in by Soundboard.java
+	}
+
+	public void stop() {
+		// if anything changed (or if settings holder noticed changes) send it to the settings handler
+	}
+
 	public void setHotkey(NativeKeyEvent nativeEvent) {
 
 	}

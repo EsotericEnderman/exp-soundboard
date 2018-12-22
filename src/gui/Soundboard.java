@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -21,7 +23,7 @@ import model.Entry;
 
 public class Soundboard extends Application {
 
-	public AudioMaster audio;
+	private AudioMaster audio;
 
 	// --- GUI Fields --- //
 
@@ -42,10 +44,10 @@ public class Soundboard extends Application {
 
 	// --- Controllers --- //
 
-	MenuController menuController;
-	EntryController entryController;
-	SettingsController settingsController;
-	ConverterController converterController;
+	private MenuController menuController;
+	private EntryController entryController;
+	private SettingsController settingsController;
+	private ConverterController converterController;
 
 	public static void main(String[] args) {
 		Application.launch(Soundboard.class, args);
@@ -131,6 +133,43 @@ public class Soundboard extends Application {
 		} else {
 			throw new NativeHookException("Native hook already started!");
 		}
+	}
+
+	public MenuController menu() {
+		return menuController;
+	}
+
+	public EntryController entry() {
+		return entryController;
+	}
+
+	public SettingsController settings() {
+		return settingsController;
+	}
+
+	public ConverterController converter() {
+		return converterController;
+	}
+
+	public AudioMaster audio() {
+		return audio;
+	}
+
+	/**
+	 * Opens a simple error dialog with an OK button, must be called on the JavaFX Thread.
+	 * This method is blocking and will wait for the user to close it.
+	 * @param message Text to be shown to the user.
+	 */
+	public void throwBlockingError(String message) {
+		new Alert(Alert.AlertType.ERROR, message, ButtonType.OK).showAndWait();
+	}
+
+	/**
+	 * Opens a simple error dialog with an Ok button, must be called on the JavaFX Thread.
+	 * @param message Text to be shown to the user.
+	 */
+	public void throwError(String message) {
+		new Alert(Alert.AlertType.ERROR, message, ButtonType.OK).show();
 	}
 
 }

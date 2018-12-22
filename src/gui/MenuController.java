@@ -17,14 +17,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class MenuController extends GuiController {
 
-	private static final int[] singleIndices = {0};
-	private static final int[] doubleIndices = {0, 1};
+	private static final int primaryIndex = 0;
+	private static final int secondaryIndex = 1;
+
+	private static final int[] singleIndices = {primaryIndex};
+	private static final int[] doubleIndices = {primaryIndex, secondaryIndex};
 
 	private ObservableList<EntryModel> tableList;
 	private ObservableList<AudioDeviceModel> audioList;
@@ -135,73 +140,16 @@ public class MenuController extends GuiController {
 		assert injectorCheck != null : "fx:id=\"injectorCheck\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert pttHoldCheck != null : "fx:id=\"pttHoldCheck\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
 		assert entryTable != null : "fx:id=\"EntryTable\" was not injected: check your FXML file 'mainmenu_jfx.fxml'.";
-
-		clipColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("clipName"));
-		hotkeyColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("hotkey"));
-
-		tableList = FXCollections.observableArrayList();
-		entryTable.setItems(tableList);
-
-		Mixer.Info[] audios = AudioSystem.getMixerInfo();
-		List<AudioDeviceModel> devices = new ArrayList<AudioDeviceModel>();
-		for (int i = 0; i < audios.length; i++) {
-			if (AudioSystem.getMixer(audios[i]).getSourceLineInfo().length > 0)
-				devices.add(new AudioDeviceModel(audios[i]));
-		}
-
-		audioList = FXCollections.observableArrayList(devices);
-		Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> cellFactory = new Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>>() {
-			@Override
-			public ListCell<AudioDeviceModel> call(ListView<AudioDeviceModel> param) {
-				return new ListCell<AudioDeviceModel>() {
-					@Override
-					protected void updateItem(AudioDeviceModel item, boolean empty) {
-						super.updateItem(item, empty);
-						if (item == null || empty) {
-							setGraphic(null);
-						} else {
-							setText(item.getName());
-						}
-					}
-
-				};
-			}
-		};
-
-		primarySpeakerCombo.setItems(audioList);
-		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
-		primarySpeakerCombo.setCellFactory(cellFactory);
-		primarySpeakerCombo.getSelectionModel().select(0); // select the first option, as to prevent the program starting with null devices selected
-		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
-			@Override
-			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
-				parent.audio.setOutput(0, getPrimarySelect().getInfo());
-			}
-		});
-
-		secondarySpeakerCombo.setItems(audioList);
-		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
-		secondarySpeakerCombo.setCellFactory(cellFactory);
-		secondarySpeakerCombo.getSelectionModel().select(0); // same as other select, this must be done before the listener to prevent race condition erros
-		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
-			@Override
-			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
-				parent.audio.setOutput(1, getSecondarySelect().getInfo());
-			}
-		});
-
-
-
 	}
 
 	@FXML
 	void onAddPressed(ActionEvent event) {
-		parent.entryController.start();
+		parent.entry().start();
 	}
 
 	@FXML
 	void onEditPressed(ActionEvent event) { // TODO potentially change this to outside function
-		parent.entryController.start(getSelectedEntry());
+		parent.entry().start(getSelectedEntry());
 	}
 
 	@FXML
@@ -218,7 +166,7 @@ public class MenuController extends GuiController {
 
 	@FXML
 	void onStopPressed(ActionEvent event) {
-		parent.audio.stopAll();
+		parent.audio().stopAll();
 	}
 
 	@FXML
@@ -259,7 +207,7 @@ public class MenuController extends GuiController {
 
 	@FXML
 	void onSettingsMenuPressed(ActionEvent event) {
-		// TODO open settings menu
+		parent.settings().start();
 	}
 
 	@FXML
@@ -270,6 +218,65 @@ public class MenuController extends GuiController {
 	@FXML
 	void onConverterMenuPressed(ActionEvent event) {
 		// TODO open converter menu
+	}
+
+	@Override
+	void preload(Soundboard parent, Stage stage, Scene scene) {
+		super.preload(parent, stage, scene);
+
+		clipColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("clipName"));
+		hotkeyColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("hotkey"));
+
+		tableList = FXCollections.observableArrayList();
+		entryTable.setItems(tableList);
+
+		Mixer.Info[] audios = AudioSystem.getMixerInfo();
+		List<AudioDeviceModel> devices = new ArrayList<AudioDeviceModel>();
+		for (int i = 0; i < audios.length; i++) {
+			if (AudioSystem.getMixer(audios[i]).getSourceLineInfo().length > 0)
+				devices.add(new AudioDeviceModel(audios[i]));
+		}
+
+		audioList = FXCollections.observableArrayList(devices);
+		Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> cellFactory = new Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>>() {
+			@Override
+			public ListCell<AudioDeviceModel> call(ListView<AudioDeviceModel> param) {
+				return new ListCell<AudioDeviceModel>() {
+					@Override
+					protected void updateItem(AudioDeviceModel item, boolean empty) {
+						super.updateItem(item, empty);
+						if (item == null || empty) {
+							setGraphic(null);
+						} else {
+							setText(item.getName());
+						}
+					}
+
+				};
+			}
+		};
+
+		primarySpeakerCombo.setItems(audioList);
+		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
+		primarySpeakerCombo.setCellFactory(cellFactory);
+		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
+			@Override
+			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
+				parent.audio().setOutput(primaryIndex, newValue.getInfo());
+			}
+		});
+		primarySpeakerCombo.getSelectionModel().select(0);
+
+		secondarySpeakerCombo.setItems(audioList);
+		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
+		secondarySpeakerCombo.setCellFactory(cellFactory);
+		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
+			@Override
+			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
+				parent.audio().setOutput(secondaryIndex, newValue.getInfo());
+			}
+		});
+		secondarySpeakerCombo.getSelectionModel().select(0);
 	}
 
 	public void addEntry(EntryModel entry) {
@@ -300,13 +307,15 @@ public class MenuController extends GuiController {
 		return secondarySpeakerCheck.isSelected();
 	}
 
-	public void play(EntryModel entry) {
+	public boolean play(EntryModel entry) {
 		try {
 			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
-			parent.audio.play(entry.getEntry().getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
+			parent.audio().play(entry.getEntry().getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
+			return true;
 		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
 			e.printStackTrace();
 			new Alert(Alert.AlertType.ERROR, "Error playing audio file: " + e.getMessage(), ButtonType.OK).showAndWait();
+			return false;
 		}
 	}
 

@@ -9,10 +9,11 @@ import java.util.List;
 
 public class MixerTest {
 
-    public static void main(String[] args) {
-        Mixer.Info[] mixers = AudioSystem.getMixerInfo();
+    static Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
 
-        for (Mixer.Info mixerInfo : mixers) {
+    public static void main(String[] args) {
+
+        for (Mixer.Info mixerInfo : mixerInfos) {
             System.out.println("Found Mixer: " + mixerInfo);
             Mixer mix = AudioSystem.getMixer(mixerInfo);
 

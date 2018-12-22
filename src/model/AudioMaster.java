@@ -1,7 +1,11 @@
 package model;
 
+import sun.audio.AudioDevice;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -12,15 +16,16 @@ import javax.sound.sampled.*;
 
 public class AudioMaster {
 
-	static ThreadGroup audioGroup = new ThreadGroup("Audio");
-
 	static final int standardBufferSize = 2048;
+
+	public final ThreadGroup audioGroup = new ThreadGroup("Audio");
 
 	private Mixer[] outputs;
 	private float[] gains;
 
 	private ThreadPoolExecutor soundGroup;
 	private AtomicBoolean playing;
+	private List<SoundRunner> active;
 
 	/**
 	 *
@@ -32,7 +37,7 @@ public class AudioMaster {
 
 	/**
 	 *
-	 * @param mixers All the mixers this object will have access to.
+	 * @param mixers All the mixers this object will initially have access to.
 	 */
 	public AudioMaster(Mixer... mixers) {
 		this(mixers.length, mixers);
@@ -46,14 +51,30 @@ public class AudioMaster {
 	public AudioMaster(int count, Mixer... mixers) {
 		this.outputs = new Mixer[count];
 		gains = new float[count];
-		soundGroup = (ThreadPoolExecutor) Executors.newCachedThreadPool(new AudioFactory());
+		active = new ArrayList<SoundRunner>();
 		playing = new AtomicBoolean(true);
+
+		soundGroup = (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(audioGroup, r);
+			}
+		});
+
 		for (int i = 0; i < mixers.length; i++) {
 			outputs[i] = mixers[i];
 			gains[i] = 0f;
 		}
 	}
 
+	/**
+	 * Retrieves and constructs the necessary javax.sound.sampled objects in order to play the given sound file.
+	 * @param sound The file that will be played.
+	 * @param indices The indices of the mixers that will be played on.
+	 * @throws LineUnavailableException
+	 * @throws UnsupportedAudioFileException
+	 * @throws IOException
+	 */ // TODO add exception explanations
 	public void play(File sound, int... indices) throws LineUnavailableException, UnsupportedAudioFileException, IOException {
 		if (!sound.exists()) {
 			throw new IOException("File " + sound.getName() + " does not exist!");
@@ -73,8 +94,8 @@ public class AudioMaster {
 			int index = indices[i];
 			Mixer output = outputs[index];
 			Line.Info[] sourceLines = output.getSourceLineInfo();
-			// For the meanwhile grab the first, it should be a sourcedataline. // TODO implement a search to grab the right line
-			speakers[i] = (SourceDataLine) output.getLine(sourceLines[0]);
+			// For the meanwhile grab the first, it should be a sourcedataline.
+			speakers[i] = (SourceDataLine) output.getLine(sourceLines[0]); // TODO implement a search to grab the right line
 			levels[i] = gains[index]; // TODO test one output off and one on
 		}
 
@@ -85,14 +106,17 @@ public class AudioMaster {
 			speakers[i].start();
 		}
 
-		soundGroup.execute(new SoundRunner(this, sound, playing, speakers));
+		SoundRunner player = new SoundRunner(this, sound, playing, speakers);
+		active.add(player);
+		soundGroup.execute(player);
 	}
 
 	public boolean stopAll() {
 		boolean stop = playing.compareAndSet(true, false);
-		// playing.lazySet(true); // should be set back to true by the time all the
-		// threads have stopped
-		while (soundGroup.getActiveCount() > 0);
+		for (SoundRunner run : active) {
+			run.stop();
+		}
+		active.clear();
 		playing.compareAndSet(false, true);
 		return stop;
 	}
@@ -119,15 +143,6 @@ public class AudioMaster {
 
 	public void setGain(int index, float gain) {
 		gains[index] = gain;
-	}
-
-}
-
-class AudioFactory implements ThreadFactory {
-
-	@Override
-	public Thread newThread(Runnable r) {
-		return new Thread(AudioMaster.audioGroup, r);
 	}
 
 }
