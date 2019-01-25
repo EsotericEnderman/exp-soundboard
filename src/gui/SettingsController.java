@@ -23,6 +23,7 @@ public class SettingsController extends GuiController {
 
 	private SettingsListener listener;
 	private Object selectedField;
+	private NativeKeyEvent workingHotkey;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -130,7 +131,11 @@ public class SettingsController extends GuiController {
 
 	@FXML
 	void onStopFieldClicked(MouseEvent event) {
-
+		if (event.isPrimaryButtonDown()) {
+			listener.listenOn(this, stopAllField);
+		} else if (event.isSecondaryButtonDown()) {
+			listener.stopListening();
+		}
 	}
 
 	@FXML
@@ -148,11 +153,11 @@ public class SettingsController extends GuiController {
 	}
 
 	public void stop() {
-		// if anything changed (or if settings holder noticed changes) send it to the settings handler
+		// if anything changed (or if settings holder noticed changes) send it to the settings
 	}
 
 	public void setHotkey(NativeKeyEvent nativeEvent) {
-
+		workingHotkey = nativeEvent;
 	}
 
 }

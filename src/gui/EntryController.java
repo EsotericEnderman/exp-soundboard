@@ -102,7 +102,7 @@ public class EntryController extends GuiController {
         try {
             listener = new EntryListener();
         } catch (NativeHookException nhe) {
-            nhe.printStackTrace();
+            nhe.printStackTrace(); // TODO consider merging the error dialog method with printing an exception
             parent.throwBlockingError(nhe.getMessage());
         }
     }

@@ -57,6 +57,7 @@ public class Soundboard extends Application {
 	public void init() throws Exception {
 		super.init();
 		startNativeKey();
+		// TODO look into calling getParameters() here
 
 		audio = new AudioMaster(2);
 
@@ -91,7 +92,6 @@ public class Soundboard extends Application {
 		menuStage = primaryStage;
 		menuStage.setScene(menuScene);
 		menuController.preload(this, menuStage, menuScene);
-		menuStage.show();
 
 		settingsStage = new Stage();
 		settingsStage.setScene(settingsScene);
@@ -110,6 +110,8 @@ public class Soundboard extends Application {
 		converterStage.initOwner(menuStage);
 		converterStage.initModality(Modality.WINDOW_MODAL);
 		converterController.preload(this, converterStage, converterScene);
+
+		menuStage.show();
 	}
 
 	@Override

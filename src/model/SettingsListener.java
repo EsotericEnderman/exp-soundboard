@@ -8,6 +8,8 @@ import org.jnativehook.keyboard.NativeKeyListener;
 
 import javafx.scene.control.TextField;
 
+import java.security.Key;
+
 public class SettingsListener implements NativeKeyListener {
 
     private SettingsController settings;
@@ -33,6 +35,7 @@ public class SettingsListener implements NativeKeyListener {
     @Override
     public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
         settings.setHotkey(nativeEvent);
+        output.setText(KeyUtil.asReadable(nativeEvent));
     }
 
     @Override

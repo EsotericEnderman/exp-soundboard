@@ -5,6 +5,7 @@ import sun.audio.AudioDevice;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -28,7 +29,7 @@ public class AudioMaster {
 	private List<SoundRunner> active;
 
 	/**
-	 *
+	 * Constructs this class with a given number of mixer slots, this value will not change.
 	 * @param count The number of total outputs this object will handle.
 	 */
 	public AudioMaster(int count) {
@@ -36,7 +37,8 @@ public class AudioMaster {
 	}
 
 	/**
-	 *
+	 * Constructs this class with an array of mixers, the class will start with this amount and gain no more.
+	 * The individual mixers can be changed however.
 	 * @param mixers All the mixers this object will initially have access to.
 	 */
 	public AudioMaster(Mixer... mixers) {
@@ -44,16 +46,21 @@ public class AudioMaster {
 	}
 
 	/**
-	 *
+	 * Constructs this class with a total number of mixers, plus an array of inital mixers to work with.
+	 * In the case that the number of mixers exceeds the size specified by count, the array will be truncated to fit.
 	 * @param count The number of total outputs this object will handle.
-	 * @param mixers The initial outputs the mixer has access to.
+	 * @param mixers The initial outputs the class has access to.
 	 */
 	public AudioMaster(int count, Mixer... mixers) {
+		// prevents an array too large causing an index out of bounds error
+		if (mixers.length > count) mixers = Arrays.copyOfRange(mixers, 0, count);
+
 		this.outputs = new Mixer[count];
 		gains = new float[count];
 		active = new ArrayList<SoundRunner>();
 		playing = new AtomicBoolean(true);
 
+		// This constructor ensures all audio playing threads will be in the threadgroup accessible from this class.
 		soundGroup = (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
@@ -61,8 +68,13 @@ public class AudioMaster {
 			}
 		});
 
+		// Copies all available mixers.
 		for (int i = 0; i < mixers.length; i++) {
 			outputs[i] = mixers[i];
+		}
+
+		// Sets default values for each gain slider.
+		for (int i = 0; i < count; i++) {
 			gains[i] = 0f;
 		}
 	}
@@ -88,6 +100,7 @@ public class AudioMaster {
 		AudioFormat format = fileFormat.getFormat();
 		FloatControl gain;
 
+		// Get each requested speaker and gain from outputs, as defined by the numbers in indices.
 		SourceDataLine[] speakers = new SourceDataLine[indices.length];
 		float[] levels = new float[indices.length];
 		for (int i = 0; i < speakers.length; i++) {
@@ -99,6 +112,7 @@ public class AudioMaster {
 			levels[i] = gains[index]; // TODO test one output off and one on
 		}
 
+		// Open each speaker, set its gain to the proper level and prepare it for playing.
 		for (int i = 0; i < speakers.length; i++) {
 			speakers[i].open(format);
 			gain = (FloatControl) speakers[i].getControl(FloatControl.Type.MASTER_GAIN);
@@ -106,6 +120,8 @@ public class AudioMaster {
 			speakers[i].start();
 		}
 
+		// Delegate the task of playing audio to a separate thread, using a thread pool to manage each thread.
+		// All the while keeping track of each thread in a separate list.
 		SoundRunner player = new SoundRunner(this, sound, playing, speakers);
 		active.add(player);
 		soundGroup.execute(player);
@@ -158,6 +174,15 @@ class SoundRunner implements Runnable {
 	private AtomicBoolean masterFlag;
 	private boolean playing;
 
+	/**
+	 *
+	 * @param master The audio controlling backend this thread was spawned from.
+	 * @param sound The file that contains audio this thread will play.
+	 * @param masterFlag A global flag all threads check to ensure their state.
+	 * @param speakers An array of outputs this thread will write audio data into.
+	 * @throws UnsupportedAudioFileException
+	 * @throws IOException
+	 */
 	public SoundRunner(AudioMaster master, File sound, AtomicBoolean masterFlag, SourceDataLine... speakers)
 			throws UnsupportedAudioFileException, IOException {
 		this.master = master;

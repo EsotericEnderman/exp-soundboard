@@ -161,6 +161,8 @@ public class MenuController extends GuiController {
 	void onRemovePressed(ActionEvent event) {
 		if (!removeSelected()) {
 			// TODO play error sound, user has no selected entry
+		} else {
+			removeSelected();
 		}
 	}
 
@@ -224,12 +226,17 @@ public class MenuController extends GuiController {
 	void preload(Soundboard parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
 
+		// Set up each column in the table to pull the appropriate data from an EntryModel within
+		// the table's internal list.
 		clipColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("clipName"));
 		hotkeyColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("hotkey"));
 
+		// Set up the table's internal list.
 		tableList = FXCollections.observableArrayList();
 		entryTable.setItems(tableList);
 
+		// Poll the system for all available audio devices, only keep ones who have a valid
+		// output (SourceLine)
 		Mixer.Info[] audios = AudioSystem.getMixerInfo();
 		List<AudioDeviceModel> devices = new ArrayList<AudioDeviceModel>();
 		for (int i = 0; i < audios.length; i++) {
@@ -237,6 +244,8 @@ public class MenuController extends GuiController {
 				devices.add(new AudioDeviceModel(audios[i]));
 		}
 
+		// Construct a list for the output selectors, which grabs the name of an audio device to
+		// display as an option.
 		audioList = FXCollections.observableArrayList(devices);
 		Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> cellFactory = new Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>>() {
 			@Override
@@ -256,6 +265,10 @@ public class MenuController extends GuiController {
 			}
 		};
 
+		// Set up the combo boxes for selecting an audio device to play to.
+		// Both combo boxes use the same list of items, as all the manipulation they do is
+		// selecting one of the elements of the list.
+		// The zero-th element is preselected to prevent the user from starting with a null audio device.
 		primarySpeakerCombo.setItems(audioList);
 		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		primarySpeakerCombo.setCellFactory(cellFactory);
@@ -267,6 +280,7 @@ public class MenuController extends GuiController {
 		});
 		primarySpeakerCombo.getSelectionModel().select(0);
 
+		// Refer to comments above
 		secondarySpeakerCombo.setItems(audioList);
 		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		secondarySpeakerCombo.setCellFactory(cellFactory);
@@ -279,16 +293,16 @@ public class MenuController extends GuiController {
 		secondarySpeakerCombo.getSelectionModel().select(0);
 	}
 
-	public void addEntry(EntryModel entry) {
-		tableList.add(entry);
+	public boolean addEntry(EntryModel entry) {
+		return tableList.add(entry);
 	}
 
-	public void removeEntry(int index) {
-		tableList.remove(index);
+	public EntryModel removeEntry(int index) {
+		return tableList.remove(index);
 	}
 
-	public void removeEntry(EntryModel entry) {
-		tableList.remove(entry);
+	public boolean removeEntry(EntryModel entry) {
+		 return tableList.remove(entry);
 	}
 
 	public EntryModel getSelectedEntry() {
@@ -314,7 +328,7 @@ public class MenuController extends GuiController {
 			return true;
 		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
 			e.printStackTrace();
-			new Alert(Alert.AlertType.ERROR, "Error playing audio file: " + e.getMessage(), ButtonType.OK).showAndWait();
+			parent.throwBlockingError("Error playing audio file: " + e.getMessage());
 			return false;
 		}
 	}
@@ -322,8 +336,7 @@ public class MenuController extends GuiController {
 	public boolean playSelected() {
 		EntryModel selected = getSelectedEntry();
 		if (selected != null) {
-			play(selected);
-			return true;
+			return play(selected);
 		} else {
 			return false;
 		}
@@ -332,9 +345,9 @@ public class MenuController extends GuiController {
 	public boolean removeSelected() {
 		EntryModel selected = getSelectedEntry();
 		if (selected != null) {
-			removeEntry(selected);
-			return true;
+			return removeEntry(selected);
 		} else {
+			// TODO report attempt to remove null entry.
 			return false;
 		}
 	}
