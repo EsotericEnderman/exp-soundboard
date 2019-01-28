@@ -159,10 +159,10 @@ public class MenuController extends GuiController {
 
 	@FXML
 	void onRemovePressed(ActionEvent event) {
-		if (!removeSelected()) {
-			// TODO play error sound, user has no selected entry
+		if (removeSelected()) {
+			// Possibly update references to the list (shouldn't be necessary)
 		} else {
-			removeSelected();
+            // TODO play error sound, user has no selected entry
 		}
 	}
 

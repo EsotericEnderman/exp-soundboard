@@ -62,22 +62,22 @@ public class Soundboard extends Application {
 		audio = new AudioMaster(2);
 
 		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("mainmenu_jfx.fxml"));
+		loader.setLocation(getClass().getResource("/res/mainmenu_jfx.fxml"));
 		mainMenu = loader.<VBox>load();
 		menuController = loader.<MenuController>getController();
 
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("settings_jfx.fxml"));
+		loader.setLocation(getClass().getResource("/res/settings_jfx.fxml"));
 		settings = loader.<VBox>load();
 		settingsController = loader.<SettingsController>getController();
 
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("entrymenu_jfx.fxml"));
+		loader.setLocation(getClass().getResource("/res/entrymenu_jfx.fxml"));
 		entryMenu = loader.<VBox>load();
 		entryController = loader.<EntryController>getController();
 
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("converter_jfx.fxml"));
+		loader.setLocation(getClass().getResource("/res/converter_jfx.fxml"));
 		converter = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
 	}

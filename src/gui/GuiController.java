@@ -24,4 +24,8 @@ public abstract class GuiController {
         this.stage = stage;
         this.scene = scene;
     }
+
+    public abstract void start();
+
+    public abstract void stop();
 }

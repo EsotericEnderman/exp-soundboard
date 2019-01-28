@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<Pane minHeight="195.0" minWidth="470.0" prefHeight="195.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ConverterController">
+<Pane minHeight="195.0" minWidth="470.0" prefHeight="195.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.ConverterController">
    <children>
       <AnchorPane prefHeight="195.0" prefWidth="470.0">
          <children>
@@ -36,7 +36,7 @@
                <children>
                   <BorderPane GridPane.rowIndex="1">
                      <left>
-                        <Button fx:id="inputSelectButton" mnemonicParsing="false" text="Select" BorderPane.alignment="CENTER" />
+                        <Button fx:id="inputSelectButton" mnemonicParsing="false" onAction="#onInputPressed" text="Select" BorderPane.alignment="CENTER" />
                      </left>
                   </BorderPane>
                   <Separator GridPane.rowIndex="2" />
@@ -62,7 +62,7 @@
                   </BorderPane>
                   <BorderPane GridPane.rowIndex="4">
                      <left>
-                        <Button fx:id="outputChangeButton" mnemonicParsing="false" text="Change" BorderPane.alignment="CENTER" />
+                        <Button fx:id="outputChangeButton" mnemonicParsing="false" onAction="#onOutputPressed" text="Change" BorderPane.alignment="CENTER" />
                      </left>
                   </BorderPane>
                   <BorderPane GridPane.rowIndex="5">
@@ -72,13 +72,13 @@
                   </BorderPane>
                   <BorderPane GridPane.rowIndex="6">
                      <right>
-                        <Button fx:id="convertButton" mnemonicParsing="false" text="Convert" BorderPane.alignment="CENTER" />
+                        <Button fx:id="convertButton" mnemonicParsing="false" onAction="#onConvertPressed" text="Convert" BorderPane.alignment="CENTER" />
                      </right>
                      <left>
                         <FlowPane alignment="CENTER_LEFT" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <children>
-                              <CheckBox fx:id="mp3Check" mnemonicParsing="false" text="MP3" />
-                              <CheckBox fx:id="wavCheck" mnemonicParsing="false" text="WAV">
+                              <CheckBox fx:id="mp3Check" mnemonicParsing="false" onAction="#onMP3Pressed" text="MP3" />
+                              <CheckBox fx:id="wavCheck" mnemonicParsing="false" onAction="#onWAVPressed" text="WAV">
                                  <FlowPane.margin>
                                     <Insets left="20.0" />
                                  </FlowPane.margin>
