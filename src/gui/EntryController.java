@@ -7,32 +7,26 @@ import java.util.ResourceBundle;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import model.KeyUtil;
+import util.KeyUtil;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import model.Entry;
 import model.EntryListener;
+import util.FileIO;
 
 public class EntryController extends GuiController {
 
 	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
     private static final String emptyHotkey = "";
-
-	private static final ExtensionFilter standard_audio = new ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac");
-	private static final ExtensionFilter all_files = new ExtensionFilter("All Files", "*.*");
 
 	private EntryListener listener;
 	private NativeKeyEvent nativeEvent;
@@ -92,12 +86,12 @@ public class EntryController extends GuiController {
 	}
 
     @Override
-    void preload(Soundboard parent, Stage stage, Scene scene) {
+    void preload(SoundboardStage parent, Stage stage, Scene scene) {
         super.preload(parent, stage, scene);
 
         chooser = new FileChooser();
         chooser.setTitle("Choose Audio File");
-        chooser.getExtensionFilters().addAll(standard_audio, all_files);
+        chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);
 
         try {
             listener = new EntryListener();

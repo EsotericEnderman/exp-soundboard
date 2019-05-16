@@ -7,8 +7,7 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
 import javafx.scene.control.TextField;
-
-import java.security.Key;
+import util.KeyUtil;
 
 public class SettingsListener implements NativeKeyListener {
 

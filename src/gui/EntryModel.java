@@ -2,7 +2,7 @@ package gui;
 
 import javafx.beans.property.SimpleStringProperty;
 import model.Entry;
-import model.KeyUtil;
+import util.KeyUtil;
 
 public class EntryModel {
 

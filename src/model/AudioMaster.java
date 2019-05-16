@@ -122,7 +122,7 @@ public class AudioMaster {
 
 		// Delegate the task of playing audio to a separate thread, using a thread pool to manage each thread.
 		// All the while keeping track of each thread in a separate list.
-		SoundRunner player = new SoundRunner(this, sound, playing, speakers);
+		SoundRunner player = new SoundRunner(this, sound, speakers);
 		active.add(player);
 		soundGroup.execute(player);
 	}
@@ -136,6 +136,8 @@ public class AudioMaster {
 		playing.compareAndSet(false, true);
 		return stop;
 	}
+
+	// --- Output methods --- ///
 
 	public Mixer getOutput(int index) {
 		return outputs[index];
@@ -157,8 +159,34 @@ public class AudioMaster {
 		outputs = mixers;
 	}
 
+	// --- Gain methods --- //
+
+	public float getGain(int index) {
+		return gains[index];
+	}
+
 	public void setGain(int index, float gain) {
 		gains[index] = gain;
+	}
+
+	public void setGains(float gain) {
+		for (int i = 0; i < gains.length; i++) {
+			gains[i] = gain;
+		}
+	}
+
+	public void setGains(float[] gains) {
+		this.gains = gains;
+	}
+
+	// --- State methods --- //
+
+	public boolean getPlaying() {
+		return playing.get();
+	}
+
+	public void setPlaying(boolean value) {
+		playing.set(value);
 	}
 
 }
@@ -171,24 +199,21 @@ class SoundRunner implements Runnable {
 	private AudioInputStream clip;
 	private AudioFormat clipFormat;
 
-	private AtomicBoolean masterFlag;
 	private boolean playing;
 
 	/**
 	 *
 	 * @param master The audio controlling backend this thread was spawned from.
 	 * @param sound The file that contains audio this thread will play.
-	 * @param masterFlag A global flag all threads check to ensure their state.
 	 * @param speakers An array of outputs this thread will write audio data into.
 	 * @throws UnsupportedAudioFileException
 	 * @throws IOException
 	 */
-	public SoundRunner(AudioMaster master, File sound, AtomicBoolean masterFlag, SourceDataLine... speakers)
+	public SoundRunner(AudioMaster master, File sound, SourceDataLine... speakers)
 			throws UnsupportedAudioFileException, IOException {
 		this.master = master;
 		this.sound = sound;
 		this.speakers = speakers;
-		this.masterFlag = masterFlag;
 
 		clip = AudioSystem.getAudioInputStream(sound);
 		clipFormat = clip.getFormat();
@@ -200,7 +225,7 @@ class SoundRunner implements Runnable {
 		byte[] buffer = new byte[AudioMaster.standardBufferSize];
 		int bytesRead = 0;
 
-		while (playing && masterFlag.get()) {
+		while (playing && master.getPlaying()) {
 			try {
 				bytesRead = clip.read(buffer, 0, AudioMaster.standardBufferSize);
 			} catch (IOException e) {

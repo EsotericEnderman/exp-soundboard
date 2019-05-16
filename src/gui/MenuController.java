@@ -1,15 +1,11 @@
 package gui;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.*;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -22,8 +18,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import model.AudioMaster;
+import model.Entry;
+import model.SoundboardModel;
+import util.ModelUtil;
 
-public class MenuController extends GuiController {
+public class MenuController extends GuiController implements Observer {
 
 	private static final int primaryIndex = 0;
 	private static final int secondaryIndex = 1;
@@ -144,17 +144,21 @@ public class MenuController extends GuiController {
 
 	@FXML
 	void onAddPressed(ActionEvent event) {
-		parent.entry().start();
+		parent.entryController().start();
 	}
 
 	@FXML
 	void onEditPressed(ActionEvent event) { // TODO potentially change this to outside function
-		parent.entry().start(getSelectedEntry());
+		parent.entryController().start(getSelectedEntry());
 	}
 
 	@FXML
 	void onPlayPressed(ActionEvent event) {
-		playSelected();
+		if (playSelected()) {
+			// TODO handle play success
+		} else {
+			// TODO handling failing to play
+		}
 	}
 
 	@FXML
@@ -168,7 +172,7 @@ public class MenuController extends GuiController {
 
 	@FXML
 	void onStopPressed(ActionEvent event) {
-		parent.audio().stopAll();
+		parent.getModel().getAudio().stopAll();
 	}
 
 	@FXML
@@ -209,7 +213,7 @@ public class MenuController extends GuiController {
 
 	@FXML
 	void onSettingsMenuPressed(ActionEvent event) {
-		parent.settings().start();
+		parent.settingsController().start();
 	}
 
 	@FXML
@@ -222,8 +226,16 @@ public class MenuController extends GuiController {
 		// TODO open converter menu
 	}
 
+	public void update(Observable o, Object arg) {
+		SoundboardModel model = (SoundboardModel) o;
+		Entry[] arr = model.getEntries();
+
+		tableList.clear();
+		tableList.addAll(ModelUtil.toModel(arr));
+	}
+
 	@Override
-	void preload(Soundboard parent, Stage stage, Scene scene) {
+	void preload(SoundboardStage parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
 
 		// Set up each column in the table to pull the appropriate data from an EntryModel within
@@ -235,18 +247,10 @@ public class MenuController extends GuiController {
 		tableList = FXCollections.observableArrayList();
 		entryTable.setItems(tableList);
 
-		// Poll the system for all available audio devices, only keep ones who have a valid
-		// output (SourceLine)
-		Mixer.Info[] audios = AudioSystem.getMixerInfo();
-		List<AudioDeviceModel> devices = new ArrayList<AudioDeviceModel>();
-		for (int i = 0; i < audios.length; i++) {
-			if (AudioSystem.getMixer(audios[i]).getSourceLineInfo().length > 0)
-				devices.add(new AudioDeviceModel(audios[i]));
-		}
+		// Set up the internal list both combo boxes pull from
+		audioList = FXCollections.observableArrayList();
 
-		// Construct a list for the output selectors, which grabs the name of an audio device to
-		// display as an option.
-		audioList = FXCollections.observableArrayList(devices);
+		// Setup a factory to properly pull data from the AudioDeviceModel to display in a combobox
 		Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> cellFactory = new Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>>() {
 			@Override
 			public ListCell<AudioDeviceModel> call(ListView<AudioDeviceModel> param) {
@@ -268,17 +272,15 @@ public class MenuController extends GuiController {
 		// Set up the combo boxes for selecting an audio device to play to.
 		// Both combo boxes use the same list of items, as all the manipulation they do is
 		// selecting one of the elements of the list.
-		// The zero-th element is preselected to prevent the user from starting with a null audio device.
 		primarySpeakerCombo.setItems(audioList);
 		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		primarySpeakerCombo.setCellFactory(cellFactory);
 		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
 			@Override
 			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
-				parent.audio().setOutput(primaryIndex, newValue.getInfo());
+				parent.getModel().getAudio().setOutput(primaryIndex, newValue.getInfo());
 			}
 		});
-		primarySpeakerCombo.getSelectionModel().select(0);
 
 		// Refer to comments above
 		secondarySpeakerCombo.setItems(audioList);
@@ -287,22 +289,9 @@ public class MenuController extends GuiController {
 		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
 			@Override
 			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
-				parent.audio().setOutput(secondaryIndex, newValue.getInfo());
+				parent.getModel().getAudio().setOutput(secondaryIndex, newValue.getInfo());
 			}
 		});
-		secondarySpeakerCombo.getSelectionModel().select(0);
-	}
-
-	public boolean addEntry(EntryModel entry) {
-		return tableList.add(entry);
-	}
-
-	public EntryModel removeEntry(int index) {
-		return tableList.remove(index);
-	}
-
-	public boolean removeEntry(EntryModel entry) {
-		 return tableList.remove(entry);
 	}
 
 	public EntryModel getSelectedEntry() {
@@ -324,9 +313,12 @@ public class MenuController extends GuiController {
 	public boolean play(EntryModel entry) {
 		try {
 			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
-			parent.audio().play(entry.getEntry().getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
+			AudioMaster master = parent.getModel().getAudio();
+			File target = entry.getEntry().getFile();
+			master.play(target, (secondaryChecked() ? doubleIndices : singleIndices));
 			return true;
-		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException e) {
+		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException | NullPointerException e) {
+			// TODO send to logger
 			e.printStackTrace();
 			parent.throwBlockingError("Error playing audio file: " + e.getMessage());
 			return false;
@@ -345,15 +337,61 @@ public class MenuController extends GuiController {
 	public boolean removeSelected() {
 		EntryModel selected = getSelectedEntry();
 		if (selected != null) {
-			return removeEntry(selected);
+			return parent.getModel().removeEntry(selected.getEntry());
 		} else {
 			// TODO report attempt to remove null entry.
 			return false;
 		}
 	}
 
+	/**
+	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
+	 * @return A list containing all devices with valid output
+	 */
+	public List<AudioDeviceModel> getValidMixers() {
+
+		// list all mixers
+		Mixer device;
+		Line.Info[] sourceInfos;
+		Mixer.Info[] deviceInfos = AudioSystem.getMixerInfo();
+		List<AudioDeviceModel> choices = new ArrayList<AudioDeviceModel>();
+		for (int i = 0; i < deviceInfos.length; i++) {
+			device = AudioSystem.getMixer(deviceInfos[i]);
+			sourceInfos = device.getSourceLineInfo();
+
+			// keep mixers with 2 or more source lines / output lines
+			if (sourceInfos.length > 1) {
+				choices.add(new AudioDeviceModel(deviceInfos[i]));
+			}
+		}
+
+		return choices;
+	}
+
 	public void reset() {
+		audioList.clear();
 	    tableList.clear();
+
+	    audioList.addAll(getValidMixers());
+
+		// The zero-th element is preselected to prevent the user from starting with a null audio device.
+		primarySpeakerCombo.getSelectionModel().select(0);
+		secondarySpeakerCombo.getSelectionModel().select(0);
+
+		secondarySpeakerCheck.setSelected(false);
+
+		injectorCheck.setSelected(false);
+		pttHoldCheck.setSelected(false);
     }
 
+	@Override
+	public void start() {
+		reset();
+		stage.show();
+	}
+
+	@Override
+	public void stop() {
+		stage.close();
+	}
 }

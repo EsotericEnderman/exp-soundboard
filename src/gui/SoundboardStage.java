@@ -1,12 +1,11 @@
 package gui;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
+import model.SoundboardModel;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
@@ -19,11 +18,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.AudioMaster;
-import model.Entry;
+import model.Settings;
 
-public class Soundboard extends Application {
+public class SoundboardStage extends Application {
 
-	private AudioMaster audio;
+	private SoundboardModel model;
 
 	// --- GUI Fields --- //
 
@@ -38,9 +37,9 @@ public class Soundboard extends Application {
 	private Scene converterScene;
 
 	private Pane mainMenu;
-	private Pane settings;
+	private Pane settingsMenu;
 	private Pane entryMenu;
-	private Pane converter;
+	private Pane converterMenu;
 
 	// --- Controllers --- //
 
@@ -50,7 +49,7 @@ public class Soundboard extends Application {
 	private ConverterController converterController;
 
 	public static void main(String[] args) {
-		Application.launch(Soundboard.class, args);
+		Application.launch(SoundboardStage.class, args);
 	}
 
 	@Override
@@ -59,16 +58,17 @@ public class Soundboard extends Application {
 		startNativeKey();
 		// TODO look into calling getParameters() here
 
-		audio = new AudioMaster(2);
+		model = new SoundboardModel(2);
+		FXMLLoader loader;
 
-		FXMLLoader loader = new FXMLLoader();
+		loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("/res/mainmenu_jfx.fxml"));
 		mainMenu = loader.<VBox>load();
 		menuController = loader.<MenuController>getController();
 
 		loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("/res/settings_jfx.fxml"));
-		settings = loader.<VBox>load();
+		settingsMenu = loader.<VBox>load();
 		settingsController = loader.<SettingsController>getController();
 
 		loader = new FXMLLoader();
@@ -78,20 +78,21 @@ public class Soundboard extends Application {
 
 		loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("/res/converter_jfx.fxml"));
-		converter = loader.<Pane>load();
+		converterMenu = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		menuScene = new Scene(mainMenu);
-		settingsScene = new Scene(settings);
+		settingsScene = new Scene(settingsMenu);
 		entryScene = new Scene(entryMenu);
-		converterScene = new Scene(converter);
+		converterScene = new Scene(converterMenu);
 
 		menuStage = primaryStage;
 		menuStage.setScene(menuScene);
 		menuController.preload(this, menuStage, menuScene);
+		model.addObserver(menuController);
 
 		settingsStage = new Stage();
 		settingsStage.setScene(settingsScene);
@@ -111,12 +112,16 @@ public class Soundboard extends Application {
 		converterStage.initModality(Modality.WINDOW_MODAL);
 		converterController.preload(this, converterStage, converterScene);
 
-		menuStage.show();
+		menuController.start();
 	}
 
 	@Override
 	public void stop() throws Exception {
 		super.stop();
+		menuController.stop();
+		settingsController.stop();
+		entryController.stop();
+		converterController.stop();
 		stopNativeKey();
 	}
 
@@ -133,28 +138,28 @@ public class Soundboard extends Application {
 		if (GlobalScreen.isNativeHookRegistered()) {
 			GlobalScreen.unregisterNativeHook();
 		} else {
-			throw new NativeHookException("Native hook already started!");
+			throw new NativeHookException("Native hook is not running!");
 		}
 	}
 
-	public MenuController menu() {
+	public MenuController menuController() {
 		return menuController;
 	}
 
-	public EntryController entry() {
+	public EntryController entryController() {
 		return entryController;
 	}
 
-	public SettingsController settings() {
+	public SettingsController settingsController() {
 		return settingsController;
 	}
 
-	public ConverterController converter() {
+	public ConverterController converterController() {
 		return converterController;
 	}
 
-	public AudioMaster audio() {
-		return audio;
+	public SoundboardModel getModel() {
+		return model;
 	}
 
 	/**

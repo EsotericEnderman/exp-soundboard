@@ -78,7 +78,7 @@
                         <FlowPane alignment="CENTER_LEFT" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <children>
                               <CheckBox fx:id="mp3Check" mnemonicParsing="false" onAction="#onMP3Pressed" text="MP3" />
-                              <CheckBox fx:id="wavCheck" mnemonicParsing="false" onAction="#onWAVPressed" text="WAV">
+                              <CheckBox fx:id="wavCheck" mnemonicParsing="false" onAction="#onWAVPressed" selected="true" text="WAV">
                                  <FlowPane.margin>
                                     <Insets left="20.0" />
                                  </FlowPane.margin>

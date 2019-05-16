@@ -1,5 +1,7 @@
 package util;
 
+import javafx.stage.FileChooser;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileIO {
+
+	public static final FileChooser.ExtensionFilter standard_audio = new FileChooser.ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac");
+	public static final FileChooser.ExtensionFilter all_files = new FileChooser.ExtensionFilter("All Files", "*.*");
 	
 	/**
 	 * Reads the entirety of a given file into a list.

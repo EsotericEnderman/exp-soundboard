@@ -62,7 +62,7 @@
      this.inputGetter = new NativeKeyInputGetter(null);
      
      setDefaultCloseOperation(2);
-     setTitle("Soundboard Entry Editor");
+     setTitle("SoundboardStage Entry Editor");
      setIconImage(SoundboardFrame.icon);
      
      JLabel lblSoundClip = new JLabel("Sound clip:");

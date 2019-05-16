@@ -65,7 +65,7 @@
    private static final long serialVersionUID = 8934802095461138592L;
    final SoundboardFrame thisFrameInstance;
    public static final float VERSION = 0.5F;
-   private final String title = "EXP Soundboard vers. 0.5 | ";
+   private final String title = "EXP SoundboardStage vers. 0.5 | ";
    private JComboBox<String> secondarySpeakerComboBox;
    private JComboBox<String> primarySpeakerComboBox;
    public AudioManager audioManager;
@@ -145,7 +145,7 @@
      this.audioManager = new AudioManager();
      soundboard = new Soundboard();
      setDefaultCloseOperation(3);
-     setTitle("EXP Soundboard vers. 0.5 | ");
+     setTitle("EXP SoundboardStage vers. 0.5 | ");
      setIconImage(icon);
      
      macInit();
@@ -480,7 +480,7 @@
      this.currentSoundboardFile = null;
      soundboard = new Soundboard();
      updateSoundboardTable();
-     setTitle("EXP Soundboard vers. 0.5 | ");
+     setTitle("EXP SoundboardStage vers. 0.5 | ");
    }
    
  
@@ -522,7 +522,7 @@
      if (session == 0) {
        File file = fc.getSelectedFile();
        this.currentSoundboardFile = soundboard.saveAsJsonFile(file);
-       setTitle("EXP Soundboard vers. 0.5 | " + this.currentSoundboardFile.getName());
+       setTitle("EXP SoundboardStage vers. 0.5 | " + this.currentSoundboardFile.getName());
      }
    }
    
@@ -544,7 +544,7 @@
          soundboard = sb;
          updateSoundboardTable();
          this.currentSoundboardFile = jsonfile;
-         setTitle("EXP Soundboard vers. 0.5 | " + this.currentSoundboardFile.getName());
+         setTitle("EXP SoundboardStage vers. 0.5 | " + this.currentSoundboardFile.getName());
        }
      }
    }
@@ -711,14 +711,14 @@
          String savedjson = gson.toJson(savedFile);
          String currentjson = gson.toJson(soundboard);
          if (!savedjson.equals(currentjson)) {
-           int option = JOptionPane.showConfirmDialog(null, "Soundboard has changed. Do you want to save?", "Save Reminder", 0);
+           int option = JOptionPane.showConfirmDialog(null, "SoundboardStage has changed. Do you want to save?", "Save Reminder", 0);
            if (option == 0) {
              soundboard.saveAsJsonFile(this.currentSoundboardFile);
            }
          }
        }
      } else if (soundboard.getSoundboardEntries().size() > 0) {
-       int option = JOptionPane.showConfirmDialog(null, "Soundboard has not been saved. Do you want to save?", "Save Reminder", 0);
+       int option = JOptionPane.showConfirmDialog(null, "SoundboardStage has not been saved. Do you want to save?", "Save Reminder", 0);
        if (option == 0) {
          fileSave();
        }
@@ -733,7 +733,7 @@
        Application application = Application.getApplication();
        application.setDockIconImage(icon);
        System.setProperty("apple.laf.useScreenMenuBar", "true");
-       System.setProperty("com.apple.mrj.application.apple.menu.about.name", "EXP Soundboard");
+       System.setProperty("com.apple.mrj.application.apple.menu.about.name", "EXP SoundboardStage");
      }
    }
    
@@ -757,7 +757,7 @@
      
      public String getDescription()
      {
-       return ".json Soundboard save file";
+       return ".json SoundboardStage save file";
      }
    }
  }

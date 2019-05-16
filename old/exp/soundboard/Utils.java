@@ -31,8 +31,8 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 
 public class Utils {
 	private static ThreadGroup clipPlayerThreadGroup = new ThreadGroup("Clip Player Group");
-	private static final String prefsName = "Expenosa's Soundboard";
-	public static final Preferences prefs = Preferences.userRoot().node("Expenosa's Soundboard");
+	private static final String prefsName = "Expenosa's SoundboardStage";
+	public static final Preferences prefs = Preferences.userRoot().node("Expenosa's SoundboardStage");
 	private static boolean PLAYALL = true;
 	public static final int BUFFERSIZE = 2048;
 	public static final float STANDARDSAMPLERATE = 44100.0F;

@@ -37,7 +37,7 @@
      setDefaultCloseOperation(2);
      setTitle("Update Available!");
      
-     JLabel lblSoundboardUpdateAvailable = new JLabel("EXP Soundboard Update Available");
+     JLabel lblSoundboardUpdateAvailable = new JLabel("EXP SoundboardStage Update Available");
      
      JScrollPane scrollPane = new JScrollPane();
      

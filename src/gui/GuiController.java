@@ -8,7 +8,7 @@ import javafx.stage.Stage;
  */
 public abstract class GuiController {
 
-    protected Soundboard parent;
+    protected SoundboardStage parent;
     protected Stage stage;
     protected Scene scene;
 
@@ -19,7 +19,7 @@ public abstract class GuiController {
      * @param stage The window this gui will run in.
      * @param scene The scene all the GUI's elements are loaded into.
      */
-    void preload(Soundboard parent, Stage stage, Scene scene) {
+    void preload(SoundboardStage parent, Stage stage, Scene scene) {
         this.parent = parent;
         this.stage = stage;
         this.scene = scene;

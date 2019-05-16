@@ -97,63 +97,58 @@ public class SettingsController extends GuiController {
 
 	@FXML
 	void onDecFieldClicked(MouseEvent event) {
-		if (event.isPrimaryButtonDown()) {
-			listener.listenOn(this, speedDecField);
-		} else if (event.isSecondaryButtonDown()) {
-			listener.stopListening();
-		}
+		listenStart(event, speedDecField);
 	}
 
 	@FXML
 	void onIncFieldClicked(MouseEvent event) {
-
+		listenStart(event, speedIncField);
 	}
 
 	@FXML
 	void onOverlapFieldClicked(MouseEvent event) {
-
+		listenStart(event, overlapSameField);
 	}
 
 	@FXML
 	void onPlaybackFieldClicked(MouseEvent event) {
-
+		listenStart(event, playbackComboField);
 	}
 
 	@FXML
 	void onPushFieldClicked(MouseEvent event) {
-
-	}
-
-	@FXML
-	void onSpeedFieldClicked(MouseEvent event) {
-
+		listenStart(event, pushToTalkField);
 	}
 
 	@FXML
 	void onStopFieldClicked(MouseEvent event) {
-		if (event.isPrimaryButtonDown()) {
-			listener.listenOn(this, stopAllField);
-		} else if (event.isSecondaryButtonDown()) {
-			listener.stopListening();
-		}
+		listenStart(event, stopAllField);
 	}
 
 	@FXML
 	void onUpdateButtonPressed(ActionEvent event) {
-
+		// TODO check for updates
 	}
 
 	@FXML
 	void onWebsiteButtonPressed(ActionEvent event) {
-
+		// TODO open default browser of github page
 	}
 
 	public void start() {
-		// grab settings from in-code settings file, should be loaded in by Soundboard.java
+		// grab settings from in-code settings file, should be loaded in by SoundboardStage.java
 	}
 
 	public void stop() {
 		// if anything changed (or if settings holder noticed changes) send it to the settings
+	}
+
+	private void listenStart(MouseEvent event, TextField feedback) {
+		if (event.isPrimaryButtonDown()) {
+			listener.listenOn(this, feedback);
+		} else if (event.isSecondaryButtonDown()) {
+			listener.stopListening();
+		}
 	}
 
 	public void setHotkey(NativeKeyEvent nativeEvent) {

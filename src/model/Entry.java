@@ -3,6 +3,7 @@ package model;
 import java.io.File;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
+import util.KeyUtil;
 
 public class Entry {
 
@@ -18,8 +19,16 @@ public class Entry {
 		return file;
 	}
 
+	public void setFile(File newFile) {
+		file = newFile;
+	}
+
 	public NativeKeyEvent getCombo() {
 		return combo;
+	}
+
+	public void setCombo(NativeKeyEvent newCombo) {
+		combo = newCombo;
 	}
 
 	public boolean checkCombo(NativeKeyEvent match) {

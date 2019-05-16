@@ -11,6 +11,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import util.FileIO;
 
 public class ConverterController extends GuiController {
 
@@ -104,21 +105,23 @@ public class ConverterController extends GuiController {
 	}
 
 	@Override
-	void preload(Soundboard parent, Stage stage, Scene scene) {
+	void preload(SoundboardStage parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
 
 		chooser = new FileChooser();
+		chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);
 	}
 
 	public void start() {
-
+		stage.show();
 	}
 
 	public void stop() {
-
+		stage.close();
 	}
 
 	private void grabOutput() {
+		chooser.setTitle("Choose Output File");
 		File selectedFile = chooser.showOpenDialog(stage);
 		if (selectedFile != null) {
 			outputText.setText(selectedFile.getAbsolutePath());
@@ -127,6 +130,7 @@ public class ConverterController extends GuiController {
 	}
 
 	private void grabInput() {
+		chooser.setTitle("Choose Input File");
 		File selectedFile = chooser.showOpenDialog(stage);
 		if (selectedFile != null) {
 			inputText.setText(selectedFile.getAbsolutePath());
