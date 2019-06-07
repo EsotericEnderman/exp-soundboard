@@ -40,8 +40,7 @@ public class Entry {
 		return KeyUtil.asReadable(combo) + " = " + file.getAbsolutePath();
 	}
 
-	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Entry obj) {
 		return (this.file == ((Entry) obj).file) && (this.combo.paramString() == ((Entry) obj).combo.paramString());
 	}
 

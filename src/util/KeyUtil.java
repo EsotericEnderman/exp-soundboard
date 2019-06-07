@@ -127,4 +127,13 @@ public class KeyUtil {
 
 		return str.toString();
 	}
+
+	public static boolean comboEquals(NativeKeyEvent first, NativeKeyEvent second) {
+		if (first.getKeyChar() != second.getKeyChar()) return false;
+		if (first.getKeyCode() != second.getKeyCode()) return false;
+		if (first.getKeyLocation() != second.getKeyLocation()) return false;
+		if (first.getID() != second.getID()) return false;
+		if (first.getModifiers() != second.getModifiers()) return false;
+		return true;
+	}
 }
