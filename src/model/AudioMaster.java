@@ -17,6 +17,9 @@ import javax.sound.sampled.*;
 
 public class AudioMaster {
 
+	public static final AudioFormat standardFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4,
+			44100.0F, false);
+
 	static final int standardBufferSize = 2048;
 
 	public final ThreadGroup audioGroup = new ThreadGroup("Audio");
@@ -88,10 +91,11 @@ public class AudioMaster {
 	 * @throws IOException
 	 */ // TODO add exception explanations
 	public void play(File sound, int... indices) throws LineUnavailableException, UnsupportedAudioFileException, IOException {
+
+		// precondition to save time
 		if (!sound.exists()) {
 			throw new IOException("File " + sound.getName() + " does not exist!");
 		}
-
 		if (!sound.canRead()) {
 			throw new IOException("File " + sound.getName() + " cannot be read!");
 		}

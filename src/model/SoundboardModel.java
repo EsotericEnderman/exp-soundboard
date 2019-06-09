@@ -18,24 +18,12 @@ public class SoundboardModel extends Observable {
         return audio;
     }
 
-    public Entry[] getEntries() {
+    public Entry[] getEntriesArr() {
         return (Entry[]) entryList.toArray();
     }
 
-    public boolean addEntry(Entry entry) {
-        notifyObservers();
-        return entryList.add(entry);
+    public List<Entry> getEntries() {
+        return entryList;
     }
-
-    public Entry removeEntry(int index) {
-        notifyObservers();
-        return entryList.remove(index);
-    }
-
-    public boolean removeEntry(Entry entry) {
-        notifyObservers();
-        return entryList.remove(entry);
-    }
-
 
 }
