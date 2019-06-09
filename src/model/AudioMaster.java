@@ -17,6 +17,7 @@ import javax.sound.sampled.*;
 
 public class AudioMaster {
 
+	// copied from old code
 	public static final AudioFormat standardFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4,
 			44100.0F, false);
 

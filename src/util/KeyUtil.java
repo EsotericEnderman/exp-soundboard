@@ -1,11 +1,13 @@
 package util;
 
 import java.awt.Toolkit;
+import java.nio.ByteBuffer;
 
 import javafx.scene.input.KeyEvent;
 import org.jnativehook.NativeInputEvent;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
+@Deprecated
 public class KeyUtil {
 
 	public static final String spacer = " + ";
@@ -135,5 +137,18 @@ public class KeyUtil {
 		if (first.getID() != second.getID()) return false;
 		if (first.getModifiers() != second.getModifiers()) return false;
 		return true;
+	}
+
+	public static byte[] comboToData(NativeKeyEvent nativeKeyEvent) {
+		ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES * 3 + Character.BYTES);
+		buffer.putInt(nativeKeyEvent.getRawCode());
+		buffer.putInt(nativeKeyEvent.getKeyCode());
+		buffer.putChar(nativeKeyEvent.getKeyChar());
+		buffer.putInt(nativeKeyEvent.getKeyLocation());
+		return buffer.array();
+	}
+
+	public static NativeKeyEvent dataToCombo(byte[] nativeKeyData) {
+		return null;
 	}
 }
