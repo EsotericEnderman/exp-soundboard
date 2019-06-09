@@ -228,7 +228,7 @@ public class MenuController extends GuiController implements Observer {
 
 	public void update(Observable o, Object arg) {
 		SoundboardModel model = (SoundboardModel) o;
-		Entry[] arr = model.getEntries();
+		Entry[] arr = model.getEntriesArr();
 
 		tableList.clear();
 		tableList.addAll(ModelUtil.toModel(arr));
@@ -337,7 +337,7 @@ public class MenuController extends GuiController implements Observer {
 	public boolean removeSelected() {
 		EntryModel selected = getSelectedEntry();
 		if (selected != null) {
-			return parent.getModel().removeEntry(selected.getEntry());
+			return parent.getModel().getEntries().remove(selected.getEntry());
 		} else {
 			// TODO report attempt to remove null entry.
 			return false;

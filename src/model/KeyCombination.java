@@ -77,20 +77,23 @@ public class KeyCombination {
     static final int netiveKeySize = Integer.BYTES * 5 + Character.BYTES;
 
     public static KeyCombination fromData(byte[] data) {
+        // reads from a byte array each nativeKey field, in reverse order to the other method
         ByteBuffer buffer = ByteBuffer.allocate(netiveKeySize);
+        buffer.put(data);
 
-        int mod = buffer.getInt();
-        int id = buffer.getInt();
-        int loc = buffer.getInt();
-        char key = buffer.getChar();
-        int code = buffer.getInt();
         int raw = buffer.getInt();
+        int code = buffer.getInt();
+        char key = buffer.getChar();
+        int loc = buffer.getInt();
+        int id = buffer.getInt();
+        int mod = buffer.getInt();
 
         NativeKeyEvent keyEvent = new NativeKeyEvent(id, mod, raw, code, key, loc);
         return new KeyCombination(keyEvent);
     }
 
     public static byte[] toData(KeyCombination combo) {
+        // assembles all relevant nativeKey fields into a byte array
         NativeKeyEvent key = combo.getNative();
         ByteBuffer buffer = ByteBuffer.allocate(netiveKeySize);
 
@@ -101,6 +104,7 @@ public class KeyCombination {
         buffer.putInt(key.getID());
         buffer.putInt(key.getModifiers());
 
+        buffer.rewind();
         return buffer.array();
     }
 

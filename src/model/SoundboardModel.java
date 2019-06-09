@@ -16,13 +16,7 @@ public class SoundboardModel extends Observable {
     public SoundboardModel(int speakerCount) {
         audio = new AudioMaster(speakerCount);
         entryList = new ArrayList<Entry>();
-
-        if (settings.nodeExists(settingsLocation)) {
-            settings = Preferences.userRoot().node(settingsLocation);
-        } else {
-            settings = Preferences.userRoot().node(settingsLocation);
-            initializeSettings();
-        }
+        settings = Preferences.userRoot().node(settingsLocation);
     }
 
     public AudioMaster getAudio() {
@@ -38,7 +32,7 @@ public class SoundboardModel extends Observable {
     }
 
     public void initializeSettings() {
-        settings.putByteArray("stopallsounds", );
+        //settings.putByteArray("stopallsounds", );
     }
 
     public class SoundboardSettings {
