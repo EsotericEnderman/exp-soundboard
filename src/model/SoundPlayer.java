@@ -3,35 +3,29 @@ package model;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class SoundRunner implements Runnable {
+public class SoundPlayer implements Runnable {
 
     private AudioMaster master;
     private Logger logger;
 
     private File sound;
-    private SourceDataLine[] speakers;
+    private SourceDataLine[] outputs;
     private AudioInputStream clip;
     private AudioFormat clipFormat;
 
-    private RunnerState state;
+    public AtomicBoolean running;
 
-    /**
-     *
-     * @param master The audio controlling backend this thread was spawned from.
-     * @param sound The file that contains audio this thread will play.
-     * @param speakers An array of outputs this thread will write audio data into.
-     * @throws UnsupportedAudioFileException
-     * @throws IOException
-     */
-    public SoundRunner(AudioMaster master, File sound, SourceDataLine... speakers)
+    public SoundPlayer(AudioMaster master, File sound, SourceDataLine... outputs)
             throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         this.master = master;
         this.sound = sound;
-        this.speakers = speakers;
-        state = RunnerState.STOPPED;
+        this.outputs = outputs;
+        logger = Logger.getLogger(SoundPlayer.class.getName());
+        running = new AtomicBoolean(true);
 
         // grab formats from file
         clip = AudioSystem.getAudioInputStream(sound);
@@ -44,51 +38,43 @@ class SoundRunner implements Runnable {
         }
 
         // ready outputs for data
-        for (SourceDataLine sdl : speakers) {
+        for (SourceDataLine sdl : outputs) {
             sdl.open(clipFormat);
-
+            sdl.start();
         }
 
-        logger = Logger.getLogger(SoundRunner.class.getName());
         logger.log(Level.INFO, "Initialized sound player on: " + sound.getName());
     }
 
     @Override
     public void run() {
-        start();
-
         // setup buffer for containing samples of audio to be played
         byte[] buffer = new byte[AudioMaster.standardBufferSize];
         int bytesRead = 0;
         int bytesWritten = 0;
 
-        while (playing && master.getPlaying()) {
+        while (running.get()) { // TODO: update writing sound
 
             // read a sample from the audio file
             try {
                 bytesRead = clip.read(buffer, 0, AudioMaster.standardBufferSize);
             } catch (IOException ioe) {
                 logger.log(Level.SEVERE, "Failed to read from file:" + sound.getName(), ioe);
+                running.set(false);
             }
 
+            // if anything was read
             if (bytesRead > 0) {
 
                 // write the sample to all outputs
-                for (SourceDataLine sdl : speakers) {
+                for (SourceDataLine sdl : outputs) {
                     bytesWritten = sdl.write(buffer, 0, AudioMaster.standardBufferSize);
-                }
-
-                // in case of an incomplete write
-                if (bytesWritten < AudioMaster.standardBufferSize) {
-                    logger.log(Level.WARNING, "Failed to write buffer to output");
-                    break;
                 }
             }
 
-            // in case of an incomplete rad
+            // once there is nothing left to write
             if (bytesRead < AudioMaster.standardBufferSize) {
-                logger.log(Level.WARNING, "Failed to read buffer from file: " + sound.getName());
-                break;
+                running.set(false);
             }
         }
 
@@ -99,29 +85,12 @@ class SoundRunner implements Runnable {
             logger.log(Level.SEVERE, "Failed to close stream from file: " + sound.getName(), ioe);
         }
 
-        for (SourceDataLine sdl : speakers) {
+        for (SourceDataLine sdl : outputs) {
             sdl.close();
         }
 
-        stop();
-    }
-
-    public void start() {
-        playing = true;
-        master.addRunner(this);
-        logger.log(Level.INFO, "Starting playing clip: " + sound.getName());
-    }
-
-    public void stop() {
-        playing = false;
-        master.removeRunner(this);
-        logger.log(Level.INFO, "Finished playing clip: " + sound.getName());
-    }
-
-    // does not immediately stop the clip
-    public synchronized void halt() {
-        logger.log(Level.INFO, "Prematurely stopping clip: " + sound.getName());
-        stop();
+        // remove self from active list
+        master.removePlayer(this);
     }
 
 }
