@@ -1,15 +1,21 @@
 package gui;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
+import model.AudioMaster;
+import model.Entry;
 import model.SoundboardModel;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
-import com.sun.istack.internal.logging.Logger;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -18,9 +24,36 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import javax.sound.sampled.*;
+
 public class SoundboardStage extends Application {
 
+	/**
+	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
+	 * @return A list containing all devices with valid output
+	 */
+	public static List<Mixer.Info> getValidMixers() {
+
+		// list all mixers
+		Mixer device;
+		Line.Info[] sourceInfos;
+		Mixer.Info[] deviceInfos = AudioSystem.getMixerInfo();
+		List<Mixer.Info> choices = new ArrayList<Mixer.Info>();
+		for (int i = 0; i < deviceInfos.length; i++) {
+			device = AudioSystem.getMixer(deviceInfos[i]);
+			sourceInfos = device.getSourceLineInfo();
+
+			// keep mixers with 2 or more source lines / output lines
+			if (sourceInfos.length > 1) {
+				choices.add(deviceInfos[i]);
+			}
+		}
+
+		return choices;
+	}
+
 	private SoundboardModel model;
+	private Logger logger;
 
 	// --- GUI Fields --- //
 
@@ -57,6 +90,7 @@ public class SoundboardStage extends Application {
 		// TODO look into calling getParameters() here
 
 		model = new SoundboardModel(2);
+		logger = Logger.getLogger(SoundboardStage.class.getName());
 		FXMLLoader loader;
 
 		loader = new FXMLLoader();
@@ -90,7 +124,7 @@ public class SoundboardStage extends Application {
 		menuStage = primaryStage;
 		menuStage.setScene(menuScene);
 		menuController.preload(this, menuStage, menuScene);
-		model.addObserver(menuController);
+		model.getEntries().addListener(menuController);
 
 		settingsStage = new Stage();
 		settingsStage.setScene(settingsScene);
@@ -126,7 +160,7 @@ public class SoundboardStage extends Application {
 	public static void startNativeKey() throws NativeHookException {
 		if (!GlobalScreen.isNativeHookRegistered()) {
 			GlobalScreen.registerNativeHook();
-			Logger.getLogger(GlobalScreen.class).setLevel(Level.OFF);
+			Logger.getLogger(GlobalScreen.class.getName()).setLevel(Level.OFF);
 		} else {
 			throw new NativeHookException("Native hook already started!");
 		}
@@ -158,6 +192,22 @@ public class SoundboardStage extends Application {
 
 	public SoundboardModel getModel() {
 		return model;
+	}
+
+	public boolean playEntry(Entry entry, int[] indices) {
+		try {
+			AudioMaster master = getModel().getAudio();
+			File target = entry.getFile();
+
+			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
+			master.play(target, indices);
+			logger.log(Level.INFO, "Played audio file: " + entry.getFile().getName());
+			return true;
+		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException | NullPointerException e) {
+			logger.log(Level.WARNING, "Error playing audio file: " + entry.getFile().getName() , e);
+			throwBlockingError("Error playing audio file: " + e.getMessage());
+			return false;
+		}
 	}
 
 	/**

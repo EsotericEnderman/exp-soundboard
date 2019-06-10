@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -12,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import model.SettingsListener;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
@@ -22,7 +24,7 @@ public class SettingsController extends GuiController {
 	private static final String emptyHotkey = "";
 
 	private SettingsListener listener;
-	private Object selectedField;
+	private Object selectedField; // TODO: swap Object with TextField
 	private NativeKeyEvent workingHotkey;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
@@ -72,6 +74,8 @@ public class SettingsController extends GuiController {
 	@FXML // fx:id="updateCheckButton"
 	private Button updateCheckButton; // Value injected by FXMLLoader
 
+	// --- GUI Methods --- //
+
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
 		assert stopAllField != null : "fx:id=\"stopAllField\" was not injected: check your FXML file 'settings_jfx.fxml'.";
@@ -87,12 +91,6 @@ public class SettingsController extends GuiController {
 		assert updateCheckBox != null : "fx:id=\"updateCheckBox\" was not injected: check your FXML file 'settings_jfx.fxml'.";
 		assert websiteButton != null : "fx:id=\"websiteButton\" was not injected: check your FXML file 'settings_jfx.fxml'.";
 		assert updateCheckButton != null : "fx:id=\"updateCheckButton\" was not injected: check your FXML file 'settings_jfx.fxml'.";
-
-		try {
-			listener = new SettingsListener();
-		} catch (NativeHookException nhe) {
-			nhe.printStackTrace();
-		}
 	}
 
 	@FXML
@@ -133,6 +131,19 @@ public class SettingsController extends GuiController {
 	@FXML
 	void onWebsiteButtonPressed(ActionEvent event) {
 		// TODO open default browser of github page
+	}
+
+	// --- General Methods --- //
+
+	@Override
+	void preload(SoundboardStage parent, Stage stage, Scene scene) {
+		super.preload(parent, stage, scene);
+
+		try {
+			listener = new SettingsListener();
+		} catch (NativeHookException nhe) {
+			nhe.printStackTrace();
+		}
 	}
 
 	public void start() {

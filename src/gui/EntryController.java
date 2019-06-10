@@ -3,6 +3,7 @@ package gui;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
@@ -53,6 +54,8 @@ public class EntryController extends GuiController {
 	@FXML // fx:id="doneButton"
 	private Button doneButton; // Value injected by FXMLLoader
 
+	// --- GUI Methods --- //
+
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
 		assert selectButton != null : "fx:id=\"selectButton\" was not injected: check your FXML file 'entrymenu_jfx.fxml'.";
@@ -85,23 +88,9 @@ public class EntryController extends GuiController {
 		grabFile();
 	}
 
-    @Override
-    void preload(SoundboardStage parent, Stage stage, Scene scene) {
-        super.preload(parent, stage, scene);
+	// --- Interaction Methods --- //
 
-        chooser = new FileChooser();
-        chooser.setTitle("Choose Audio File");
-        chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);
-
-        try {
-            listener = new EntryListener();
-        } catch (NativeHookException nhe) {
-            nhe.printStackTrace(); // TODO consider merging the error dialog method with printing an exception
-            parent.throwBlockingError(nhe.getMessage());
-        }
-    }
-
-    public String getHotkeyText() {
+	public String getHotkeyText() {
 		return hotkeyField.getText();
 	}
 
@@ -139,13 +128,34 @@ public class EntryController extends GuiController {
 		}
 	}
 
-	public void start(EntryModel starter) {
+	// --- General Methods --- //
+
+    @Override
+    void preload(SoundboardStage parent, Stage stage, Scene scene) {
+        super.preload(parent, stage, scene);
+
+        chooser = new FileChooser();
+        chooser.setTitle("Choose Audio File");
+        chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);
+
+        try {
+            listener = new EntryListener();
+        } catch (NativeHookException nhe) {
+            nhe.printStackTrace(); // TODO consider merging the error dialog method with printing an exception
+            parent.throwBlockingError(nhe.getMessage());
+        }
+
+		logger.log(Level.INFO, "Entry GUI controller initialized");
+    }
+
+	public void start(Entry starter) {
 		if (starter != null) {
 			hotkeyField.setStyle("-fx-control-inner-background: white;");
-			selectionText.setText(starter.getEntry().getFile().getAbsolutePath());
-			hotkeyField.setText(starter.getHotkey());
-			nativeEvent = starter.getEntry().getCombo();
-			workFile = starter.getEntry().getFile();
+			selectionText.setText(starter.getFile().getAbsolutePath());
+			hotkeyField.setText(starter.getCombo().toString());
+			nativeEvent = starter.getCombo().getNative();
+			workFile = starter.getFile();
+			logger.log(Level.INFO, "Started editing entry" + starter.toString());
 			stage.show();
 		} else {
 			start();
@@ -158,26 +168,32 @@ public class EntryController extends GuiController {
 		hotkeyField.setText(emptyHotkey);
 		nativeEvent = null;
 		workFile = null;
+		logger.log(Level.INFO, "Starting new entry");
 		stage.show();
 	}
 
-	public void stop(EntryModel ender) {
+	@Deprecated
+	public void stop(Entry ender) {
 		if (ender != null) {
 			stopListening();
-			parent.menu().addEntry(ender);
+			parent.getModel().getEntries().add(ender);
+			logger.log(Level.INFO, "Finished and returned entry to soundboard");
 			stage.close();
 		} else {
-            parent.throwBlockingError("Model argument is null!");
+            //parent.throwBlockingError("Model argument is null!");
+            logger.log(Level.WARNING, "Model argument is null!");
 		}
 	}
 
 	public void stop() {
 		if (workFile != null && nativeEvent != null) {
 			stopListening();
-			parent.menu().addEntry(new EntryModel(new Entry(workFile, nativeEvent)));
+			parent.getModel().getEntries().add(new Entry(workFile, nativeEvent));
+			logger.log(Level.INFO, "Finished and added new entry to soundboard");
 			stage.close();
 		} else {
-		    parent.throwBlockingError("Not all fields have been filled!");
+		    //parent.throwBlockingError("Not all fields have been filled!");
+			logger.log(Level.WARNING, "Not all fields have been filled!");
 		}
 	}
 

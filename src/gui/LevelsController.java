@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 
-public class LevelsController {
+public class LevelsController extends GuiController {
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -27,5 +27,15 @@ public class LevelsController {
         assert primarySlider != null : "fx:id=\"primarySlider\" was not injected: check your FXML file 'levels_jfx.fxml'.";
         assert secondarySlider != null : "fx:id=\"secondarySlider\" was not injected: check your FXML file 'levels_jfx.fxml'.";
         assert injectorSlider != null : "fx:id=\"injectorSlider\" was not injected: check your FXML file 'levels_jfx.fxml'.";
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void stop() {
+
     }
 }

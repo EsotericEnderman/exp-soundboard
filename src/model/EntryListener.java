@@ -29,7 +29,7 @@ public class EntryListener implements NativeKeyListener {
 
 	@Override
 	public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
-		display.setHotkeyText(KeyUtil.asReadable(nativeEvent));
+		display.setHotkeyText(KeyCombination.asReadable(nativeEvent));
 		display.setCombo(nativeEvent);
 	}
 

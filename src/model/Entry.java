@@ -8,9 +8,14 @@ import util.KeyUtil;
 public class Entry {
 
 	private File file;
-	private NativeKeyEvent combo;
+	private KeyCombination combo;
 
-	public Entry(File file, NativeKeyEvent combo) {
+	public Entry(File file, NativeKeyEvent nativeKey) {
+		combo = new KeyCombination(nativeKey);
+		this.file = file;
+	}
+
+	public Entry(File file, KeyCombination combo) {
 		this.file = file;
 		this.combo = combo;
 	}
@@ -23,29 +28,25 @@ public class Entry {
 		file = newFile;
 	}
 
-	public NativeKeyEvent getCombo() {
+	public KeyCombination getCombo() {
 		return combo;
 	}
 
-	public void setCombo(NativeKeyEvent newCombo) {
+	public void setCombo(KeyCombination newCombo) {
 		combo = newCombo;
 	}
 
-	public boolean checkCombo(NativeKeyEvent match) {
-		return combo.paramString() == match.paramString();
+	public boolean checkCombo(KeyCombination match) {
+		return combo.equals(match);
 	}
 
 	@Override
 	public String toString() {
-		return KeyUtil.asReadable(combo) + " = " + file.getAbsolutePath();
-	}
-
-	public boolean equals(Entry obj) {
-		return (this.file == ((Entry) obj).file) && (this.combo.paramString() == ((Entry) obj).combo.paramString());
+		return combo.toString() + " = " + file.getAbsolutePath();
 	}
 
 	@Override
-	protected Object clone() throws CloneNotSupportedException {
+	protected Object clone() {
 		return new Entry(file, combo);
 	}
 

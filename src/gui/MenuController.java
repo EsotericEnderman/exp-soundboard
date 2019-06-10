@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.logging.*;
 
 import javax.sound.sampled.*;
 
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,7 +27,7 @@ import model.Entry;
 import model.SoundboardModel;
 import util.ModelUtil;
 
-public class MenuController extends GuiController implements Observer {
+public class MenuController extends GuiController implements ListChangeListener<Entry> {
 
 	private static final int primaryIndex = 0;
 	private static final int secondaryIndex = 1;
@@ -31,8 +35,8 @@ public class MenuController extends GuiController implements Observer {
 	private static final int[] singleIndices = {primaryIndex};
 	private static final int[] doubleIndices = {primaryIndex, secondaryIndex};
 
-	private ObservableList<EntryModel> tableList;
-	private ObservableList<AudioDeviceModel> audioList;
+	private ObservableList<Entry> tableList;
+	private ObservableList<Mixer.Info> audioList;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -97,10 +101,10 @@ public class MenuController extends GuiController implements Observer {
 	private CheckBox secondarySpeakerCheck; // Value injected by FXMLLoader
 
 	@FXML // fx:id="secondarySpeakerCombo"
-	private ComboBox<AudioDeviceModel> secondarySpeakerCombo; // Value injected by FXMLLoader
+	private ComboBox<Mixer.Info> secondarySpeakerCombo; // Value injected by FXMLLoader
 
 	@FXML // fx:id="primarySpeakerCombo"
-	private ComboBox<AudioDeviceModel> primarySpeakerCombo; // Value injected by FXMLLoader
+	private ComboBox<Mixer.Info> primarySpeakerCombo; // Value injected by FXMLLoader
 
 	@FXML // fx:id="injectorCheck"
 	private CheckBox injectorCheck; // Value injected by FXMLLoader
@@ -109,13 +113,15 @@ public class MenuController extends GuiController implements Observer {
 	private CheckBox pttHoldCheck; // Value injected by FXMLLoader
 
 	@FXML // fx:id="entryTable"
-	private TableView<EntryModel> entryTable; // Value injected by FXMLLoader
+	private TableView<Entry> entryTable; // Value injected by FXMLLoader
 
 	@FXML // fx:id="clipColumn"
-	private TableColumn<EntryModel, String> clipColumn; // Value injected by FXMLLoader
+	private TableColumn<Entry, String> clipColumn; // Value injected by FXMLLoader
 
 	@FXML // fx:id="hotkeyColumn"
-	private TableColumn<EntryModel, String> hotkeyColumn; // Value injected by FXMLLoader
+	private TableColumn<Entry, String> hotkeyColumn; // Value injected by FXMLLoader
+
+	// --- GUI Methods --- //
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
@@ -164,7 +170,7 @@ public class MenuController extends GuiController implements Observer {
 	@FXML
 	void onRemovePressed(ActionEvent event) {
 		if (removeSelected()) {
-			// Possibly update references to the list (shouldn't be necessary)
+			// TODO handle remove success
 		} else {
             // TODO play error sound, user has no selected entry
 		}
@@ -187,8 +193,7 @@ public class MenuController extends GuiController implements Observer {
 
 	@FXML
 	void onCloseMenuPressed(ActionEvent event) {
-		// TODO poll if working file has been saved, if so ask user before, then close
-		// everything
+		// TODO poll if working file has been saved, if so ask user before, then close everything
 	}
 
 	@FXML
@@ -219,29 +224,93 @@ public class MenuController extends GuiController implements Observer {
 	@FXML
 	void onLevelsMenuPressed(ActionEvent event) {
 		// TODO open levels menu, start live updating values to audio master
+		//parent.levelsController().start();
 	}
 
 	@FXML
 	void onConverterMenuPressed(ActionEvent event) {
 		// TODO open converter menu
+		//parent.converterController().start();
 	}
 
-	public void update(Observable o, Object arg) {
-		SoundboardModel model = (SoundboardModel) o;
-		Entry[] arr = model.getEntriesArr();
+	// --- Interaction Methods --- //
 
-		tableList.clear();
-		tableList.addAll(ModelUtil.toModel(arr));
+	public Entry getSelectedEntry() {
+		return entryTable.getSelectionModel().getSelectedItem();
+	}
+
+	public Mixer.Info getPrimarySelect() {
+		return primarySpeakerCombo.getValue();
+	}
+
+	public Mixer.Info getSecondarySelect() {
+		return secondarySpeakerCombo.getValue();
+	}
+
+	public boolean secondaryChecked() {
+		return secondarySpeakerCheck.isSelected();
+	}
+
+	public boolean playSelected() {
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			return parent.playEntry(selected, (secondaryChecked() ? doubleIndices : singleIndices));
+		} else {
+			return false;
+		}
+	}
+
+	public boolean removeSelected() {
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			return parent.getModel().getEntries().remove(selected);
+		} else {
+			// TODO report attempt to remove null entry.
+			parent.throwBlockingError("Cannot remove no selection!");
+			return false;
+		}
+	}
+
+	// --- General Methods --- //
+
+	// called when the internal list in SoundboardModel changes
+	public void onChanged(Change<? extends Entry> change) {
+		// Copied from Oracle's Javadoc on javafx.collections.ListChangeListener.Change
+		// https://docs.oracle.com/javase/8/javafx/api/javafx/collections/ListChangeListener.Change.html
+		while (change.next()) {
+			if (change.wasPermutated()) {
+				for (int i = change.getFrom(); i < change.getTo(); ++i) {
+					// permutate
+				}
+			} else if (change.wasUpdated()) {
+				// update item
+			} else {
+				for (Entry remitem : change.getRemoved()) {
+					//tableList.remove(remitem);
+				}
+				for (Entry additem: change.getAddedSubList()) {
+					//tableList.add(additem);
+				}
+			}
+		}
 	}
 
 	@Override
 	void preload(SoundboardStage parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
 
-		// Set up each column in the table to pull the appropriate data from an EntryModel within
+		// Set up each column in the table to pull the appropriate data from an Entry within
 		// the table's internal list.
-		clipColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("clipName"));
-		hotkeyColumn.setCellValueFactory(new PropertyValueFactory<EntryModel, String>("hotkey"));
+		clipColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Entry, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(TableColumn.CellDataFeatures<Entry, String> p) {
+				return new ReadOnlyStringWrapper(p.getValue().getFile().getName());
+			}
+		});
+		hotkeyColumn.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Entry, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(TableColumn.CellDataFeatures<Entry, String> p) {
+				return new ReadOnlyStringWrapper(p.getValue().getCombo().toString());
+			}
+		});
 
 		// Set up the table's internal list.
 		tableList = FXCollections.observableArrayList();
@@ -250,13 +319,13 @@ public class MenuController extends GuiController implements Observer {
 		// Set up the internal list both combo boxes pull from
 		audioList = FXCollections.observableArrayList();
 
-		// Setup a factory to properly pull data from the AudioDeviceModel to display in a combobox
-		Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>> cellFactory = new Callback<ListView<AudioDeviceModel>, ListCell<AudioDeviceModel>>() {
+		// Setup a factory to properly pull data from Mixer.Info to display in a combobox
+		Callback<ListView<Mixer.Info>, ListCell<Mixer.Info>> cellFactory = new Callback<ListView<Mixer.Info>, ListCell<Mixer.Info>>() {
 			@Override
-			public ListCell<AudioDeviceModel> call(ListView<AudioDeviceModel> param) {
-				return new ListCell<AudioDeviceModel>() {
+			public ListCell<Mixer.Info> call(ListView<Mixer.Info> param) {
+				return new ListCell<Mixer.Info>() {
 					@Override
-					protected void updateItem(AudioDeviceModel item, boolean empty) {
+					protected void updateItem(Mixer.Info item, boolean empty) {
 						super.updateItem(item, empty);
 						if (item == null || empty) {
 							setGraphic(null);
@@ -275,10 +344,10 @@ public class MenuController extends GuiController implements Observer {
 		primarySpeakerCombo.setItems(audioList);
 		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		primarySpeakerCombo.setCellFactory(cellFactory);
-		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
+		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
 			@Override
-			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
-				parent.getModel().getAudio().setOutput(primaryIndex, newValue.getInfo());
+			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
+				parent.getModel().getAudio().setOutput(primaryIndex, newValue);
 			}
 		});
 
@@ -286,93 +355,21 @@ public class MenuController extends GuiController implements Observer {
 		secondarySpeakerCombo.setItems(audioList);
 		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		secondarySpeakerCombo.setCellFactory(cellFactory);
-		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<AudioDeviceModel>() {
+		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
 			@Override
-			public void changed(ObservableValue<? extends AudioDeviceModel> observable, AudioDeviceModel oldValue, AudioDeviceModel newValue) {
-				parent.getModel().getAudio().setOutput(secondaryIndex, newValue.getInfo());
+			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
+				parent.getModel().getAudio().setOutput(secondaryIndex, newValue);
 			}
 		});
-	}
 
-	public EntryModel getSelectedEntry() {
-		return entryTable.getSelectionModel().getSelectedItem();
-	}
-
-	public AudioDeviceModel getPrimarySelect() {
-		return primarySpeakerCombo.getValue();
-	}
-
-	public AudioDeviceModel getSecondarySelect() {
-		return secondarySpeakerCombo.getValue();
-	}
-
-	public boolean secondaryChecked() {
-		return secondarySpeakerCheck.isSelected();
-	}
-
-	public boolean play(EntryModel entry) {
-		try {
-			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
-			AudioMaster master = parent.getModel().getAudio();
-			File target = entry.getEntry().getFile();
-			master.play(target, (secondaryChecked() ? doubleIndices : singleIndices));
-			return true;
-		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException | NullPointerException e) {
-			// TODO send to logger
-			e.printStackTrace();
-			parent.throwBlockingError("Error playing audio file: " + e.getMessage());
-			return false;
-		}
-	}
-
-	public boolean playSelected() {
-		EntryModel selected = getSelectedEntry();
-		if (selected != null) {
-			return play(selected);
-		} else {
-			return false;
-		}
-	}
-
-	public boolean removeSelected() {
-		EntryModel selected = getSelectedEntry();
-		if (selected != null) {
-			return parent.getModel().getEntries().remove(selected.getEntry());
-		} else {
-			// TODO report attempt to remove null entry.
-			return false;
-		}
-	}
-
-	/**
-	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
-	 * @return A list containing all devices with valid output
-	 */
-	public List<AudioDeviceModel> getValidMixers() {
-
-		// list all mixers
-		Mixer device;
-		Line.Info[] sourceInfos;
-		Mixer.Info[] deviceInfos = AudioSystem.getMixerInfo();
-		List<AudioDeviceModel> choices = new ArrayList<AudioDeviceModel>();
-		for (int i = 0; i < deviceInfos.length; i++) {
-			device = AudioSystem.getMixer(deviceInfos[i]);
-			sourceInfos = device.getSourceLineInfo();
-
-			// keep mixers with 2 or more source lines / output lines
-			if (sourceInfos.length > 1) {
-				choices.add(new AudioDeviceModel(deviceInfos[i]));
-			}
-		}
-
-		return choices;
+		logger.log(Level.INFO, "Menu GUI controller initialized");
 	}
 
 	public void reset() {
 		audioList.clear();
 	    tableList.clear();
 
-	    audioList.addAll(getValidMixers());
+	    audioList.addAll(SoundboardStage.getValidMixers());
 
 		// The zero-th element is preselected to prevent the user from starting with a null audio device.
 		primarySpeakerCombo.getSelectionModel().select(0);

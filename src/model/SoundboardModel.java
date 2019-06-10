@@ -1,22 +1,27 @@
 package model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.prefs.Preferences;
 
-public class SoundboardModel extends Observable {
+public class SoundboardModel {
 
     static final String settingsLocation = "EXP-soundboard";
 
     private AudioMaster audio;
-    private List<Entry> entryList;
+    private ObservableList<Entry> entryList;
     private Preferences settings;
 
     public SoundboardModel(int speakerCount) {
         audio = new AudioMaster(speakerCount);
-        entryList = new ArrayList<Entry>();
+        entryList = FXCollections.observableArrayList();
         settings = Preferences.userRoot().node(settingsLocation);
+
+
     }
 
     public AudioMaster getAudio() {
@@ -27,12 +32,8 @@ public class SoundboardModel extends Observable {
         return (Entry[]) entryList.toArray();
     }
 
-    public List<Entry> getEntries() {
+    public ObservableList<Entry> getEntries() {
         return entryList;
-    }
-
-    public void initializeSettings() {
-        //settings.putByteArray("stopallsounds", );
     }
 
     public class SoundboardSettings {

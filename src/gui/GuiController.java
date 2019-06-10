@@ -3,12 +3,19 @@ package gui;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
 /**
  * A parent class to every class that handles interaction between code and gui.
  */
 public abstract class GuiController {
 
     protected SoundboardStage parent;
+    protected Logger logger;
+
     protected Stage stage;
     protected Scene scene;
 
@@ -23,6 +30,29 @@ public abstract class GuiController {
         this.parent = parent;
         this.stage = stage;
         this.scene = scene;
+
+        // Setup logger
+        logger = Logger.getLogger(this.getClass().getName());
+
+        // Setup logger handler to pipe important logs to error dialogs
+        Handler guiOutput = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                parent.throwBlockingError(record.getMessage());
+            }
+
+            @Override
+            public void flush() {
+
+            }
+
+            @Override
+            public void close() throws SecurityException {
+
+            }
+        };
+        guiOutput.setLevel(Level.WARNING);
+        logger.addHandler(guiOutput);
     }
 
     public abstract void start();
