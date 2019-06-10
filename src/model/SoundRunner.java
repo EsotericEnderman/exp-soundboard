@@ -9,13 +9,14 @@ import java.util.logging.Logger;
 class SoundRunner implements Runnable {
 
     private AudioMaster master;
+    private Logger logger;
+
     private File sound;
     private SourceDataLine[] speakers;
     private AudioInputStream clip;
     private AudioFormat clipFormat;
-    private Logger logger;
 
-    private boolean playing;
+    private RunnerState state;
 
     /**
      *
@@ -26,11 +27,13 @@ class SoundRunner implements Runnable {
      * @throws IOException
      */
     public SoundRunner(AudioMaster master, File sound, SourceDataLine... speakers)
-            throws UnsupportedAudioFileException, IOException {
+            throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         this.master = master;
         this.sound = sound;
         this.speakers = speakers;
+        state = RunnerState.STOPPED;
 
+        // grab formats from file
         clip = AudioSystem.getAudioInputStream(sound);
         clipFormat = clip.getFormat();
 
@@ -40,13 +43,20 @@ class SoundRunner implements Runnable {
             logger.log(Level.INFO, "Target file: " + sound.getName() + " is using converted format");
         }
 
+        // ready outputs for data
+        for (SourceDataLine sdl : speakers) {
+            sdl.open(clipFormat);
+
+        }
+
         logger = Logger.getLogger(SoundRunner.class.getName());
         logger.log(Level.INFO, "Initialized sound player on: " + sound.getName());
-        playing = true;
     }
 
     @Override
     public void run() {
+        start();
+
         // setup buffer for containing samples of audio to be played
         byte[] buffer = new byte[AudioMaster.standardBufferSize];
         int bytesRead = 0;
@@ -57,8 +67,8 @@ class SoundRunner implements Runnable {
             // read a sample from the audio file
             try {
                 bytesRead = clip.read(buffer, 0, AudioMaster.standardBufferSize);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ioe) {
+                logger.log(Level.SEVERE, "Failed to read from file:" + sound.getName(), ioe);
             }
 
             if (bytesRead > 0) {
@@ -71,37 +81,47 @@ class SoundRunner implements Runnable {
                 // in case of an incomplete write
                 if (bytesWritten < AudioMaster.standardBufferSize) {
                     logger.log(Level.WARNING, "Failed to write buffer to output");
-                    playing = false;
-                    continue;
+                    break;
                 }
             }
 
             // in case of an incomplete rad
             if (bytesRead < AudioMaster.standardBufferSize) {
                 logger.log(Level.WARNING, "Failed to read buffer from file: " + sound.getName());
-                playing = false;
-                continue;
+                break;
             }
         }
 
         // close remaining streams
         try {
             clip.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ioe) {
+            logger.log(Level.SEVERE, "Failed to close stream from file: " + sound.getName(), ioe);
         }
 
         for (SourceDataLine sdl : speakers) {
             sdl.close();
         }
 
+        stop();
+    }
+
+    public void start() {
+        playing = true;
+        master.addRunner(this);
+        logger.log(Level.INFO, "Starting playing clip: " + sound.getName());
+    }
+
+    public void stop() {
+        playing = false;
+        master.removeRunner(this);
         logger.log(Level.INFO, "Finished playing clip: " + sound.getName());
     }
 
     // does not immediately stop the clip
-    public synchronized void stop() {
+    public synchronized void halt() {
         logger.log(Level.INFO, "Prematurely stopping clip: " + sound.getName());
-        playing = false;
+        stop();
     }
 
 }

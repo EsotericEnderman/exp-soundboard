@@ -10,6 +10,8 @@ import java.util.List;
 
 public class KeyCombination {
 
+    // --- toString methods --- //
+
     public static final String spacer = " + ";
 
     public static List<String> modifiersAsReadable(int modifierFlags) {
@@ -74,7 +76,9 @@ public class KeyCombination {
         return String.join(spacer, keys);
     }
 
-    static final int netiveKeySize = Integer.BYTES * 5 + Character.BYTES;
+    // --- Serialization --- //
+
+    static final int netiveKeySize = Integer.BYTES * 5 + Character.BYTES; // size of all relevant nativeKey fields in bytes
 
     public static KeyCombination fromData(byte[] data) {
         // reads from a byte array each nativeKey field, in reverse order to the other method
@@ -108,6 +112,8 @@ public class KeyCombination {
         return buffer.array();
     }
 
+    // --- Object implementation --- //
+
     private NativeKeyEvent nativeKeyEvent;
 
     public KeyCombination(NativeKeyEvent nativeKeyEvent) {
@@ -135,7 +141,7 @@ public class KeyCombination {
 
     @Override
     public String toString() {
-        return super.toString();
+        return asReadable(nativeKeyEvent);
     }
 
     @Override

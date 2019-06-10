@@ -12,6 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sound.sampled.*;
 
@@ -21,16 +23,20 @@ public class AudioMaster {
 	public static final AudioFormat standardFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4,
 			44100.0F, false);
 
+	public static SourceDataLine getSpeakerLine(Mixer mixer) throws LineUnavailableException {
+		Line.Info[] sourceLines = mixer.getSourceLineInfo();
+		return (SourceDataLine) mixer.getLine(sourceLines[0]);  // TODO implement a search to grab the right line
+	}
+
 	static final int standardBufferSize = 2048;
 
 	public final ThreadGroup audioGroup = new ThreadGroup("Audio");
 
 	private Mixer[] outputs;
-	private float[] gains;
+	private FloatControl[] gainControls;
 
-	private ThreadPoolExecutor soundGroup;
-	private AtomicBoolean playing;
-	private List<SoundRunner> active;
+	private List<Thread> active;
+	private Logger logger;
 
 	/**
 	 * Constructs this class with a given number of mixer slots, this value will not change.
@@ -55,32 +61,28 @@ public class AudioMaster {
 	 * @param count The number of total outputs this object will handle.
 	 * @param mixers The initial outputs the class has access to.
 	 */
-	public AudioMaster(int count, Mixer... mixers) {
-		// prevents an array too large causing an index out of bounds error
-		if (mixers.length > count) mixers = Arrays.copyOfRange(mixers, 0, count);
+	public AudioMaster(int count, Mixer... mixers) throws LineUnavailableException {
+		// extends given array, to prevent an out of bounds exception
+		if (mixers.length < count) mixers = Arrays.copyOf(mixers, count);
 
 		this.outputs = new Mixer[count];
-		gains = new float[count];
-		active = new ArrayList<SoundRunner>();
-		playing = new AtomicBoolean(true);
-
-		// This constructor ensures all audio playing threads will be in the threadgroup accessible from this class.
-		soundGroup = (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactory() {
-			@Override
-			public Thread newThread(Runnable r) {
-				return new Thread(audioGroup, r);
-			}
-		});
+		gainControls = new FloatControl[count];
+		active = new ArrayList<Thread>();
+		logger = Logger.getLogger(AudioMaster.class.getName());
 
 		// Copies all available mixers.
-		for (int i = 0; i < mixers.length; i++) {
+		for (int i = 0; i < count; i++) {
 			outputs[i] = mixers[i];
 		}
 
 		// Sets default values for each gain slider.
+		SourceDataLine speaker;
 		for (int i = 0; i < count; i++) {
-			gains[i] = 0f;
+			speaker = getSpeakerLine(outputs[i]);
+			gainControls[i] = (FloatControl) speaker.getControl(FloatControl.Type.MASTER_GAIN);
 		}
+
+		logger.log(Level.INFO, "Initialized Audio backend with " + count + " outputs");
 	}
 
 	/**
@@ -103,7 +105,6 @@ public class AudioMaster {
 
 		AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(sound);
 		AudioFormat format = fileFormat.getFormat();
-		FloatControl gain;
 
 		// Get each requested speaker and gain from outputs, as defined by the numbers in indices.
 		SourceDataLine[] speakers = new SourceDataLine[indices.length];
@@ -113,7 +114,7 @@ public class AudioMaster {
 			Mixer output = outputs[index];
 			Line.Info[] sourceLines = output.getSourceLineInfo();
 			// For the meanwhile grab the first, it should be a sourcedataline.
-			speakers[i] = (SourceDataLine) output.getLine(sourceLines[0]); // TODO implement a search to grab the right line
+			speakers[i] = (SourceDataLine) output.getLine(sourceLines[0]);
 			levels[i] = gains[index]; // TODO test one output off and one on
 		}
 
@@ -128,14 +129,15 @@ public class AudioMaster {
 		// Delegate the task of playing audio to a separate thread, using a thread pool to manage each thread.
 		// All the while keeping track of each thread in a separate list.
 		SoundRunner player = new SoundRunner(this, sound, speakers);
-		active.add(player);
+		//active.add(player);
 		soundGroup.execute(player);
 	}
 
 	public boolean stopAll() {
+		logger.log(Level.INFO, "Stopping all playing sounds");
 		boolean stop = playing.compareAndSet(true, false);
 		for (SoundRunner run : active) {
-			run.stop();
+			run.halt();
 		}
 		active.clear();
 		playing.compareAndSet(false, true);
@@ -148,7 +150,7 @@ public class AudioMaster {
 		return outputs[index];
 	}
 
-	public Mixer[] getOutputs() {
+	public final Mixer[] getOutputs() {
 		return outputs;
 	}
 
@@ -159,29 +161,31 @@ public class AudioMaster {
 	public void setOutput(int index, Mixer mixer) {
 		outputs[index] = mixer;
 	}
-	
-	public void setOutputs(Mixer[] mixers) {
-		outputs = mixers;
-	}
 
 	// --- Gain methods --- //
 
 	public float getGain(int index) {
-		return gains[index];
+		return gainControls[index].getValue();
 	}
 
 	public void setGain(int index, float gain) {
-		gains[index] = gain;
+		gainControls[index].setValue(gain);
 	}
 
 	public void setGains(float gain) {
-		for (int i = 0; i < gains.length; i++) {
-			gains[i] = gain;
+		for (int i = 0; i < gainControls.length; i++) {
+			gainControls[i].setValue(gain);
 		}
 	}
 
-	public void setGains(float[] gains) {
-		this.gains = gains;
+	// --- SoundRunner methods --- //
+
+	public boolean removeRunner(SoundRunner runner) {
+		return active.remove(runner);
+	}
+
+	public boolean addRunner(SoundRunner runner) {
+		return active.add(runner);
 	}
 
 	// --- State methods --- //
