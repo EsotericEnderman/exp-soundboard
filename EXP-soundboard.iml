@@ -9,10 +9,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="applejavaextensions" level="project" />
-    <orderEntry type="library" name="gson" level="project" />
-    <orderEntry type="library" name="jave" level="project" />
-    <orderEntry type="library" name="jnativehook" level="project" />
-    <orderEntry type="library" name="miglayout" level="project" />
+    <orderEntry type="library" name="applejavaextensions" level="application" />
+    <orderEntry type="library" name="gson" level="application" />
+    <orderEntry type="library" name="jave-1.0" level="application" />
+    <orderEntry type="library" name="jnativehook-2.1.0" level="application" />
+    <orderEntry type="library" name="miglayout" level="application" />
   </component>
 </module>

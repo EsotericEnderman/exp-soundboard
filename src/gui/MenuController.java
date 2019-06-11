@@ -25,7 +25,6 @@ import javafx.util.Callback;
 import model.AudioMaster;
 import model.Entry;
 import model.SoundboardModel;
-import util.ModelUtil;
 
 public class MenuController extends GuiController implements ListChangeListener<Entry> {
 
