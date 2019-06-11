@@ -61,16 +61,19 @@ public class SoundboardStage extends Application {
 	private Stage settingsStage;
 	private Stage entryStage;
 	private Stage converterStage;
+	private Stage levelStage;
 
 	private Scene menuScene;
 	private Scene settingsScene;
 	private Scene entryScene;
 	private Scene converterScene;
+	private Scene levelScene;
 
 	private Pane mainMenu;
 	private Pane settingsMenu;
 	private Pane entryMenu;
 	private Pane converterMenu;
+	private Pane levelMenu;
 
 	// --- Controllers --- //
 
@@ -78,6 +81,7 @@ public class SoundboardStage extends Application {
 	private EntryController entryController;
 	private SettingsController settingsController;
 	private ConverterController converterController;
+	private LevelsController levelsController;
 
 	public static void main(String[] args) {
 		Application.launch(SoundboardStage.class, args);
@@ -93,6 +97,7 @@ public class SoundboardStage extends Application {
 		logger = Logger.getLogger(SoundboardStage.class.getName());
 		FXMLLoader loader;
 
+		// load fxml files and controllers, pass to fields
 		loader = new FXMLLoader();
 		loader.setLocation(getClass().getResource("/res/mainmenu_jfx.fxml"));
 		mainMenu = loader.<VBox>load();
@@ -112,45 +117,61 @@ public class SoundboardStage extends Application {
 		loader.setLocation(getClass().getResource("/res/converter_jfx.fxml"));
 		converterMenu = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
+
+		loader = new FXMLLoader();
+		loader.setLocation(getClass().getResource("/res/levels_jfx.fxml"));
+		levelMenu = loader.<Pane>load();
+		levelsController = loader.<LevelsController>getController();
+
+		logger.log(Level.INFO, "GUI Controllers loaded");
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		menuScene = new Scene(mainMenu);
-		settingsScene = new Scene(settingsMenu);
-		entryScene = new Scene(entryMenu);
-		converterScene = new Scene(converterMenu);
 
+		// init JavaFX objects (can only be done in JavaFX thread), initialize with arguments
+		menuScene = new Scene(mainMenu);
 		menuStage = primaryStage;
 		menuStage.setScene(menuScene);
 		menuController.preload(this, menuStage, menuScene);
 		model.getEntries().addListener(menuController);
 
+		settingsScene = new Scene(settingsMenu);
 		settingsStage = new Stage();
 		settingsStage.setScene(settingsScene);
 		settingsStage.initOwner(menuStage);
 		settingsStage.initModality(Modality.WINDOW_MODAL);
 		settingsController.preload(this,settingsStage, settingsScene);
 
+		entryScene = new Scene(entryMenu);
 		entryStage = new Stage();
 		entryStage.setScene(entryScene);
 		entryStage.initOwner(menuStage);
 		entryStage.initModality(Modality.WINDOW_MODAL);
 		entryController.preload(this, entryStage, entryScene);
 
+		converterScene = new Scene(converterMenu);
 		converterStage = new Stage();
 		converterStage.setScene(converterScene);
 		converterStage.initOwner(menuStage);
 		converterStage.initModality(Modality.WINDOW_MODAL);
 		converterController.preload(this, converterStage, converterScene);
 
+		levelScene = new Scene(levelMenu);
+		levelStage = new Stage();
+		levelStage.setScene(levelScene);
+		levelStage.initOwner(menuStage);
+		levelStage.initModality(Modality.WINDOW_MODAL);
+		levelsController.preload(this, levelStage, levelScene);
+
+		logger.log(Level.INFO, "GUI Controllers initialized");
 		menuController.start();
 	}
 
 	@Override
 	public void stop() throws Exception {
 		super.stop();
-		menuController.stop();
+		menuController.stop(); // TODO: may need to implement a force close
 		settingsController.stop();
 		entryController.stop();
 		converterController.stop();
@@ -188,6 +209,10 @@ public class SoundboardStage extends Application {
 
 	public ConverterController converterController() {
 		return converterController;
+	}
+
+	public LevelsController levelsController() {
+		return levelsController;
 	}
 
 	public SoundboardModel getModel() {

@@ -3,7 +3,6 @@ package model;
 import java.io.File;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
-import util.KeyUtil;
 
 public class Entry {
 

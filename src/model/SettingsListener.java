@@ -7,7 +7,6 @@ import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
 import javafx.scene.control.TextField;
-import util.KeyUtil;
 
 public class SettingsListener implements NativeKeyListener {
 
@@ -34,7 +33,7 @@ public class SettingsListener implements NativeKeyListener {
     @Override
     public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
         settings.setHotkey(nativeEvent);
-        output.setText(KeyUtil.asReadable(nativeEvent));
+        output.setText(KeyCombination.asReadable(nativeEvent));
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import util.KeyUtil;
+import model.KeyCombination;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
@@ -80,7 +80,7 @@ public class EntryController extends GuiController {
 
 	@FXML
 	void onFieldPressed(KeyEvent event) {
-		System.out.println(KeyUtil.asReadable(event));
+		logger.log(Level.INFO, event.getText() + " pressed");
 	}
 
 	@FXML
