@@ -38,7 +38,8 @@ public abstract class GuiController {
         Handler guiOutput = new Handler() {
             @Override
             public void publish(LogRecord record) {
-                parent.throwBlockingError(record.getMessage());
+                if (record.getLevel() == Level.WARNING || record.getLevel() == Level.SEVERE)
+                    parent.throwError(record.getMessage());
             }
 
             @Override
@@ -58,4 +59,9 @@ public abstract class GuiController {
     public abstract void start();
 
     public abstract void stop();
+
+    public void forceStop() {
+        logger.log(Level.INFO, "Force stopping " + this.getClass().getName());
+        stage.close();
+    }
 }

@@ -24,7 +24,7 @@ public class SoundPlayer implements Runnable {
         this.master = master;
         this.sound = sound;
         this.outputs = outputs;
-        logger = Logger.getLogger(SoundPlayer.class.getName());
+        logger = Logger.getLogger(this.getClass().getName());
         running = new AtomicBoolean(true);
 
         // grab formats from file
@@ -61,6 +61,7 @@ public class SoundPlayer implements Runnable {
             } catch (IOException ioe) {
                 logger.log(Level.SEVERE, "Failed to read from file:" + sound.getName(), ioe);
                 running.set(false);
+                continue;
             }
 
             // if anything was read
@@ -74,6 +75,7 @@ public class SoundPlayer implements Runnable {
 
             // once there is nothing left to write
             if (bytesRead < AudioMaster.standardBufferSize) {
+                logger.log(Level.INFO, "Reached end of stream");
                 running.set(false);
             }
         }
@@ -91,6 +93,7 @@ public class SoundPlayer implements Runnable {
 
         // remove self from active list
         master.removePlayer(this);
+        logger.log(Level.INFO, "Instance finished: " + sound.getName());
     }
 
 }

@@ -2,10 +2,11 @@ package gui;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -23,10 +24,13 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import sun.util.logging.LoggingSupport;
 
 import javax.sound.sampled.*;
 
 public class SoundboardStage extends Application {
+
+	public static final String LOG_FORMAT = "[%1$td %1$tb, %1$tY / %1$tl:%1$tM:%1$tS %1$Tp] {%2$s} [%4$s] %5$s%6$s%n";
 
 	/**
 	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
@@ -84,6 +88,15 @@ public class SoundboardStage extends Application {
 	private LevelsController levelsController;
 
 	public static void main(String[] args) {
+
+		// sets all logs format as defined
+		System.setProperty("java.util.logging.SimpleFormatter.format", LOG_FORMAT);
+
+		// setting the jnativehook logger to only log what's important
+		Logger nativeLogger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
+		nativeLogger.setLevel(Level.WARNING);
+		nativeLogger.setUseParentHandlers(false);
+
 		Application.launch(SoundboardStage.class, args);
 	}
 
@@ -91,10 +104,11 @@ public class SoundboardStage extends Application {
 	public void init() throws Exception {
 		super.init();
 		startNativeKey();
+
 		// TODO look into calling getParameters() here
 
 		model = new SoundboardModel(2);
-		logger = Logger.getLogger(SoundboardStage.class.getName());
+		logger = Logger.getLogger(this.getClass().getName());
 		FXMLLoader loader;
 
 		// load fxml files and controllers, pass to fields
@@ -181,7 +195,6 @@ public class SoundboardStage extends Application {
 	public static void startNativeKey() throws NativeHookException {
 		if (!GlobalScreen.isNativeHookRegistered()) {
 			GlobalScreen.registerNativeHook();
-			Logger.getLogger(GlobalScreen.class.getName()).setLevel(Level.OFF);
 		} else {
 			throw new NativeHookException("Native hook already started!");
 		}

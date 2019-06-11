@@ -3,7 +3,9 @@ package gui;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Slider;
+import javafx.stage.Stage;
 
 public class LevelsController extends GuiController {
 
@@ -30,12 +32,17 @@ public class LevelsController extends GuiController {
     }
 
     @Override
-    public void start() {
+    void preload(SoundboardStage parent, Stage stage, Scene scene) {
+        super.preload(parent, stage, scene);
+    }
 
+    @Override
+    public void start() {
+        // TODO grab gain from model
     }
 
     @Override
     public void stop() {
-
+        // TODO shut down listeners
     }
 }

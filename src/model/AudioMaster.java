@@ -4,10 +4,7 @@ import sun.audio.AudioDevice;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -38,7 +35,7 @@ public class AudioMaster {
 
 	private Mixer[] outputs;
 
-	private List<SoundPlayer> active;
+	private Map<SoundPlayer, Thread> active;
 
 	private Logger logger;
 
@@ -55,8 +52,8 @@ public class AudioMaster {
 		if (mixers.length < count) mixers = Arrays.copyOf(mixers, count);
 
 		this.outputs = new Mixer[count];
-		active = new ArrayList<SoundPlayer>();
-		logger = Logger.getLogger(AudioMaster.class.getName());
+		active = new HashMap<SoundPlayer, Thread>();
+		logger = Logger.getLogger(this.getClass().getName());
 
 		// Copies all available mixers.
 		for (int i = 0; i < count; i++) {
@@ -81,19 +78,18 @@ public class AudioMaster {
 
 		// Get each requested speaker and gain from outputs, as defined by the numbers in indices.
 		SourceDataLine[] speakers = new SourceDataLine[indices.length];
-		float[] levels = new float[indices.length];
-		for (int i = 0; i < speakers.length; i++) {
+		for (int i = 0; i < indices.length; i++) {
 			int index = indices[i];
-			Mixer output = outputs[index];
-			Line.Info[] sourceLines = output.getSourceLineInfo();
-			// For the meanwhile grab the first, it should be a sourcedataline.
-			speakers[i] = (SourceDataLine) output.getLine(sourceLines[0]);
+			Mixer speaker = outputs[index];
+			speakers[i] = getSpeakerLine(speaker);
 		}
 
+		logger.log(Level.INFO, "Dispatching thread to play: " + sound.getName());
+
 		SoundPlayer player = new SoundPlayer(this, sound, speakers);
-		Thread runner = new Thread(player);
+		Thread runner = new Thread(audioGroup, player, sound.getName());
 		runner.start();
-		active.add(player);
+		active.put(player, runner);
 	}
 
 	// --- Output methods --- ///
@@ -127,14 +123,14 @@ public class AudioMaster {
 	// --- Player methods --- //
 
 	public boolean removePlayer(SoundPlayer player) {
-		return active.remove(player);
+		return Objects.nonNull(active.remove(player));
 	}
 
 	// --- Global Audio Controls --- //
 
 	public void stopAll() {
 		logger.log(Level.INFO, "Stopping all playing sounds");
-		for (SoundPlayer player : active) {
+		for (SoundPlayer player : active.keySet()) {
 			player.running.set(false); // TODO: shouldn't have concurrency errors, needs verification
 			active.remove(player); // TODO: streamline
 		}
