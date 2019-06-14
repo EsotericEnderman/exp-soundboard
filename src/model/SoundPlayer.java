@@ -17,7 +17,8 @@ public class SoundPlayer implements Runnable {
     private AudioInputStream clip;
     private AudioFormat clipFormat;
 
-    public AtomicBoolean running;
+    public final AtomicBoolean running;
+    public final AtomicBoolean paused;
 
     public SoundPlayer(AudioMaster master, File sound, SourceDataLine... outputs)
             throws UnsupportedAudioFileException, IOException, LineUnavailableException {
@@ -26,14 +27,16 @@ public class SoundPlayer implements Runnable {
         this.outputs = outputs;
         logger = Logger.getLogger(this.getClass().getName());
         running = new AtomicBoolean(true);
+        paused = new AtomicBoolean(true);
 
         // grab formats from file
         clip = AudioSystem.getAudioInputStream(sound);
         clipFormat = clip.getFormat();
 
         // in case the target clip is of a different format than is used for playing
-        if (clipFormat.equals(AudioMaster.standardFormat)) {
+        if (!clipFormat.matches(AudioMaster.standardFormat)) {
             clip = AudioSystem.getAudioInputStream(AudioMaster.standardFormat, clip);
+            clipFormat = clip.getFormat();
             logger.log(Level.INFO, "Target file: " + sound.getName() + " is using converted format");
         }
 
@@ -55,39 +58,55 @@ public class SoundPlayer implements Runnable {
 
         while (running.get()) { // TODO: update writing sound
 
-            // read a sample from the audio file
-            try {
-                bytesRead = clip.read(buffer, 0, AudioMaster.standardBufferSize);
-            } catch (IOException ioe) {
-                logger.log(Level.SEVERE, "Failed to read from file:" + sound.getName(), ioe);
-                running.set(false);
-                continue;
-            }
-
-            // if anything was read
-            if (bytesRead > 0) {
-
-                // write the sample to all outputs
-                for (SourceDataLine sdl : outputs) {
-                    bytesWritten = sdl.write(buffer, 0, AudioMaster.standardBufferSize);
+            if (paused.get()) {
+                synchronized (paused) {
+                    try {
+                        paused.wait();
+                    } catch (InterruptedException ie) {
+                        logger.log(Level.WARNING, "Failed to pause thread: ", ie);
+                        running.compareAndSet(true, false);
+                    }
                 }
             }
 
-            // once there is nothing left to write
-            if (bytesRead < AudioMaster.standardBufferSize) {
+            // read a sample from the audio file
+            try {
+                bytesRead = clip.read(buffer, 0, buffer.length);
+            } catch (IOException ioe) {
+                logger.log(Level.SEVERE, "Failed to read from file:" + sound.getName(), ioe);
+                running.compareAndSet(true, false);
+            }
+
+            // if anything was read
+            if (bytesRead >= 0) {
+
+                // write the sample to all outputs
+                for (SourceDataLine sdl : outputs) {
+                    bytesWritten = sdl.write(buffer, 0, bytesRead);
+
+                    if (bytesWritten < bytesRead) {
+                        logger.log(Level.WARNING, "Line closed before stream was finished!");
+                        running.compareAndSet(true, false);
+                        break;
+                    }
+                }
+            } else {
+                // once there is nothing left to write
                 logger.log(Level.INFO, "Reached end of stream");
-                running.set(false);
+                running.compareAndSet(true, false);
             }
         }
 
-        // close remaining streams
+        // close remaining stream
         try {
             clip.close();
         } catch (IOException ioe) {
             logger.log(Level.SEVERE, "Failed to close stream from file: " + sound.getName(), ioe);
         }
 
+        // clean buffer and release access to resource
         for (SourceDataLine sdl : outputs) {
+            sdl.drain();
             sdl.close();
         }
 

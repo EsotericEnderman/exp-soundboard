@@ -91,11 +91,12 @@ public class SoundboardStage extends Application {
 
 		// sets all logs format as defined
 		System.setProperty("java.util.logging.SimpleFormatter.format", LOG_FORMAT);
+		Logger global = Logger.getGlobal();
 
 		// setting the jnativehook logger to only log what's important
 		Logger nativeLogger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-		nativeLogger.setLevel(Level.WARNING);
-		nativeLogger.setUseParentHandlers(false);
+		nativeLogger.setLevel(Level.ALL);
+		//nativeLogger.setUseParentHandlers(false);
 
 		Application.launch(SoundboardStage.class, args);
 	}

@@ -12,8 +12,7 @@ import java.util.prefs.Preferences;
 
 public class SoundboardModel {
 
-    static Preferences userSettings = Preferences.userRoot().node("EXP-soundboard");
-    static Preferences globalSettings = Preferences.systemRoot().node("EXP-soundboard");
+    static Preferences userSettings = Preferences.userRoot().node("exp-soundboard");
 
     private AudioMaster audio;
     private ObservableList<Entry> entryList;

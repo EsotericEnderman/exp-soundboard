@@ -1,14 +1,11 @@
 package model;
 
-import sun.audio.AudioDevice;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,9 +31,8 @@ public class AudioMaster {
 	public final ThreadGroup audioGroup = new ThreadGroup("Audio");
 
 	private Mixer[] outputs;
-
-	private Map<SoundPlayer, Thread> active;
-
+	private ThreadPoolExecutor audioThreadManager;
+	private List<SoundPlayer> active;
 	private Logger logger;
 
 	public AudioMaster(int count) {
@@ -52,8 +48,16 @@ public class AudioMaster {
 		if (mixers.length < count) mixers = Arrays.copyOf(mixers, count);
 
 		this.outputs = new Mixer[count];
-		active = new HashMap<SoundPlayer, Thread>();
+		active = new ArrayList<SoundPlayer>();
 		logger = Logger.getLogger(this.getClass().getName());
+
+		// This constructor ensures all audio playing threads will be in the thread group accessible from this class.
+		audioThreadManager = (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				return new Thread(audioGroup, r);
+			}
+		});
 
 		// Copies all available mixers.
 		for (int i = 0; i < count; i++) {
@@ -63,20 +67,17 @@ public class AudioMaster {
 		logger.log(Level.INFO, "Initialized Audio backend with " + count + " outputs");
 	}
 
-	public void play(File sound, int... indices) throws LineUnavailableException, UnsupportedAudioFileException, IOException {
+	public void play(File sound, int... indices) throws LineUnavailableException, UnsupportedAudioFileException, IOException, IllegalArgumentException {
 
 		// precondition to save time
 		if (!sound.exists()) {
-			throw new IOException("File " + sound.getName() + " does not exist!");
+			throw new IllegalArgumentException("File " + sound.getName() + " does not exist!");
 		}
 		if (!sound.canRead()) {
-			throw new IOException("File " + sound.getName() + " cannot be read!");
+			throw new IllegalArgumentException("File " + sound.getName() + " cannot be read!");
 		}
 
-		AudioFileFormat fileFormat = AudioSystem.getAudioFileFormat(sound);
-		AudioFormat format = fileFormat.getFormat();
-
-		// Get each requested speaker and gain from outputs, as defined by the numbers in indices.
+		// Get each requested speaker by the array of indices
 		SourceDataLine[] speakers = new SourceDataLine[indices.length];
 		for (int i = 0; i < indices.length; i++) {
 			int index = indices[i];
@@ -86,10 +87,10 @@ public class AudioMaster {
 
 		logger.log(Level.INFO, "Dispatching thread to play: " + sound.getName());
 
+		// package audio player in its own thread
 		SoundPlayer player = new SoundPlayer(this, sound, speakers);
-		Thread runner = new Thread(audioGroup, player, sound.getName());
-		runner.start();
-		active.put(player, runner);
+		audioThreadManager.execute(player);
+		active.add(player);
 	}
 
 	// --- Output methods --- ///
@@ -122,17 +123,42 @@ public class AudioMaster {
 
 	// --- Player methods --- //
 
+	public boolean addPlayer(SoundPlayer player) {
+		return active.add(player);
+	}
+
 	public boolean removePlayer(SoundPlayer player) {
-		return Objects.nonNull(active.remove(player));
+		return active.remove(player);
 	}
 
 	// --- Global Audio Controls --- //
 
 	public void stopAll() {
 		logger.log(Level.INFO, "Stopping all playing sounds");
-		for (SoundPlayer player : active.keySet()) {
+		for (SoundPlayer player : active) {
 			player.running.set(false); // TODO: shouldn't have concurrency errors, needs verification
 			active.remove(player); // TODO: streamline
+		}
+	}
+
+	public void pauseAll() {
+		logger.log(Level.INFO, "Pausing all playing sounds");
+		for (SoundPlayer player : active) {
+			synchronized (player.paused) {
+				player.paused.compareAndSet(false, true);
+				logger.log(Level.INFO, "Paused thread: " + player);
+			}
+		}
+	}
+
+	public void resumeAll() {
+		logger.log(Level.INFO, "Unpausing all paused sounds");
+		for (SoundPlayer player : active) {
+			synchronized (player.paused) {
+				player.paused.compareAndSet(true, false);
+				player.paused.notify();
+				logger.log(Level.INFO, "Unpaused thead: " + player);
+			}
 		}
 	}
 
