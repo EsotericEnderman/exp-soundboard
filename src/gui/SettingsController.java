@@ -133,6 +133,20 @@ public class SettingsController extends GuiController {
 		// TODO open default browser of github page
 	}
 
+	// --- Interaction Methods --- //
+
+	private void listenStart(MouseEvent event, TextField feedback) {
+		if (event.isPrimaryButtonDown()) {
+			listener.listenOn(this, feedback);
+		} else if (event.isSecondaryButtonDown()) {
+			listener.stopListening();
+		}
+	}
+
+	public void setHotkey(NativeKeyEvent nativeEvent) {
+		workingHotkey = nativeEvent;
+	}
+
 	// --- General Methods --- //
 
 	@Override
@@ -146,24 +160,27 @@ public class SettingsController extends GuiController {
 		}
 	}
 
+	@Override
+	public void reset() {
+
+	}
+
+	private void init() {
+
+	}
+
+	@Override
 	public void start() {
 		// grab settings from in-code settings file, should be loaded in by SoundboardStage.java
 	}
 
+	@Override
 	public void stop() {
 		// if anything changed (or if settings holder noticed changes) send it to the settings
 	}
 
-	private void listenStart(MouseEvent event, TextField feedback) {
-		if (event.isPrimaryButtonDown()) {
-			listener.listenOn(this, feedback);
-		} else if (event.isSecondaryButtonDown()) {
-			listener.stopListening();
-		}
-	}
 
-	public void setHotkey(NativeKeyEvent nativeEvent) {
-		workingHotkey = nativeEvent;
-	}
+
+
 
 }

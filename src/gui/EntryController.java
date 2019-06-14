@@ -2,6 +2,7 @@ package gui;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
@@ -24,6 +25,9 @@ import model.EntryListener;
 import util.FileIO;
 
 public class EntryController extends GuiController {
+
+	private static final String defaultTextStyle = "-fx-control-inner-background: white;";
+	private static final String activeTextStyle = "-fx-control-inner-background: cyan;";
 
 	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
@@ -107,13 +111,13 @@ public class EntryController extends GuiController {
 	}
 
 	public void startListening() {
-		hotkeyField.setStyle("-fx-control-inner-background: cyan;");
+		hotkeyField.setStyle(activeTextStyle);
 		hotkeyField.setText(defaultPress);
 		listener.listenOn(this);
 	}
 
 	public void stopListening() {
-		hotkeyField.setStyle("-fx-control-inner-background: white;");
+		hotkeyField.setStyle(defaultTextStyle);
 		if (hotkeyField.getText() == defaultPress) {
 			hotkeyField.setText(emptyHotkey);
 		}
@@ -133,6 +137,7 @@ public class EntryController extends GuiController {
     @Override
     void preload(SoundboardStage parent, Stage stage, Scene scene) {
         super.preload(parent, stage, scene);
+		logger.log(Level.INFO, "Initializing entry controller");
 
         chooser = new FileChooser();
         chooser.setTitle("Choose Audio File");
@@ -141,21 +146,32 @@ public class EntryController extends GuiController {
         try {
             listener = new EntryListener();
         } catch (NativeHookException nhe) {
-            nhe.printStackTrace(); // TODO consider merging the error dialog method with printing an exception
-            parent.throwBlockingError(nhe.getMessage());
+            logger.log(Level.WARNING, "Failed to create entry assembler: " + nhe);
         }
-
-		logger.log(Level.INFO, "Entry GUI controller initialized");
     }
+
+	@Override
+	public void reset() {
+		logger.log(Level.INFO, "Resetting GUI elements");
+		init(defaultTextStyle, defaultSelect, emptyHotkey, null, null);
+	}
+
+	private void init(String hotkeyStyle, String selection, String hotkeyText, NativeKeyEvent key, File file) {
+		hotkeyField.setStyle(hotkeyStyle);
+		selectionText.setText(selection);
+		hotkeyField.setText(hotkeyText);
+		nativeEvent = key;
+		workFile = file;
+	}
 
 	public void start(Entry starter) {
 		if (starter != null) {
-			hotkeyField.setStyle("-fx-control-inner-background: white;");
-			selectionText.setText(starter.getFile().getAbsolutePath());
-			hotkeyField.setText(starter.getCombo().toString());
-			nativeEvent = starter.getCombo().getNative();
-			workFile = starter.getFile();
 			logger.log(Level.INFO, "Started editing entry" + starter.toString());
+			init(defaultTextStyle,
+					starter.getFile().getAbsolutePath(),
+					starter.getCombo().toString(),
+					starter.getCombo().getNative(),
+					starter.getFile());
 			stage.show();
 		} else {
 			start();
@@ -163,36 +179,18 @@ public class EntryController extends GuiController {
 	}
 
 	public void start() {
-		hotkeyField.setStyle("-fx-control-inner-background: white;");
-		selectionText.setText(defaultSelect);
-		hotkeyField.setText(emptyHotkey);
-		nativeEvent = null;
-		workFile = null;
 		logger.log(Level.INFO, "Starting new entry");
+		init(defaultTextStyle, defaultSelect, emptyHotkey, null, null);
 		stage.show();
-	}
-
-	@Deprecated
-	public void stop(Entry ender) {
-		if (ender != null) {
-			stopListening();
-			parent.getModel().getEntries().add(ender);
-			logger.log(Level.INFO, "Finished and returned entry to soundboard");
-			stage.close();
-		} else {
-            //parent.throwBlockingError("Model argument is null!");
-            logger.log(Level.WARNING, "Model argument is null!");
-		}
 	}
 
 	public void stop() {
 		if (workFile != null && nativeEvent != null) {
+			logger.log(Level.INFO, "Finished and adding new entry to soundboard");
 			stopListening();
 			parent.getModel().getEntries().add(new Entry(workFile, nativeEvent));
-			logger.log(Level.INFO, "Finished and added new entry to soundboard");
 			stage.close();
 		} else {
-		    //parent.throwBlockingError("Not all fields have been filled!");
 			logger.log(Level.WARNING, "Not all fields have been filled!");
 		}
 	}

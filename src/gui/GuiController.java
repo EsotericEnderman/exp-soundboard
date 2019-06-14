@@ -56,6 +56,8 @@ public abstract class GuiController {
         logger.addHandler(guiOutput);
     }
 
+    public abstract void reset();
+
     public abstract void start();
 
     public abstract void stop();
@@ -63,5 +65,6 @@ public abstract class GuiController {
     public void forceStop() {
         logger.log(Level.INFO, "Force stopping " + this.getClass().getName());
         stage.close();
+        stop();
     }
 }

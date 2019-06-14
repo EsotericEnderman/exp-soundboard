@@ -251,6 +251,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	}
 
 	public boolean playSelected() {
+		logger.log(Level.INFO, "Playing selected entry");
 		Entry selected = getSelectedEntry();
 		if (selected != null) {
 			return parent.playEntry(selected, (secondaryChecked() ? doubleIndices : singleIndices));
@@ -260,12 +261,13 @@ public class MenuController extends GuiController implements ListChangeListener<
 	}
 
 	public boolean removeSelected() {
+		logger.log(Level.INFO, "Removing selected entry");
 		Entry selected = getSelectedEntry();
 		if (selected != null) {
 			return parent.getModel().getEntries().remove(selected);
 		} else {
 			// TODO report attempt to remove null entry.
-			parent.throwBlockingError("Cannot remove no selection!");
+			logger.log(Level.WARNING, "Cannot remove no selection!");
 			return false;
 		}
 	}
@@ -279,16 +281,16 @@ public class MenuController extends GuiController implements ListChangeListener<
 		while (change.next()) {
 			if (change.wasPermutated()) {
 				for (int i = change.getFrom(); i < change.getTo(); ++i) {
-					// permutate
+					// permutate // TODO use this
 				}
 			} else if (change.wasUpdated()) {
-				// update item
+				// update item // TODO use this
 			} else {
 				for (Entry remitem : change.getRemoved()) {
-					//tableList.remove(remitem);
+					tableList.remove(remitem);
 				}
 				for (Entry additem: change.getAddedSubList()) {
-					//tableList.add(additem);
+					tableList.add(additem);
 				}
 			}
 		}
@@ -297,6 +299,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	@Override
 	void preload(SoundboardStage parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
+		logger.log(Level.INFO, "Initializing main menu controller");
 
 		// Set up each column in the table to pull the appropriate data from an Entry within
 		// the table's internal list.
@@ -361,10 +364,12 @@ public class MenuController extends GuiController implements ListChangeListener<
 			}
 		});
 
-		logger.log(Level.INFO, "Menu GUI controller initialized");
+
 	}
 
 	public void reset() {
+		logger.log(Level.INFO, "Resetting GUI elements");
+
 		audioList.clear();
 	    tableList.clear();
 
@@ -379,6 +384,10 @@ public class MenuController extends GuiController implements ListChangeListener<
 		injectorCheck.setSelected(false);
 		pttHoldCheck.setSelected(false);
     }
+
+	private void init() {
+
+	}
 
 	@Override
 	public void start() {

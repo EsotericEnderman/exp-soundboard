@@ -41,7 +41,7 @@ public class Entry {
 
 	@Override
 	public String toString() {
-		return combo.toString() + " = " + file.getAbsolutePath();
+		return combo.toString() + " = " + file.getName();
 	}
 
 	@Override

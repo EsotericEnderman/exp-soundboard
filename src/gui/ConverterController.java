@@ -2,7 +2,10 @@ package gui;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -58,6 +61,8 @@ public class ConverterController extends GuiController {
 	@FXML // fx:id="inputText"
 	private Label inputText; // Value injected by FXMLLoader
 
+	// --- GUI Methods --- //
+
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
 		assert inputSelectButton != null : "fx:id=\"inputSelectButton\" was not injected: check your FXML file 'converter_jfx.fxml'.";
@@ -73,7 +78,17 @@ public class ConverterController extends GuiController {
 
 	@FXML
 	void onConvertPressed(ActionEvent event) {
+		// TODO: implement audio format conversion
+	}
 
+	@FXML
+	void onMP3Pressed(ActionEvent event) {
+		wavCheck.setSelected(!mp3Check.isSelected());
+	}
+
+	@FXML
+	void onWAVPressed(ActionEvent event) {
+		mp3Check.setSelected(!wavCheck.isSelected());
 	}
 
 	@FXML
@@ -82,47 +97,15 @@ public class ConverterController extends GuiController {
 	}
 
 	@FXML
-	/**
-	 * Sets the value of the other check box to this box's opposite
-	 * Ensures that only a single box is checked.
-	 */
-	void onMP3Pressed(ActionEvent event) {
-		wavCheck.setSelected(!mp3Check.isSelected());
-	}
-
-	@FXML
 	void onOutputPressed(ActionEvent event) {
 		grabOutput();
 	}
 
-	@FXML
-	/**
-	 * Sets the value of the other check box to this box's opposite
-	 * Ensures that only a single box is checked.
-	 */
-	void onWAVPressed(ActionEvent event) {
-		mp3Check.setSelected(!wavCheck.isSelected());
-	}
-
-	@Override
-	void preload(SoundboardStage parent, Stage stage, Scene scene) {
-		super.preload(parent, stage, scene);
-
-		chooser = new FileChooser();
-		chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);
-	}
-
-	public void start() {
-		stage.show();
-	}
-
-	public void stop() {
-		stage.close();
-	}
+	// --- Interaction Methods --- //
 
 	private void grabOutput() {
 		chooser.setTitle("Choose Output File");
-		File selectedFile = chooser.showOpenDialog(stage);
+		File selectedFile = chooser.showSaveDialog(stage);
 		if (selectedFile != null) {
 			outputText.setText(selectedFile.getAbsolutePath());
 			outputFile = selectedFile;
@@ -136,6 +119,47 @@ public class ConverterController extends GuiController {
 			inputText.setText(selectedFile.getAbsolutePath());
 			inputFile = selectedFile;
 		}
+	}
+
+	// --- General Methods --- //
+
+	private String getProgress(int value) {
+		if (value < 0) return defaultProgress;
+		return value + "%";
+	}
+
+	@Override
+	void preload(SoundboardStage parent, Stage stage, Scene scene) {
+		super.preload(parent, stage, scene);
+		logger.log(Level.INFO, "Initializing converter controller");
+
+		chooser = new FileChooser();
+		chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);
+	}
+
+	@Override
+	public void reset() {
+		init(defaultSelect, defaultSelect, true, -1, defaultEncoding);
+	}
+
+	private void init(String input, String output, boolean format, int progress, String encoding) {
+		inputText.setText(input);
+		outputText.setText(output);
+		mp3Check.setSelected(format);
+		wavCheck.setSelected(!format);
+		encodingProgressText.setText(getProgress(progress));
+		encodingMessageText.setText(encoding);
+	}
+
+	@Override
+	public void start() {
+		reset();
+		stage.show();
+	}
+
+	@Override
+	public void stop() {
+		stage.close();
 	}
 
 }

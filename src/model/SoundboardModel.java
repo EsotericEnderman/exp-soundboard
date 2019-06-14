@@ -12,17 +12,16 @@ import java.util.prefs.Preferences;
 
 public class SoundboardModel {
 
-    static final String settingsLocation = "EXP-soundboard";
+    static Preferences userSettings = Preferences.userRoot().node("EXP-soundboard");
+    static Preferences globalSettings = Preferences.systemRoot().node("EXP-soundboard");
 
     private AudioMaster audio;
     private ObservableList<Entry> entryList;
-    private Preferences settings;
     private Logger logger;
 
     public SoundboardModel(int speakerCount) {
         audio = new AudioMaster(speakerCount);
         entryList = FXCollections.observableArrayList();
-        settings = Preferences.userRoot().node(settingsLocation);
         logger = Logger.getLogger(this.getClass().getName());
 
         logger.log(Level.INFO, "Initialized model with " + speakerCount + " outputs");
@@ -41,7 +40,21 @@ public class SoundboardModel {
     }
 
     public class SoundboardSettings {
-
+        // Stop all sounds hotkey
+        // modified playback speed hotkey
+        // modified playback speed multiplier
+        // modifier speed increase key
+        // modifier speed decrease key
+        // VoIP ptt key
+        // Overlap sound toggle hotkey
+        // Mixer.Info for primary and secondary speakers
+        // Mic Injector microphone and virtual cable
+        // check for update on launch toggle
+        // use mic injector toggle
+        // auto-hold ptt keys
+        // use second speaker toggle
+        // primary, secondary, mic injector gains
+        // converter output format
     }
 
 }
