@@ -14,5 +14,8 @@
     <orderEntry type="library" name="jave-1.0" level="application" />
     <orderEntry type="library" name="jnativehook-2.1.0" level="application" />
     <orderEntry type="library" name="miglayout" level="application" />
+    <orderEntry type="library" name="JLayer1.0" level="application" />
+    <orderEntry type="library" name="mp3spi1.9.5" level="application" />
+    <orderEntry type="library" name="tritonus_share" level="application" />
   </component>
 </module>

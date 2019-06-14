@@ -25,12 +25,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import sun.util.logging.LoggingSupport;
+import util.LogFormatter;
 
 import javax.sound.sampled.*;
 
 public class SoundboardStage extends Application {
-
-	public static final String LOG_FORMAT = "[%1$td %1$tb, %1$tY / %1$tl:%1$tM:%1$tS %1$Tp] {%2$s} [%4$s] %5$s%6$s%n";
 
 	/**
 	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
@@ -90,13 +89,18 @@ public class SoundboardStage extends Application {
 	public static void main(String[] args) {
 
 		// sets all logs format as defined
-		System.setProperty("java.util.logging.SimpleFormatter.format", LOG_FORMAT);
-		Logger global = Logger.getGlobal();
+		//System.setProperty("java.util.logging.SimpleFormatter.format", LOG_FORMAT);
+		//Logger projectLogger = Logger.getLogger();
+		//LogManager globalManager = LogManager.getLogManager();
+		Logger globalLogger = Logger.getLogger("");
+		for (Handler handler : globalLogger.getHandlers()) {
+			handler.setFormatter(new LogFormatter());
+		}
 
 		// setting the jnativehook logger to only log what's important
 		Logger nativeLogger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-		nativeLogger.setLevel(Level.ALL);
-		//nativeLogger.setUseParentHandlers(false);
+		nativeLogger.setLevel(Level.OFF);
+		nativeLogger.setUseParentHandlers(false);
 
 		Application.launch(SoundboardStage.class, args);
 	}
