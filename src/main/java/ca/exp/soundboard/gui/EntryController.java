@@ -83,6 +83,7 @@ public class EntryController extends GuiController {
 	@FXML
 	void onFieldPressed(KeyEvent event) {
 		logger.log(Level.INFO, event.getText() + " pressed");
+		stopListening();
 	}
 
 	@FXML
@@ -123,8 +124,10 @@ public class EntryController extends GuiController {
 	}
 
 	private void grabFile() {
+		logger.log(Level.INFO, "Picking sound file to bind");
 		File selectedFile = chooser.showOpenDialog(stage);
 		if (selectedFile != null) {
+			logger.log(Level.INFO, "Picked: \"" + selectedFile.getName() + "\"");
 			selectionText.setText(selectedFile.getAbsolutePath());
 			workFile = selectedFile;
 		}
@@ -183,9 +186,9 @@ public class EntryController extends GuiController {
 	}
 
 	public void stop() {
+		if (listener.isListening()) stopListening();
 		if (workFile != null && nativeEvent != null) {
 			logger.log(Level.INFO, "Finished and adding new entry to soundboard");
-			stopListening();
 			parent.getModel().getEntries().add(new Entry(workFile, nativeEvent));
 			stage.close();
 		} else {

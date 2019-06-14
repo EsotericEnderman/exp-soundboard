@@ -52,6 +52,8 @@ public class SoundboardStage extends Application {
 		return choices;
 	}
 
+	static Logger globalLogger = Logger.getLogger("");
+
 	private SoundboardModel model;
 	private Logger logger;
 
@@ -85,13 +87,25 @@ public class SoundboardStage extends Application {
 
 	public static void main(String[] args) {
 
-		// sets all logs format as defined
-		//System.setProperty("java.ca.exp.soundboard.util.logging.SimpleFormatter.format", LOG_FORMAT);
-		//Logger projectLogger = Logger.getLogger();
-		//LogManager globalManager = LogManager.getLogManager();
-		Logger globalLogger = Logger.getLogger("");
+		// sets all logs to format with extra parameters, global logger is expected to only have one handler
 		for (Handler handler : globalLogger.getHandlers()) {
 			handler.setFormatter(new LogFormatter());
+		}
+
+		// set all logs output to xml
+		try {
+			globalLogger.addHandler(new FileHandler("log.xml"));
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+
+		// set all logs output text to file
+		try {
+			FileHandler fHand = new FileHandler("log.txt");
+			fHand.setFormatter(new LogFormatter());
+			globalLogger.addHandler(fHand);
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
 		}
 
 		// setting the jnativehook logger to only log what's important
@@ -99,6 +113,7 @@ public class SoundboardStage extends Application {
 		nativeLogger.setLevel(Level.OFF);
 		nativeLogger.setUseParentHandlers(false);
 
+		// Open the soundboard
 		Application.launch(SoundboardStage.class, args);
 	}
 
@@ -113,37 +128,38 @@ public class SoundboardStage extends Application {
 		logger = Logger.getLogger(this.getClass().getName());
 		FXMLLoader loader;
 
+		logger.log(Level.INFO, "Loading GUI controllers");
+
 		// load fxml files and controllers, pass to fields
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("/mainmenu_jfx.fxml"));
+		loader.setLocation(getClass().getClassLoader().getResource("mainmenu_jfx.fxml"));
 		mainMenu = loader.<VBox>load();
 		menuController = loader.<MenuController>getController();
 
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("/settings_jfx.fxml"));
+		loader.setLocation(getClass().getClassLoader().getResource(("settings_jfx.fxml")));
 		settingsMenu = loader.<VBox>load();
 		settingsController = loader.<SettingsController>getController();
 
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("/entrymenu_jfx.fxml"));
+		loader.setLocation(getClass().getClassLoader().getResource(("entrymenu_jfx.fxml")));
 		entryMenu = loader.<VBox>load();
 		entryController = loader.<EntryController>getController();
 
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("/converter_jfx.fxml"));
+		loader.setLocation(getClass().getClassLoader().getResource(("converter_jfx.fxml")));
 		converterMenu = loader.<Pane>load();
 		converterController = loader.<ConverterController>getController();
 
 		loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("/levels_jfx.fxml"));
+		loader.setLocation(getClass().getClassLoader().getResource(("levels_jfx.fxml")));
 		levelMenu = loader.<Pane>load();
 		levelsController = loader.<LevelsController>getController();
-
-		logger.log(Level.INFO, "GUI Controllers loaded");
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		logger.log(Level.INFO, "Initializing GUI controllers");
 
 		// init JavaFX objects (can only be done in JavaFX thread), initialize with arguments
 		menuScene = new Scene(mainMenu);
@@ -180,8 +196,11 @@ public class SoundboardStage extends Application {
 		levelStage.initModality(Modality.WINDOW_MODAL);
 		levelsController.preload(this, levelStage, levelScene);
 
-		logger.log(Level.INFO, "GUI Controllers initialized");
 		menuController.start();
+	}
+
+	private void initController(GuiController controller) {
+
 	}
 
 	@Override
@@ -241,11 +260,10 @@ public class SoundboardStage extends Application {
 
 			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
 			master.play(target, indices);
-			logger.log(Level.INFO, "Played audio file: " + entry.getFile().getName());
+			logger.log(Level.INFO, "Played audio file: \"" + entry.getFile().getName() + "\"");
 			return true;
 		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException | NullPointerException e) {
 			logger.log(Level.WARNING, "Error playing audio file: " + entry.getFile().getName() , e);
-			throwBlockingError("Error playing audio file: " + e.getMessage());
 			return false;
 		}
 	}

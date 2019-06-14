@@ -147,26 +147,18 @@ public class MenuController extends GuiController implements ListChangeListener<
 	}
 
 	@FXML
-	void onEditPressed(ActionEvent event) { // TODO potentially change this to outside function
+	void onEditPressed(ActionEvent event) {
 		parent.entryController().start(getSelectedEntry());
 	}
 
 	@FXML
 	void onPlayPressed(ActionEvent event) {
-		if (playSelected()) {
-			// TODO handle play success
-		} else {
-			// TODO handling failing to play
-		}
+		playSelected();
 	}
 
 	@FXML
 	void onRemovePressed(ActionEvent event) {
-		if (removeSelected()) {
-			// TODO handle remove success
-		} else {
-            // TODO play error sound, user has no selected entry
-		}
+		removeSelected();
 	}
 
 	@FXML
@@ -250,6 +242,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 		if (selected != null) {
 			return parent.playEntry(selected, (secondaryChecked() ? doubleIndices : singleIndices));
 		} else {
+			logger.log(Level.WARNING, "Cannot play no selection!");
 			return false;
 		}
 	}
@@ -343,6 +336,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
 			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
+				logger.log(Level.INFO, "Selected " + newValue.getName() + " as primary speaker");
 				parent.getModel().getAudio().setOutput(primaryIndex, newValue);
 			}
 		});
@@ -354,6 +348,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
 			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
+				logger.log(Level.INFO, "Selected " + newValue.getName() + " as secondary speaker");
 				parent.getModel().getAudio().setOutput(secondaryIndex, newValue);
 			}
 		});

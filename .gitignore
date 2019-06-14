@@ -11,6 +11,11 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+target/
+log.txt
+log.txt.lck
+log.xml
+log.xml.lck
 
 # External tool builders
 .externalToolBuilders/

@@ -27,40 +27,36 @@ public class SoundPlayer implements Runnable {
         this.outputs = outputs;
         logger = Logger.getLogger(this.getClass().getName());
         running = new AtomicBoolean(true);
-        paused = new AtomicBoolean(true);
+        paused = new AtomicBoolean(false);
 
         // grab formats from file
         clip = AudioSystem.getAudioInputStream(sound);
         clipFormat = clip.getFormat();
 
         // in case the target clip is of a different format than is used for playing
-        if (!clipFormat.matches(AudioMaster.standardFormat)) {
-            clip = AudioSystem.getAudioInputStream(AudioMaster.standardFormat, clip);
-            clipFormat = clip.getFormat();
-            logger.log(Level.INFO, "Target file: " + sound.getName() + " is using converted format");
+        if (!clipFormat.matches(AudioMaster.decodeFormat)) {
+            clip = AudioSystem.getAudioInputStream(AudioMaster.decodeFormat, clip);
+            //clipFormat = clip.getFormat();
+            logger.log(Level.INFO, "Target file: \"" + sound.getName() + "\" is using converted format");
         }
 
-        // ready outputs for data
-        for (SourceDataLine sdl : outputs) {
-            sdl.open(clipFormat);
-            sdl.start();
-        }
-
-        logger.log(Level.INFO, "Initialized sound player on: " + sound.getName());
+        logger.log(Level.INFO, "Initialized sound player on: \"" + sound.getName() + "\"");
     }
 
     @Override
     public void run() {
         // setup buffer for containing samples of audio to be played
-        byte[] buffer = new byte[AudioMaster.standardBufferSize];
+        byte[] buffer = new byte[outputs[0].getBufferSize()];
         int bytesRead = 0;
         int bytesWritten = 0;
+        int index = 0;
 
         while (running.get()) { // TODO: update writing sound
 
             if (paused.get()) {
                 synchronized (paused) {
                     try {
+                        logger.log(Level.WARNING, this + " pausing");
                         paused.wait();
                     } catch (InterruptedException ie) {
                         logger.log(Level.WARNING, "Failed to pause thread: ", ie);
@@ -81,8 +77,8 @@ public class SoundPlayer implements Runnable {
             if (bytesRead >= 0) {
 
                 // write the sample to all outputs
-                for (SourceDataLine sdl : outputs) {
-                    bytesWritten = sdl.write(buffer, 0, bytesRead);
+                for (index = 0; index < outputs.length; index++) {
+                    bytesWritten = outputs[index].write(buffer, 0, bytesRead);
 
                     if (bytesWritten < bytesRead) {
                         logger.log(Level.WARNING, "Line closed before stream was finished!");
@@ -90,6 +86,16 @@ public class SoundPlayer implements Runnable {
                         break;
                     }
                 }
+
+                /*for (SourceDataLine sdl : outputs) {
+                    bytesWritten = sdl.write(buffer, 0, bytesRead);
+
+                    if (bytesWritten < bytesRead) {
+                        logger.log(Level.WARNING, "Line closed before stream was finished!");
+                        running.compareAndSet(true, false);
+                        break;
+                    }
+                }*/
             } else {
                 // once there is nothing left to write
                 logger.log(Level.INFO, "Reached end of stream");
@@ -106,7 +112,7 @@ public class SoundPlayer implements Runnable {
 
         // clean buffer and release access to resource
         for (SourceDataLine sdl : outputs) {
-            sdl.drain();
+            //sdl.drain();
             sdl.close();
         }
 
@@ -115,4 +121,8 @@ public class SoundPlayer implements Runnable {
         logger.log(Level.INFO, "Instance finished: " + sound.getName());
     }
 
+    @Override
+    public String toString() {
+        return Thread.currentThread().getName() + "/\"" + sound.getName() + "\"";
+    }
 }

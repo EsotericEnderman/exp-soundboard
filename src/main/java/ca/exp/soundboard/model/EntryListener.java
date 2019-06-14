@@ -6,6 +6,7 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +34,10 @@ public class EntryListener implements NativeKeyListener {
 		logger.log(Level.INFO, "Stopping hotkey listening");
 		GlobalScreen.removeNativeKeyListener(this);
 		this.display = null;
+	}
+
+	public boolean isListening() {
+		return Objects.nonNull(display);
 	}
 
 	@Override
