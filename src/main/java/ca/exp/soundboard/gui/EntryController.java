@@ -82,7 +82,7 @@ public class EntryController extends GuiController {
 
 	@FXML
 	void onFieldPressed(KeyEvent event) {
-		logger.log(Level.INFO, event.getText() + " pressed");
+		logger.log(Level.INFO, "\"" + event.getText() + "\" pressed");
 		stopListening();
 	}
 

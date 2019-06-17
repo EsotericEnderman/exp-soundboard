@@ -13,18 +13,19 @@ public class SoundPlayer implements Runnable {
     private Logger logger;
 
     private File sound;
-    private SourceDataLine[] outputs;
+    private SourceDataLine output;
     private AudioInputStream clip;
     private AudioFormat clipFormat;
+    private String thread;
 
     public final AtomicBoolean running;
     public final AtomicBoolean paused;
 
-    public SoundPlayer(AudioMaster master, File sound, SourceDataLine... outputs)
+    public SoundPlayer(AudioMaster master, File sound, SourceDataLine output)
             throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         this.master = master;
         this.sound = sound;
-        this.outputs = outputs;
+        this.output = output;
         logger = Logger.getLogger(this.getClass().getName());
         running = new AtomicBoolean(true);
         paused = new AtomicBoolean(false);
@@ -45,8 +46,10 @@ public class SoundPlayer implements Runnable {
 
     @Override
     public void run() {
+        thread = Thread.currentThread().getName();
+
         // setup buffer for containing samples of audio to be played
-        byte[] buffer = new byte[outputs[0].getBufferSize()];
+        byte[] buffer = new byte[output.getBufferSize()];
         int bytesRead = 0;
         int bytesWritten = 0;
         int index = 0;
@@ -69,33 +72,20 @@ public class SoundPlayer implements Runnable {
             try {
                 bytesRead = clip.read(buffer, 0, buffer.length);
             } catch (IOException ioe) {
-                logger.log(Level.SEVERE, "Failed to read from file:" + sound.getName(), ioe);
+                logger.log(Level.SEVERE, "Failed to read from file: \"" + sound.getName() + "\"", ioe);
                 running.compareAndSet(true, false);
             }
 
             // if anything was read
             if (bytesRead >= 0) {
+                // write the sample to the output
+                bytesWritten = output.write(buffer, 0, bytesRead);
 
-                // write the sample to all outputs
-                for (index = 0; index < outputs.length; index++) {
-                    bytesWritten = outputs[index].write(buffer, 0, bytesRead);
-
-                    if (bytesWritten < bytesRead) {
-                        logger.log(Level.WARNING, "Line closed before stream was finished!");
-                        running.compareAndSet(true, false);
-                        break;
-                    }
+                if (bytesWritten < bytesRead) {
+                    logger.log(Level.WARNING, "Line closed before stream was finished!");
+                    running.compareAndSet(true, false);
+                    break;
                 }
-
-                /*for (SourceDataLine sdl : outputs) {
-                    bytesWritten = sdl.write(buffer, 0, bytesRead);
-
-                    if (bytesWritten < bytesRead) {
-                        logger.log(Level.WARNING, "Line closed before stream was finished!");
-                        running.compareAndSet(true, false);
-                        break;
-                    }
-                }*/
             } else {
                 // once there is nothing left to write
                 logger.log(Level.INFO, "Reached end of stream");
@@ -103,26 +93,22 @@ public class SoundPlayer implements Runnable {
             }
         }
 
-        // close remaining stream
+        // close remaining stream, clean buffer and release access to resource
         try {
             clip.close();
+            output.drain();
+            output.close();
         } catch (IOException ioe) {
-            logger.log(Level.SEVERE, "Failed to close stream from file: " + sound.getName(), ioe);
-        }
-
-        // clean buffer and release access to resource
-        for (SourceDataLine sdl : outputs) {
-            //sdl.drain();
-            sdl.close();
+            logger.log(Level.SEVERE, "Failed to close stream from file: \"" + sound.getName() + "\"", ioe);
         }
 
         // remove self from active list
         master.removePlayer(this);
-        logger.log(Level.INFO, "Instance finished: " + sound.getName());
+        logger.log(Level.INFO, "Instance finished: \"" + sound.getName() + "\"");
     }
 
     @Override
     public String toString() {
-        return Thread.currentThread().getName() + "/\"" + sound.getName() + "\"";
+        return thread + "/" + sound.getName();
     }
 }

@@ -209,7 +209,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	@FXML
 	void onLevelsMenuPressed(ActionEvent event) {
 		// TODO open levels menu, start live updating values to audio master
-		//parent.levelsController().start();
+		parent.levelsController().start();
 	}
 
 	@FXML

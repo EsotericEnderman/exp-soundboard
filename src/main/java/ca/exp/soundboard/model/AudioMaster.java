@@ -88,20 +88,27 @@ public class AudioMaster {
 
 		// Get each requested speaker by the array of indices
 		SourceDataLine[] speakers = new SourceDataLine[indices.length];
+		SoundPlayer[] players = new SoundPlayer[indices.length];
 		for (int i = 0; i < indices.length; i++) {
+			// retrieve requested output(s)
 			int index = indices[i];
 			Mixer speaker = outputs[index];
+
+			// grab proper SourceDataLine
 			speakers[i] = getSpeakerLine(speaker);
 			speakers[i].open(decodeFormat, standardBufferSize);
 			speakers[i].start();
+
+			// make a thread for each output
+			players[i] = new SoundPlayer(this, sound, speakers[i]);
+			active.add(players[i]);
+			logger.log(Level.INFO, "Dispatching thread to play: \"" + sound.getName() + "\" on " + speaker.getMixerInfo().getName());
 		}
 
-		// package audio player in its own thread
-		SoundPlayer player = new SoundPlayer(this, sound, speakers);
-
-		logger.log(Level.INFO, "Dispatching thread to play: \"" + sound.getName() + "\"");
-		audioThreadManager.execute(player);
-		active.add(player);
+		// send threads to player
+		for (SoundPlayer player : players) {
+			audioThreadManager.execute(player);
+		}
 	}
 
 	// --- Output methods --- ///
