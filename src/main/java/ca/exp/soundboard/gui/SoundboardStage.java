@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
 
+import ca.exp.soundboard.util.ImmediateStreamHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
@@ -87,33 +88,77 @@ public class SoundboardStage extends Application {
 
 	public static void main(String[] args) {
 
-		// sets all logs to format with extra parameters, global logger is expected to only have one handler
+		// remove default handler(s) from global logger, partially disables console output
 		for (Handler handler : globalLogger.getHandlers()) {
-			handler.setFormatter(new LogFormatter());
+			//handler.setLevel(Level.OFF);
+			globalLogger.removeHandler(handler);
 		}
 
-		// set all logs output to xml
-		try {
-			globalLogger.addHandler(new FileHandler("log.xml"));
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
+		/// The following handlers split logs by Level, anything below warning goes to System.out, the rest to System.err
 
-		// set all logs output text to file
+		// logging to System.out
+		ImmediateStreamHandler outHand = new ImmediateStreamHandler(System.out, new LogFormatter());
+		outHand.setFilter(new Filter() {
+			@Override
+			public boolean isLoggable(LogRecord record) {
+				return record.getLevel().intValue() < Level.WARNING.intValue();
+			}
+		});
+		globalLogger.addHandler(outHand);
+
+		// logging to System.err
+		ImmediateStreamHandler errHand = new ImmediateStreamHandler(System.err, new LogFormatter());
+		errHand.setFilter(new Filter() {
+			@Override
+			public boolean isLoggable(LogRecord record) {
+				return !(record.getLevel().intValue() < Level.WARNING.intValue());
+			}
+		});
+		globalLogger.addHandler(errHand);
+
+		// logging System.out to file
 		try {
-			FileHandler fHand = new FileHandler("log.txt");
+			// logging to file
+			FileHandler fHand = new FileHandler("stdout.txt");
 			fHand.setFormatter(new LogFormatter());
+			fHand.setFilter(new Filter() {
+				@Override
+				public boolean isLoggable(LogRecord record) {
+					return record.getLevel().intValue() < Level.WARNING.intValue();
+				}
+			});
 			globalLogger.addHandler(fHand);
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			globalLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
+		}
+
+		// logging System.err to file
+		try {
+			// logging to file
+			FileHandler fHand = new FileHandler("stderr.txt");
+			fHand.setFormatter(new LogFormatter());
+			fHand.setLevel(Level.WARNING);
+			globalLogger.addHandler(fHand);
+		} catch (IOException ioe) {
+			globalLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
 		}
 
 		// setting the jnativehook logger to only log what's important
 		Logger nativeLogger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
-		nativeLogger.setLevel(Level.OFF);
-		nativeLogger.setUseParentHandlers(false);
+		nativeLogger.setLevel(Level.WARNING);
 
-		// Open the soundboard
+		// Adding a filter to chop off the extra line ending off of jnativehook logs
+		nativeLogger.setFilter(new Filter() {
+			@Override
+			public boolean isLoggable(LogRecord record) {
+				String in = record.getMessage();
+				String out = in.substring(0, in.length() - 1);
+				record.setMessage(out);
+				return true;
+			}
+		});
+
+		// Launch the GUI
 		Application.launch(SoundboardStage.class, args);
 	}
 

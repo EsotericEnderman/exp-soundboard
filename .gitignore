@@ -12,10 +12,10 @@ local.properties
 .loadpath
 .recommenders
 target/
-log.txt
-log.txt.lck
-log.xml
-log.xml.lck
+stdout.txt
+stdout.txt.lck
+stderr.txt
+stderr.txt.lck
 
 # External tool builders
 .externalToolBuilders/

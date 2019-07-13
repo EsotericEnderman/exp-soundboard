@@ -97,18 +97,21 @@ public class LevelsController extends GuiController {
 
     @Override
     public void start() {
+        logger.log(Level.INFO, "Starting levels controller");
         reset();
         AudioMaster audio = parent.getModel().getAudio();
         try {
             init(audio.getGain(0), audio.getGain(1), 0f);
-            stage.show();
         } catch (LineUnavailableException lue) {
             logger.log(Level.WARNING, "Failed to fetch speaker gain from audio controller: ", lue);
+        } finally {
+            stage.show();
         }
     }
 
     @Override
     public void stop() {
-        stage.show();
+        logger.log(Level.INFO, "Closing levels controller");
+        stage.close();
     }
 }

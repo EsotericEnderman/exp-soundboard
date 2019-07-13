@@ -13,10 +13,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import ca.exp.soundboard.model.Entry;
 
@@ -208,14 +210,12 @@ public class MenuController extends GuiController implements ListChangeListener<
 
 	@FXML
 	void onLevelsMenuPressed(ActionEvent event) {
-		// TODO open levels menu, start live updating values to audio master
 		parent.levelsController().start();
 	}
 
 	@FXML
 	void onConverterMenuPressed(ActionEvent event) {
-		// TODO open converter menu
-		//parent.converterController().start();
+		parent.converterController().start();
 	}
 
 	// --- Interaction Methods --- //
@@ -257,6 +257,25 @@ public class MenuController extends GuiController implements ListChangeListener<
 			logger.log(Level.WARNING, "Cannot remove no selection!");
 			return false;
 		}
+	}
+
+	public void closeMenu() {
+		logger.log(Level.INFO, "Main window closed, stopping");
+		try {
+			parent.stop();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Failed to close the application!", e);
+		}
+	}
+
+	public void setPrimarySpeaker(Mixer.Info request) {
+		logger.log(Level.INFO, "Selected " + request.getName() + " as primary speaker");
+		parent.getModel().getAudio().setOutput(primaryIndex, request);
+	}
+
+	public void setSecondarySpeaker(Mixer.Info request) {
+		logger.log(Level.INFO, "Selected " + request.getName() + " as secondary speaker");
+		parent.getModel().getAudio().setOutput(secondaryIndex, request);
 	}
 
 	// --- General Methods --- //
@@ -336,8 +355,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
 			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
-				logger.log(Level.INFO, "Selected " + newValue.getName() + " as primary speaker");
-				parent.getModel().getAudio().setOutput(primaryIndex, newValue);
+				setPrimarySpeaker(newValue);
 			}
 		});
 
@@ -348,12 +366,17 @@ public class MenuController extends GuiController implements ListChangeListener<
 		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
 			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
-				logger.log(Level.INFO, "Selected " + newValue.getName() + " as secondary speaker");
-				parent.getModel().getAudio().setOutput(secondaryIndex, newValue);
+				setSecondarySpeaker(newValue);
 			}
 		});
 
-
+		// Closes the entire program when this window is closed
+		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				closeMenu();
+			}
+		});
 	}
 
 	public void reset() {

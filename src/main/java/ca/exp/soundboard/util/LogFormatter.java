@@ -9,8 +9,8 @@ import java.util.logging.LogRecord;
 public class LogFormatter extends Formatter {
 
     // format string for printing the log record
-    private static final String format = "[%1$td %1$tb, %1$tY / %1$tl:%1$tM:%1$tS %1$Tp] [%7$s] {%2$s} [%4$s] %5$s%6$s%n";
-    private final Date dat = new Date();
+    protected static final String format = "[%1$td %1$tb, %1$tY / %1$tl:%1$tM:%1$tS %1$Tp] [%7$s] {%2$s} [%4$s] %5$s%6$s%n";
+    protected final Date dat = new Date();
 
     @Override
     public synchronized String format(LogRecord record) {

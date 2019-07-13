@@ -3,24 +3,38 @@ package ca.exp.soundboard.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.*;
+import java.util.InvalidPropertiesFormatException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.InvalidPreferencesFormatException;
 import java.util.prefs.Preferences;
 
 public class SoundboardModel {
 
-    static Preferences userSettings = Preferences.userRoot().node("exp-soundboard");
+    public static void saveToFile(SoundboardModel model, File target) throws IOException, BackingStoreException {
+        FileOutputStream out = new FileOutputStream(target);
+        model.modelPreferences.exportNode(out);
+    }
+
+    public static void loadFromFile(SoundboardModel model, File source) throws IOException, InvalidPreferencesFormatException {
+        FileInputStream in = new FileInputStream(source);
+        Preferences.importPreferences(in);
+    }
 
     private AudioMaster audio;
     private ObservableList<Entry> entryList;
+    private Preferences modelPreferences;
     private Logger logger;
 
     public SoundboardModel(int speakerCount) {
         audio = new AudioMaster(speakerCount);
         entryList = FXCollections.observableArrayList();
         logger = Logger.getLogger(this.getClass().getName());
+        modelPreferences = Preferences.userRoot().node(this.getClass().getCanonicalName());
 
-        logger.log(Level.INFO, "Initialized ca.exp.soundboard.model with " + speakerCount + " outputs");
+        logger.log(Level.INFO, "Initialized " + this.getClass().getName() + " with " + speakerCount + " outputs");
     }
 
     public AudioMaster getAudio() {
@@ -51,6 +65,14 @@ public class SoundboardModel {
         // use second speaker toggle
         // primary, secondary, mic injector gains
         // converter output format
+    }
+
+    public void saveToFile(File target) {
+
+    }
+
+    public void loadFromFile(File source) {
+
     }
 
 }

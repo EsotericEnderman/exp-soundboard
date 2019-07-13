@@ -22,11 +22,19 @@ public class AudioMaster {
 
 
 	public static SourceDataLine getSpeakerLine(Mixer mixer) throws LineUnavailableException {
-		return (SourceDataLine) mixer.getLine(standardDataLine);  // TODO implement a search to grab the right line
+		if (mixer.isLineSupported(standardDataLine)) {
+			return (SourceDataLine) mixer.getLine(standardDataLine);
+		} else {
+			return null;
+		}
 	}
 
 	public static FloatControl getMasterGain(SourceDataLine source) {
-		return (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
+		if (source.isOpen()) {
+			return (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
+		} else {
+			return null;
+		}
 	}
 
 
@@ -37,6 +45,8 @@ public class AudioMaster {
 	private ThreadPoolExecutor audioThreadManager;
 	private List<SoundPlayer> active;
 	private Logger logger;
+
+	private float[] gains;
 
 	public AudioMaster(int count) {
 		this(count, new Mixer[0]);
@@ -53,6 +63,7 @@ public class AudioMaster {
 		this.outputs = new Mixer[count];
 		active = new CopyOnWriteArrayList<SoundPlayer>();
 		logger = Logger.getLogger(this.getClass().getName());
+		gains = new float[count];
 
 		// This constructor ensures all audio playing threads will be in the thread group accessible from this class.
 		audioThreadManager = (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactory() {
@@ -71,26 +82,29 @@ public class AudioMaster {
 			outputs[i] = mixers[i];
 		}
 
-		logger.log(Level.INFO, "Initialized Audio backend with " + count + " outputs");
+		// reset gains
+		for (int i = 0; i < count; i++) {
+			gains[i] = 0f;
+		}
+
+		logger.log(Level.INFO, "Initialized " + this.getClass().getName() + " with " + count + " outputs");
 	}
 
 	public void play(File sound, int... indices) throws LineUnavailableException, UnsupportedAudioFileException, IOException, IllegalArgumentException {
 
 		// precondition to save time
 		if (!sound.exists()) {
-			throw new IllegalArgumentException("File " + sound.getName() + " does not exist!");
+			throw new IllegalArgumentException("File \"" + sound.getName() + "\" does not exist!");
 		}
 		if (!sound.canRead()) {
-			throw new IllegalArgumentException("File " + sound.getName() + " cannot be read!");
+			throw new IllegalArgumentException("File \"" + sound.getName() + "\" cannot be read!");
 		}
-
-		AudioFormat format = decodeFormat;
 
 		// Get each requested speaker by the array of indices
 		SourceDataLine[] speakers = new SourceDataLine[indices.length];
 		SoundPlayer[] players = new SoundPlayer[indices.length];
 		for (int i = 0; i < indices.length; i++) {
-			// retrieve requested output(s)
+			// retrieve requested output Mixer(s)
 			int index = indices[i];
 			Mixer speaker = outputs[index];
 
@@ -98,6 +112,11 @@ public class AudioMaster {
 			speakers[i] = getSpeakerLine(speaker);
 			speakers[i].open(decodeFormat, standardBufferSize);
 			speakers[i].start();
+
+			// set gain for SourceDataLine
+			FloatControl gainControl = getMasterGain(speakers[i]);
+			float speakerGain = gains[index];
+			gainControl.setValue(speakerGain);
 
 			// make a thread for each output
 			players[i] = new SoundPlayer(this, sound, speakers[i]);
@@ -121,7 +140,7 @@ public class AudioMaster {
 		return outputs;
 	}
 
-	public void setOutput(int index, Mixer.Info outputInfo) {
+	public void setOutput(int index, Mixer.Info outputInfo) throws IllegalArgumentException, NullPointerException {
 		outputs[index] = AudioSystem.getMixer(outputInfo);
 	}
 	
@@ -131,11 +150,13 @@ public class AudioMaster {
 
 	// --- Gain methods --- //
 
-	public float getGain(int index) throws LineUnavailableException {
+	public float getGain(int index) throws LineUnavailableException, IllegalArgumentException, NullPointerException {
+		if (index < 0 || index > outputs.length) throw new IllegalArgumentException("Index is invalid");
 		return getMasterGain(getSpeakerLine(outputs[index])).getValue();
 	}
 
-	public void setGain(int index, float gain) throws LineUnavailableException {
+	public void setGain(int index, float gain) throws LineUnavailableException, IllegalArgumentException, NullPointerException {
+		if (index < 0 || index > outputs.length) throw new IllegalArgumentException("Index is invalid");
 		getMasterGain(getSpeakerLine(outputs[index])).setValue(gain);
 	}
 
@@ -153,18 +174,21 @@ public class AudioMaster {
 
 	public void stopAll() {
 		logger.log(Level.INFO, "Stopping all playing sounds");
-		for (SoundPlayer player : active) {
-			player.running.set(false); // TODO: shouldn't have concurrency errors, needs verification
-			active.remove(player); // TODO: streamline
-			logger.log(Level.INFO, "Removed thread: " + player);
+		SoundPlayer player;
+		for (int i = 0; i < active.size(); i++) {
+			active.get(i).running.compareAndSet(true, false);// TODO: shouldn't have concurrency errors, needs verification
+			player = active.remove(i);
+			logger.log(Level.INFO, "Removed thread: \"" + player + "\"");
 		}
 	}
 
 	public void pauseAll() {
 		logger.log(Level.INFO, "Pausing all playing sounds");
-		for (SoundPlayer player : active) {
+		SoundPlayer player;
+		for (int i = 0; i < active.size(); i++) {
+			player = active.get(i);
 			player.paused.compareAndSet(false, true);
-			logger.log(Level.INFO, "Paused thread: " + player);
+			logger.log(Level.INFO, "Paused thread: \"" + player + "\"");
 		}
 	}
 
@@ -173,7 +197,7 @@ public class AudioMaster {
 		for (SoundPlayer player : active) {
 			player.paused.compareAndSet(true, false);
 			player.paused.notify();
-			logger.log(Level.INFO, "Unpaused thead: " + player);
+			logger.log(Level.INFO, "Unpaused thead: \"" + player + "\"");
 		}
 	}
 
