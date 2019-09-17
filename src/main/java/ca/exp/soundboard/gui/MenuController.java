@@ -293,9 +293,11 @@ public class MenuController extends GuiController implements ListChangeListener<
 				// update item // TODO use this
 			} else {
 				for (Entry remitem : change.getRemoved()) {
+					logger.log(Level.INFO, "Reflecting entry list reduction in GUI");
 					tableList.remove(remitem);
 				}
 				for (Entry additem: change.getAddedSubList()) {
+					logger.log(Level.INFO, "Reflecting entry list expansion in GUI");
 					tableList.add(additem);
 				}
 			}
@@ -370,7 +372,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 			}
 		});
 
-		// Closes the entire program when this window is closed
+		// overwrites default behaviour from GuiController, closes the entire program when this window is closed
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent event) {
@@ -385,8 +387,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 		audioList.clear();
 	    tableList.clear();
 
-	    audioList.addAll(SoundboardStage.getValidMixers());
-
 		// The zero-th element is preselected to prevent the user from starting with a null audio device.
 		primarySpeakerCombo.getSelectionModel().select(0);
 		secondarySpeakerCombo.getSelectionModel().select(0);
@@ -397,18 +397,28 @@ public class MenuController extends GuiController implements ListChangeListener<
 		pttHoldCheck.setSelected(false);
     }
 
-	private void init() {
+	private void init(Entry[] entries, int primaryIndex, int secondaryIndex, boolean secondaryCheck, boolean injector, boolean pttHold) {
+		audioList.addAll(SoundboardStage.getValidMixers());
+		tableList.addAll(entries);
 
+		primarySpeakerCombo.getSelectionModel().select(primaryIndex);
+		secondarySpeakerCombo.getSelectionModel().select(secondaryIndex);
+
+		secondarySpeakerCheck.setSelected(secondaryCheck);
+		injectorCheck.setSelected(injector);
+		pttHoldCheck.setSelected(pttHold);
 	}
 
 	@Override
 	public void start() {
 		reset();
 		stage.show();
+		active = true;
 	}
 
 	@Override
 	public void stop() {
 		stage.close();
+		active = false;
 	}
 }

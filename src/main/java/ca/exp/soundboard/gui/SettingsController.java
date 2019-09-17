@@ -16,13 +16,20 @@ import ca.exp.soundboard.model.SettingsListener;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
+import javax.xml.soap.Text;
+
 public class SettingsController extends GuiController {
 
+	private static final String defaultTextStyle = "-fx-control-inner-background: white;";
+	private static final String activeTextStyle = "-fx-control-inner-background: cyan;";
+
+	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
 	private static final String emptyHotkey = "";
 
+
 	private SettingsListener listener;
-	private Object selectedField; // TODO: swap Object with TextField
+	private TextField selectedField; // TODO: swap Object with TextField
 	private NativeKeyEvent workingHotkey;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
@@ -93,32 +100,56 @@ public class SettingsController extends GuiController {
 
 	@FXML
 	void onDecFieldClicked(MouseEvent event) {
-		listenStart(event, speedDecField);
+		if (event.isPrimaryButtonDown()) {
+			startListening(speedDecField);
+		} else if (event.isSecondaryButtonDown()) {
+			stopListening(speedDecField);
+		}
 	}
 
 	@FXML
 	void onIncFieldClicked(MouseEvent event) {
-		listenStart(event, speedIncField);
+		if (event.isPrimaryButtonDown()) {
+			startListening(speedIncField);
+		} else if (event.isSecondaryButtonDown()) {
+			stopListening(speedIncField);
+		}
 	}
 
 	@FXML
 	void onOverlapFieldClicked(MouseEvent event) {
-		listenStart(event, overlapSameField);
+		if (event.isPrimaryButtonDown()) {
+			startListening(overlapSameField);
+		} else if (event.isSecondaryButtonDown()) {
+			stopListening(overlapSameField);
+		}
 	}
 
 	@FXML
 	void onPlaybackFieldClicked(MouseEvent event) {
-		listenStart(event, playbackComboField);
+		if (event.isPrimaryButtonDown()) {
+			startListening(playbackComboField);
+		} else if (event.isSecondaryButtonDown()) {
+			stopListening(playbackComboField);
+		}
 	}
 
 	@FXML
 	void onPushFieldClicked(MouseEvent event) {
-		listenStart(event, pushToTalkField);
+		if (event.isPrimaryButtonDown()) {
+			startListening(pushToTalkField);
+		} else if (event.isSecondaryButtonDown()) {
+			stopListening(pushToTalkField);
+		}
 	}
 
 	@FXML
 	void onStopFieldClicked(MouseEvent event) {
-		listenStart(event, stopAllField);
+		if (event.isPrimaryButtonDown()) {
+			startListening(stopAllField);
+		} else if (event.isSecondaryButtonDown()) {
+			stopListening(stopAllField);
+		}
 	}
 
 	@FXML
@@ -133,16 +164,38 @@ public class SettingsController extends GuiController {
 
 	// --- Interaction Methods --- //
 
-	private void listenStart(MouseEvent event, TextField feedback) {
-		if (event.isPrimaryButtonDown()) {
-			listener.listenOn(this, feedback);
-		} else if (event.isSecondaryButtonDown()) {
-			listener.stopListening();
-		}
+	public String getHotkeyText() {
+		return selectedField.getText();
 	}
 
-	public void setHotkey(NativeKeyEvent nativeEvent) {
+	public void setHotkeyText(String text) {
+		selectedField.setText(text);
+	}
+
+	public NativeKeyEvent getCombo() {
+		return workingHotkey;
+	}
+
+	public void setCombo(NativeKeyEvent nativeEvent) {
 		workingHotkey = nativeEvent;
+	}
+
+	private void startListening(TextField feedback) {
+		if (selectedField != null) {
+			stopListening(selectedField);
+		}
+
+		feedback.setStyle(activeTextStyle);
+		feedback.setText(defaultPress);
+		listener.listenOn(this);
+	}
+
+	private void stopListening(TextField feedback) {
+		feedback.setStyle(defaultTextStyle);
+		if (feedback.getText() == defaultPress) {
+			feedback.setText(emptyHotkey);
+		}
+		listener.stopListening();
 	}
 
 	// --- General Methods --- //
@@ -174,6 +227,7 @@ public class SettingsController extends GuiController {
 
 	@Override
 	public void stop() {
+		if (listener.isListening()) stopListening(selectedField);
 		// if anything changed (or if settings holder noticed changes) send it to the settings
 	}
 

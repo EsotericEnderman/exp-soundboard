@@ -5,9 +5,11 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
@@ -140,10 +142,12 @@ public class EntryController extends GuiController {
         super.preload(parent, stage, scene);
 		logger.log(Level.INFO, "Initializing entry controller");
 
+		// setup file chooser, add filter for known audio files
         chooser = new FileChooser();
         chooser.setTitle("Choose Audio File");
         chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);
 
+        // setup listener for catching a hotkey
         try {
             listener = new EntryListener();
         } catch (NativeHookException nhe) {
@@ -174,6 +178,7 @@ public class EntryController extends GuiController {
 					starter.getCombo().getNative(),
 					starter.getFile());
 			stage.show();
+			active = true;
 		} else {
 			start();
 		}
@@ -183,6 +188,7 @@ public class EntryController extends GuiController {
 		logger.log(Level.INFO, "Starting new entry");
 		init(defaultTextStyle, defaultSelect, emptyHotkey, null, null);
 		stage.show();
+		active = true;
 	}
 
 	public void stop() {
@@ -191,9 +197,16 @@ public class EntryController extends GuiController {
 			logger.log(Level.INFO, "Finished and adding new entry to soundboard");
 			parent.getModel().getEntries().add(new Entry(workFile, nativeEvent));
 			stage.close();
+			active = false;
 		} else {
 			logger.log(Level.WARNING, "Not all fields have been filled!");
 		}
 	}
 
+	@Override
+	public void forceStop() {
+		super.forceStop();
+		nativeEvent = null;
+		workFile = null;
+	}
 }

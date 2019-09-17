@@ -29,6 +29,8 @@ import javax.sound.sampled.*;
 
 public class SoundboardStage extends Application {
 
+	static Logger rootLogger = Logger.getLogger("");
+
 	/**
 	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
 	 * @return A list containing all devices with valid output
@@ -52,8 +54,6 @@ public class SoundboardStage extends Application {
 
 		return choices;
 	}
-
-	static Logger globalLogger = Logger.getLogger("");
 
 	private SoundboardModel model;
 	private Logger logger;
@@ -89,9 +89,9 @@ public class SoundboardStage extends Application {
 	public static void main(String[] args) {
 
 		// remove default handler(s) from global logger, partially disables console output
-		for (Handler handler : globalLogger.getHandlers()) {
+		for (Handler handler : rootLogger.getHandlers()) {
 			//handler.setLevel(Level.OFF);
-			globalLogger.removeHandler(handler);
+			rootLogger.removeHandler(handler);
 		}
 
 		/// The following handlers split logs by Level, anything below warning goes to System.out, the rest to System.err
@@ -104,7 +104,7 @@ public class SoundboardStage extends Application {
 				return record.getLevel().intValue() < Level.WARNING.intValue();
 			}
 		});
-		globalLogger.addHandler(outHand);
+		rootLogger.addHandler(outHand);
 
 		// logging to System.err
 		ImmediateStreamHandler errHand = new ImmediateStreamHandler(System.err, new LogFormatter());
@@ -114,7 +114,7 @@ public class SoundboardStage extends Application {
 				return !(record.getLevel().intValue() < Level.WARNING.intValue());
 			}
 		});
-		globalLogger.addHandler(errHand);
+		rootLogger.addHandler(errHand);
 
 		// logging System.out to file
 		try {
@@ -127,9 +127,9 @@ public class SoundboardStage extends Application {
 					return record.getLevel().intValue() < Level.WARNING.intValue();
 				}
 			});
-			globalLogger.addHandler(fHand);
+			rootLogger.addHandler(fHand);
 		} catch (IOException ioe) {
-			globalLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
+			rootLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
 		}
 
 		// logging System.err to file
@@ -138,9 +138,9 @@ public class SoundboardStage extends Application {
 			FileHandler fHand = new FileHandler("stderr.txt");
 			fHand.setFormatter(new LogFormatter());
 			fHand.setLevel(Level.WARNING);
-			globalLogger.addHandler(fHand);
+			rootLogger.addHandler(fHand);
 		} catch (IOException ioe) {
-			globalLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
+			rootLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
 		}
 
 		// setting the jnativehook logger to only log what's important
@@ -244,33 +244,29 @@ public class SoundboardStage extends Application {
 		menuController.start();
 	}
 
-	private void initController(GuiController controller) {
-
-	}
-
 	@Override
-	public void stop() throws Exception {
+	public void stop() throws Exception { // TODO: each controller reports it's being force closed twice?
 		super.stop();
-		menuController.stop(); // TODO: may need to implement a force close
-		settingsController.stop();
-		entryController.stop();
-		converterController.stop();
+		menuController.forceStop();
+		entryController.forceStop();
+		settingsController.forceStop();
+		converterController.forceStop();
 		stopNativeKey();
 	}
 
-	public static void startNativeKey() throws NativeHookException {
-		if (!GlobalScreen.isNativeHookRegistered()) {
+	private static void startNativeKey() {
+		try {
 			GlobalScreen.registerNativeHook();
-		} else {
-			throw new NativeHookException("Native hook already started!");
+		} catch (NativeHookException nhe) {
+			rootLogger.log(Level.SEVERE, "Failed to register jnativehook!", nhe);
 		}
 	}
 
-	public static void stopNativeKey() throws NativeHookException {
-		if (GlobalScreen.isNativeHookRegistered()) {
+	private static void stopNativeKey() {
+		try {
 			GlobalScreen.unregisterNativeHook();
-		} else {
-			throw new NativeHookException("Native hook is not running!");
+		} catch (NativeHookException nhe) {
+			rootLogger.log(Level.SEVERE, "Failed to unregister jnativehook!", nhe);
 		}
 	}
 
@@ -298,6 +294,7 @@ public class SoundboardStage extends Application {
 		return model;
 	}
 
+	// Convenience method, makes the code for playing audio from a controller smaller
 	public boolean playEntry(Entry entry, int[] indices) {
 		try {
 			AudioMaster master = getModel().getAudio();

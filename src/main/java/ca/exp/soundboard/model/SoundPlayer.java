@@ -3,6 +3,8 @@ package ca.exp.soundboard.model;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,4 +113,5 @@ public class SoundPlayer implements Runnable {
     public String toString() {
         return thread + "/" + sound.getName();
     }
+
 }

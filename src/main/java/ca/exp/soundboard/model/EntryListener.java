@@ -33,7 +33,7 @@ public class EntryListener implements NativeKeyListener {
 	public void stopListening() {
 		logger.log(Level.INFO, "Stopping hotkey listening");
 		GlobalScreen.removeNativeKeyListener(this);
-		this.display = null;
+		display = null;
 	}
 
 	public boolean isListening() {

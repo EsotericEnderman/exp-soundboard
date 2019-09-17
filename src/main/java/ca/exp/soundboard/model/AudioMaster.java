@@ -16,28 +16,23 @@ public class AudioMaster {
 
 	// copied from old code
 	public static final int standardBufferSize = 2048;
-	public static final AudioFormat decodeFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4,
-			44100.0F, false);
-	public static final DataLine.Info standardDataLine = new DataLine.Info(SourceDataLine.class, decodeFormat, standardBufferSize);
+	public static final int standardSampleSize = 16;
+	public static final int standardChannels = 2;
+	public static final int standardFrameSize = 4;
+	public static final float standardSampleRate = 44100.0F;
 
+	public static final AudioFormat decodeFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, standardSampleRate,
+			standardSampleSize, standardChannels, standardFrameSize, standardSampleRate, false);
+	public static final DataLine.Info standardDataLine = new DataLine.Info(SourceDataLine.class, decodeFormat,
+			standardBufferSize);
 
-	public static SourceDataLine getSpeakerLine(Mixer mixer) throws LineUnavailableException {
-		if (mixer.isLineSupported(standardDataLine)) {
-			return (SourceDataLine) mixer.getLine(standardDataLine);
-		} else {
-			return null;
-		}
+	public static SourceDataLine getSpeakerLine(Mixer mixer) throws LineUnavailableException, IllegalArgumentException {
+		return (SourceDataLine) mixer.getLine(standardDataLine);
 	}
 
-	public static FloatControl getMasterGain(SourceDataLine source) {
-		if (source.isOpen()) {
-			return (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
-		} else {
-			return null;
-		}
+	public static FloatControl getMasterGain(SourceDataLine source) throws IllegalArgumentException {
+		return (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
 	}
-
-
 
 	public final ThreadGroup audioGroup = new ThreadGroup("Audio");
 
@@ -45,6 +40,7 @@ public class AudioMaster {
 	private ThreadPoolExecutor audioThreadManager;
 	private List<SoundPlayer> active;
 	private Logger logger;
+	private AudioFormat modDecodeFormat; // TODO format for modified speed, mult samplerate by float in [0,1]
 
 	private float[] gains;
 
@@ -110,13 +106,13 @@ public class AudioMaster {
 
 			// grab proper SourceDataLine
 			speakers[i] = getSpeakerLine(speaker);
-			speakers[i].open(decodeFormat, standardBufferSize);
-			speakers[i].start();
+			//speakers[i].open(decodeFormat, standardBufferSize);
+			//speakers[i].start();
 
 			// set gain for SourceDataLine
 			FloatControl gainControl = getMasterGain(speakers[i]);
 			float speakerGain = gains[index];
-			gainControl.setValue(speakerGain);
+			gainControl.setValue(speakerGain); // TODO: implement changing gain of currently running sound threads
 
 			// make a thread for each output
 			players[i] = new SoundPlayer(this, sound, speakers[i]);
@@ -136,10 +132,6 @@ public class AudioMaster {
 		return outputs[index];
 	}
 
-	public final Mixer[] getOutputs() {
-		return outputs;
-	}
-
 	public void setOutput(int index, Mixer.Info outputInfo) throws IllegalArgumentException, NullPointerException {
 		outputs[index] = AudioSystem.getMixer(outputInfo);
 	}
@@ -150,14 +142,18 @@ public class AudioMaster {
 
 	// --- Gain methods --- //
 
-	public float getGain(int index) throws LineUnavailableException, IllegalArgumentException, NullPointerException {
-		if (index < 0 || index > outputs.length) throw new IllegalArgumentException("Index is invalid");
-		return getMasterGain(getSpeakerLine(outputs[index])).getValue();
+	public float getGain(int index) {
+		return gains[index];
 	}
 
-	public void setGain(int index, float gain) throws LineUnavailableException, IllegalArgumentException, NullPointerException {
-		if (index < 0 || index > outputs.length) throw new IllegalArgumentException("Index is invalid");
-		getMasterGain(getSpeakerLine(outputs[index])).setValue(gain);
+	public void setGain(int index, float gain) {
+		gains[index] = gain;
+
+		try {
+			getMasterGain(getSpeakerLine(outputs[index])).setValue(gain);
+		} catch (LineUnavailableException | IllegalArgumentException e) {
+			logger.log(Level.WARNING, "Failed to update line gain", e);
+		}
 	}
 
 	// --- Player methods --- //

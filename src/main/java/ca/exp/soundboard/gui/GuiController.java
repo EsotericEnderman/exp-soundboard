@@ -1,7 +1,9 @@
 package ca.exp.soundboard.gui;
 
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -18,6 +20,8 @@ public abstract class GuiController {
 
     protected Stage stage;
     protected Scene scene;
+
+    protected boolean active;
 
     /**
      * Allows the controller to access GUI objects before initialize() is called by the JavaFX thread.
@@ -54,6 +58,18 @@ public abstract class GuiController {
         };
         guiOutput.setLevel(Level.WARNING);
         logger.addHandler(guiOutput);
+
+        // set default action on close button to be force stop
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                forceStop();
+            }
+        });
+    }
+
+    public boolean getActive() {
+        return active;
     }
 
     public abstract void reset();
@@ -65,6 +81,6 @@ public abstract class GuiController {
     public void forceStop() {
         logger.log(Level.INFO, "Force stopping " + this.getClass().getName());
         stage.close();
-        stop();
+        active = false;
     }
 }

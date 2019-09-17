@@ -106,6 +106,7 @@ public class LevelsController extends GuiController {
             logger.log(Level.WARNING, "Failed to fetch speaker gain from audio controller: ", lue);
         } finally {
             stage.show();
+            active = true;
         }
     }
 
@@ -113,5 +114,6 @@ public class LevelsController extends GuiController {
     public void stop() {
         logger.log(Level.INFO, "Closing levels controller");
         stage.close();
+        active = false;
     }
 }
