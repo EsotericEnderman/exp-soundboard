@@ -294,22 +294,6 @@ public class SoundboardStage extends Application {
 		return model;
 	}
 
-	// Convenience method, makes the code for playing audio from a controller smaller
-	public boolean playEntry(Entry entry, int[] indices) {
-		try {
-			AudioMaster master = getModel().getAudio();
-			File target = entry.getFile();
-
-			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
-			master.play(target, indices);
-			logger.log(Level.INFO, "Played audio file: \"" + entry.getFile().getName() + "\"");
-			return true;
-		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException | NullPointerException e) {
-			logger.log(Level.WARNING, "Error playing audio file: " + entry.getFile().getName() , e);
-			return false;
-		}
-	}
-
 	/**
 	 * Opens a simple error dialog with an OK button, must be called on the JavaFX Thread.
 	 * This method is blocking and will wait for the user to close it.
