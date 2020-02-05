@@ -17,8 +17,8 @@
     <orderEntry type="library" name="Maven: com.googlecode.soundlibs:mp3spi:1.9.5-1" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.soundlibs:jlayer:1.0.1-1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:3.8.2" level="project" />
-    <orderEntry type="library" name="Maven: com.googlecode.soundlibs:tritonus-share:0.3.7-1" level="project" />
     <orderEntry type="library" name="Maven: ws.schild:jave-core:2.4.0" level="project" />
     <orderEntry type="library" name="Maven: commons-logging:commons-logging-api:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.googlecode.soundlibs:tritonus-share:0.3.7-1" level="project" />
   </component>
 </module>
