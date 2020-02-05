@@ -17,7 +17,6 @@ public class SoundPlayer implements Runnable {
     private File sound;
     private SourceDataLine output;
     private AudioInputStream clip;
-    private AudioFormat clipFormat;
     private int index;
 
     public final AtomicBoolean running;
@@ -34,14 +33,15 @@ public class SoundPlayer implements Runnable {
         paused = new AtomicBoolean(false);
 
         // grab formats from file
-        clip = AudioSystem.getAudioInputStream(sound);
-        clipFormat = clip.getFormat();
-
-        // in case the target clip is of a different format than is used for playing
-        if (!clipFormat.matches(AudioMaster.decodeFormat)) {
-            clip = AudioSystem.getAudioInputStream(AudioMaster.decodeFormat, clip);
-            //clipFormat = clip.getFormat();
-            logger.log(Level.INFO, "Target file: \"" + sound.getName() + "\" is using converted format");
+        AudioFormat clipFormat;
+        try {
+            clip = AudioSystem.getAudioInputStream(sound);
+            clipFormat = clip.getFormat();
+            if (!clipFormat.equals(AudioMaster.decodeFormat)) {
+                clip = AudioSystem.getAudioInputStream(AudioMaster.decodeFormat, clip);
+            }
+        } catch (UnsupportedAudioFileException uafe) {
+            logger.log(Level.INFO, "Target file: \"" + sound.getName() + "\" is unsupported natively, using converted format");
         }
 
         logger.log(Level.INFO, "Initialized sound player on: \"" + sound.getName() + "\"");

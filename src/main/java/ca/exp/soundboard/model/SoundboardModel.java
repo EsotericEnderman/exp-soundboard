@@ -41,10 +41,6 @@ public class SoundboardModel {
         return audio;
     }
 
-    public Entry[] getEntriesArr() {
-        return (Entry[]) entryList.toArray();
-    }
-
     public ObservableList<Entry> getEntries() {
         return entryList;
     }

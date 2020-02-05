@@ -168,7 +168,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	void onPlayPressed(ActionEvent event) {
 		Entry selected = getSelectedEntry();
 		if (selected != null) {
-			logger.log(Level.INFO, "Playing entry: " + selected.toString());
+			logger.log(Level.INFO, "Playing entry: \'" + selected.toString() + "\'");
 			try {
 				parent.getModel().getAudio().play(selected.getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
 			} catch (LineUnavailableException | UnsupportedAudioFileException | IOException | IllegalArgumentException e) {
@@ -388,11 +388,11 @@ public class MenuController extends GuiController implements ListChangeListener<
 		logger.log(Level.INFO, "Resetting GUI elements");
 
 		// The zero-th element is preselected to prevent the user from starting with a null audio device.
-		init(null, 0, 0, false, false, false);
+		init(AudioSystem.getMixerInfo(), parent.getModel().getEntries(), 0, 0, false, false, false);
     }
 
-	private void init(Entry[] entries, int primaryIndex, int secondaryIndex, boolean secondaryCheck, boolean injector, boolean pttHold) {
-		audioList.addAll(SoundboardStage.getValidMixers());
+	private void init(Mixer.Info[] devices, Collection<? extends Entry> entries, int primaryIndex, int secondaryIndex, boolean secondaryCheck, boolean injector, boolean pttHold) {
+		audioList.addAll(devices);
 		tableList.addAll(entries);
 
 		primarySpeakerCombo.getSelectionModel().select(primaryIndex);

@@ -3,14 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+	<!-- Basic Information -->
     <groupId>ca.exp.soundboard</groupId>
     <artifactId>exp-soundboard</artifactId>
     <version>0.6</version>
-    <name>EXP-Soundboard</name>
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-	</properties>
+	<packaging>jar</packaging>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook -->
 		<dependency>
@@ -18,7 +16,32 @@
 			<artifactId>jnativehook</artifactId>
 			<version>2.1.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/javazoom/jlayer -->
+		<dependency>
+			<groupId>javazoom</groupId>
+			<artifactId>jlayer</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.googlecode.soundlibs/mp3spi -->
+		<dependency>
+			<groupId>com.googlecode.soundlibs</groupId>
+			<artifactId>mp3spi</artifactId>
+			<version>1.9.5-1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/ws.schild/jave-core -->
+		<dependency>
+			<groupId>ws.schild</groupId>
+			<artifactId>jave-core</artifactId>
+			<version>2.4.0</version>
+		</dependency>
+
 	</dependencies>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<!-- Build Settings -->
 	<build>
 		<plugins>
 			<plugin>
@@ -33,10 +56,15 @@
 					</execution>
 				</executions>
 				<configuration>
+					<executable>java</executable>
+					<classpathScope>compile</classpathScope>
 					<mainClass>ca.exp.soundboard.gui.SoundboardStage</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-    <packaging>jar</packaging>
+
+	<!-- Extra Project Information -->
+	<name>EXP-Soundboard</name>
+	<url>https://github.com/CardboardBread/EXP-soundboard</url>
 </project>

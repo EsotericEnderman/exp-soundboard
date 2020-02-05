@@ -164,6 +164,7 @@ public class SoundboardStage extends Application {
 	public void init() throws Exception {
 		super.init();
 		startNativeKey();
+		AudioMaster.startMP3Decoder();
 
 		// TODO look into calling getParameters() here
 
@@ -244,7 +245,7 @@ public class SoundboardStage extends Application {
 	}
 
 	@Override
-	public void stop() throws Exception { // TODO: each controller reports it's being force closed twice?
+	public void stop() throws Exception {
 		super.stop();
 		stopNativeKey();
 		Platform.exit();

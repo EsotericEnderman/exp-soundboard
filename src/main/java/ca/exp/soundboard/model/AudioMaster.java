@@ -2,6 +2,7 @@ package ca.exp.soundboard.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -16,14 +17,24 @@ public class AudioMaster {
 
 	// copied from old code
 	public static final int standardBufferSize = 2048;
+	public static final int internalBufferSize = 8192;
 	public static final int standardSampleSize = 16;
 	public static final int standardChannels = 2;
 	public static final int standardFrameSize = 4;
 	public static final float standardSampleRate = 44100.0F;
 
-	public static final AudioFormat decodeFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, standardSampleRate,
-			standardSampleSize, standardChannels, standardFrameSize, standardSampleRate, false);
-	public static final DataLine.Info standardDataLine = new DataLine.Info(SourceDataLine.class, decodeFormat,
+	public static final AudioFormat decodeFormat = new AudioFormat(
+			AudioFormat.Encoding.PCM_SIGNED,
+			standardSampleRate,
+			standardSampleSize,
+			standardChannels,
+			standardFrameSize,
+			standardSampleRate,
+			false);
+
+	public static final DataLine.Info standardDataLine = new DataLine.Info(
+			SourceDataLine.class,
+			decodeFormat,
 			standardBufferSize);
 
 	public static SourceDataLine getSpeakerLine(Mixer mixer) throws LineUnavailableException, IllegalArgumentException {
@@ -32,6 +43,27 @@ public class AudioMaster {
 
 	public static FloatControl getMasterGain(SourceDataLine source) throws IllegalArgumentException {
 		return (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
+	}
+
+	public static boolean isFileSupported(File target) {
+		try {
+			AudioSystem.getAudioFileFormat(target);
+			return true;
+		} catch (UnsupportedAudioFileException | IOException e) {
+			return false;
+		}
+	}
+
+	public static boolean startMP3Decoder() {
+		InputStream loaderfile = AudioMaster.class.getClassLoader().getResourceAsStream("loader.mp3");
+		try {
+			AudioSystem.getAudioFileFormat(loaderfile);
+			AudioInputStream stream = AudioSystem.getAudioInputStream(loaderfile);
+			stream.close();
+			return true;
+		} catch (UnsupportedAudioFileException | IOException e) {
+			return false;
+		}
 	}
 
 	private AudioFormat modDecodeFormat; // TODO format for modified speed, mult samplerate by float in [0,1]
@@ -102,13 +134,14 @@ public class AudioMaster {
 
 			// grab proper SourceDataLine
 			speakers[i] = getSpeakerLine(speaker);
-			speakers[i].open(decodeFormat, standardBufferSize);
-			speakers[i].start();
+			speakers[i].open(decodeFormat, internalBufferSize);
 
 			// set gain for SourceDataLine
 			FloatControl gainControl = getMasterGain(speakers[i]);
 			float speakerGain = gains[index];
 			gainControl.setValue(speakerGain); // TODO: implement changing gain of currently running sound threads
+
+			speakers[i].start();
 
 			// make a thread for each output
 			players[i] = new SoundPlayer(this, sound, speakers[i], index);
