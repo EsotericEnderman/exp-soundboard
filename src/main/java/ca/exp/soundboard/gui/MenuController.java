@@ -1,11 +1,13 @@
 package ca.exp.soundboard.gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.*;
 
 import javax.sound.sampled.*;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -167,7 +169,11 @@ public class MenuController extends GuiController implements ListChangeListener<
 		Entry selected = getSelectedEntry();
 		if (selected != null) {
 			logger.log(Level.INFO, "Playing entry: " + selected.toString());
-			parent.getModel().getAudio().play(selected.getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
+			try {
+				parent.getModel().getAudio().play(selected.getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
+			} catch (LineUnavailableException | UnsupportedAudioFileException | IOException | IllegalArgumentException e) {
+				logger.log(Level.WARNING, "Failed to play target file!", e);
+			}
 		} else {
 			logger.log(Level.WARNING, "Cannot play no selection!");
 		}
@@ -285,10 +291,12 @@ public class MenuController extends GuiController implements ListChangeListener<
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/collections/ListChangeListener.Change.html
 		while (change.next()) {
 			if (change.wasPermutated()) {
+				logger.log(Level.INFO, "Reflecting entry list permutation in GUI");
 				for (int i = change.getFrom(); i < change.getTo(); ++i) {
 					// permutate // TODO use this
 				}
 			} else if (change.wasUpdated()) {
+				logger.log(Level.INFO, "Reflecting entry list update in GUI");
 				// update item // TODO use this
 			} else {
 				for (Entry remitem : change.getRemoved()) {
@@ -330,7 +338,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 
 		// Setup a factory to properly pull data from Mixer.Info to display in a combobox
 		Callback<ListView<Mixer.Info>, ListCell<Mixer.Info>> cellFactory = new Callback<ListView<Mixer.Info>, ListCell<Mixer.Info>>() {
-			@Override
 			public ListCell<Mixer.Info> call(ListView<Mixer.Info> param) {
 				return new ListCell<Mixer.Info>() {
 					@Override
@@ -354,7 +361,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		primarySpeakerCombo.setCellFactory(cellFactory);
 		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
-			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
 				setPrimarySpeaker(newValue);
 			}
@@ -365,7 +371,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		secondarySpeakerCombo.setCellFactory(cellFactory);
 		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
-			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
 				setSecondarySpeaker(newValue);
 			}
@@ -373,7 +378,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 
 		// overwrites default behaviour from GuiController, closes the entire program when this window is closed
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			@Override
 			public void handle(WindowEvent event) {
 				closeMenu();
 			}
@@ -383,17 +387,8 @@ public class MenuController extends GuiController implements ListChangeListener<
 	public void reset() {
 		logger.log(Level.INFO, "Resetting GUI elements");
 
-		audioList.clear();
-	    tableList.clear();
-
 		// The zero-th element is preselected to prevent the user from starting with a null audio device.
-		primarySpeakerCombo.getSelectionModel().select(0);
-		secondarySpeakerCombo.getSelectionModel().select(0);
-
-		secondarySpeakerCheck.setSelected(false);
-
-		injectorCheck.setSelected(false);
-		pttHoldCheck.setSelected(false);
+		init(null, 0, 0, false, false, false);
     }
 
 	private void init(Entry[] entries, int primaryIndex, int secondaryIndex, boolean secondaryCheck, boolean injector, boolean pttHold) {

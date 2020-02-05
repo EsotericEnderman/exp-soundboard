@@ -53,17 +53,23 @@ public class AudioMaster {
 	}
 
 	public AudioMaster(int count, Mixer... mixers) {
-		// extends given array, to prevent an out of bounds exception
-		if (mixers.length < count) mixers = Arrays.copyOf(mixers, count);
 
+		// setup mixers, copying in the given
+		int min = mixers.length < count ? mixers.length : count;
 		this.outputs = new Mixer[count];
-		active = new ArrayList<SoundPlayer>();
+		for (int i = 0; i < min; i++) outputs[i] = mixers[i];
+
+		active = new Vector<SoundPlayer>();
 		logger = Logger.getLogger(this.getClass().getName());
+
+		// setup gains, starting all at zero
 		gains = new float[count];
+		for (int i = 0; i < count; i++) {
+			gains[i] = 0f;
+		}
 
 		// This constructor ensures all audio playing threads will be in the thread group accessible from this class.
 		audioThreadManager = (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactory() {
-			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(audioGroup, r);
 			}
@@ -72,16 +78,6 @@ public class AudioMaster {
 		// make sure the thread manager has a buffer for the first files to be played without interruption
 		audioThreadManager.setCorePoolSize(10);
 		audioThreadManager.prestartCoreThread();
-
-		// Copies all available mixers.
-		for (int i = 0; i < count; i++) {
-			outputs[i] = mixers[i];
-		}
-
-		// reset gains
-		for (int i = 0; i < count; i++) {
-			gains[i] = 0f;
-		}
 
 		logger.log(Level.INFO, "Initialized " + this.getClass().getName() + " with " + count + " outputs");
 	}
@@ -106,8 +102,8 @@ public class AudioMaster {
 
 			// grab proper SourceDataLine
 			speakers[i] = getSpeakerLine(speaker);
-			//speakers[i].open(decodeFormat, standardBufferSize);
-			//speakers[i].start();
+			speakers[i].open(decodeFormat, standardBufferSize);
+			speakers[i].start();
 
 			// set gain for SourceDataLine
 			FloatControl gainControl = getMasterGain(speakers[i]);
@@ -115,7 +111,7 @@ public class AudioMaster {
 			gainControl.setValue(speakerGain); // TODO: implement changing gain of currently running sound threads
 
 			// make a thread for each output
-			players[i] = new SoundPlayer(this, sound, speakers[i]);
+			players[i] = new SoundPlayer(this, sound, speakers[i], index);
 			active.add(players[i]);
 			logger.log(Level.INFO, "Dispatching thread to play: \"" + sound.getName() + "\" on " + speaker.getMixerInfo().getName());
 		}
@@ -135,10 +131,6 @@ public class AudioMaster {
 	public void setOutput(int index, Mixer.Info outputInfo) throws IllegalArgumentException, NullPointerException {
 		outputs[index] = AudioSystem.getMixer(outputInfo);
 	}
-	
-	public void setOutput(int index, Mixer mixer) {
-		outputs[index] = mixer;
-	}
 
 	// --- Gain methods --- //
 
@@ -148,41 +140,26 @@ public class AudioMaster {
 
 	public void setGain(int index, float gain) {
 		gains[index] = gain;
-
-		try {
-			getMasterGain(getSpeakerLine(outputs[index])).setValue(gain);
-		} catch (LineUnavailableException | IllegalArgumentException e) {
-			logger.log(Level.WARNING, "Failed to update line gain", e);
-		}
 	}
 
 	// --- Player methods --- //
 
-	public boolean addPlayer(SoundPlayer player) {
-		return active.add(player);
-	}
-
-	public boolean removePlayer(SoundPlayer player) {
-		return active.remove(player);
-	}
 
 	// --- Global Audio Controls --- //
 
 	public void stopAll() {
 		logger.log(Level.INFO, "Stopping all playing sounds");
-		SoundPlayer player;
-		for (int i = 0; i < active.size(); i++) {
-			active.get(i).running.compareAndSet(true, false);// TODO: shouldn't have concurrency errors, needs verification
-			player = active.remove(i);
+		for (SoundPlayer player : active) {
+			player.paused.compareAndSet(false, false); // TODO: shouldn't have concurrency errors, needs verification
+			player.running.compareAndSet(true, false);
 			logger.log(Level.INFO, "Removed thread: \"" + player + "\"");
 		}
+		active.clear();
 	}
 
 	public void pauseAll() {
 		logger.log(Level.INFO, "Pausing all playing sounds");
-		SoundPlayer player;
-		for (int i = 0; i < active.size(); i++) {
-			player = active.get(i);
+		for (SoundPlayer player : active) {
 			player.paused.compareAndSet(false, true);
 			logger.log(Level.INFO, "Paused thread: \"" + player + "\"");
 		}

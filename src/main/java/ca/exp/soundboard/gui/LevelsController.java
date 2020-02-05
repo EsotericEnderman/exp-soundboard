@@ -51,7 +51,6 @@ public class LevelsController extends GuiController {
 
         // setup primary slider to change gain on primary speaker
         primarySlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 parent.getModel().getAudio().setGain(0, newValue.floatValue());
             }
@@ -59,7 +58,6 @@ public class LevelsController extends GuiController {
 
         // setup secondary slider to change gain on secondary speaker
         secondarySlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 parent.getModel().getAudio().setGain(1, newValue.floatValue());
             }
@@ -67,7 +65,6 @@ public class LevelsController extends GuiController {
 
         // setup tertiary slider to change gain on mic injector
         injectorSlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 // TODO update mic injector with new gain newValue.floatValue()
             }
@@ -93,14 +90,9 @@ public class LevelsController extends GuiController {
         reset();
 
         AudioMaster audio = parent.getModel().getAudio();
-        try {
-            init(audio.getGain(0), audio.getGain(1), 0f);
-        } catch (LineUnavailableException lue) {
-            logger.log(Level.WARNING, "Failed to fetch speaker gain from audio controller: ", lue);
-        } finally {
-            stage.show();
-            active = true;
-        }
+        init(audio.getGain(0), audio.getGain(1), 0f);
+        stage.show();
+        active = true;
     }
 
     @Override

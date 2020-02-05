@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.*;
 
 import ca.exp.soundboard.util.ImmediateStreamHandler;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
@@ -98,13 +99,11 @@ public class SoundboardStage extends Application {
 
 		// filters for splitting log output to different handlers
 		Filter outFilt = new Filter() {
-			@Override
 			public boolean isLoggable(LogRecord record) {
 				return record.getLevel().intValue() < Level.WARNING.intValue();
 			}
 		};
 		Filter errFilt = new Filter() {
-			@Override
 			public boolean isLoggable(LogRecord record) {
 				return !(record.getLevel().intValue() < Level.WARNING.intValue());
 			}
@@ -129,6 +128,7 @@ public class SoundboardStage extends Application {
 			rootLogger.addHandler(fHand);
 		} catch (IOException ioe) {
 			rootLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
+			// TODO: exit if failed to log to file? raise to user?
 		}
 
 		// logging System.err to file
@@ -148,7 +148,6 @@ public class SoundboardStage extends Application {
 
 		// Adding a filter to chop off the extra line ending off of jnativehook logs
 		nativeLogger.setFilter(new Filter() {
-			@Override
 			public boolean isLoggable(LogRecord record) {
 				String in = record.getMessage();
 				String out = in.substring(0, in.length() - 1);
@@ -209,6 +208,7 @@ public class SoundboardStage extends Application {
 		menuScene = new Scene(mainMenu);
 		menuStage = primaryStage;
 		menuStage.setScene(menuScene);
+		//menuStage.setOnCloseRequest(e -> Platform.exit());
 		menuController.preload(this, menuStage, menuScene);
 		model.getEntries().addListener(menuController);
 
@@ -246,11 +246,9 @@ public class SoundboardStage extends Application {
 	@Override
 	public void stop() throws Exception { // TODO: each controller reports it's being force closed twice?
 		super.stop();
-		menuController.forceStop();
-		entryController.forceStop();
-		settingsController.forceStop();
-		converterController.forceStop();
 		stopNativeKey();
+		Platform.exit();
+		System.exit(0);
 	}
 
 	private static void startNativeKey() {
@@ -258,6 +256,7 @@ public class SoundboardStage extends Application {
 			GlobalScreen.registerNativeHook();
 		} catch (NativeHookException nhe) {
 			rootLogger.log(Level.SEVERE, "Failed to register jnativehook!", nhe);
+			// TODO: exit on failure? report to user? relaunch?
 		}
 	}
 

@@ -7,5 +7,36 @@
     <artifactId>exp-soundboard</artifactId>
     <version>0.6</version>
     <name>EXP-Soundboard</name>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook -->
+		<dependency>
+			<groupId>com.1stleg</groupId>
+			<artifactId>jnativehook</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>ca.exp.soundboard.gui.SoundboardStage</mainClass>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
     <packaging>jar</packaging>
 </project>

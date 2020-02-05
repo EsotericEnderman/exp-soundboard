@@ -112,7 +112,7 @@ public class KeyCombination {
         return buffer.array();
     }
 
-    // --- Object implementation --- //
+    // --- Object Implementation --- //
 
     private NativeKeyEvent nativeKeyEvent;
 

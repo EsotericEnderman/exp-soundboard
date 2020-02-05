@@ -18,16 +18,17 @@ public class SoundPlayer implements Runnable {
     private SourceDataLine output;
     private AudioInputStream clip;
     private AudioFormat clipFormat;
-    private String thread;
+    private int index;
 
     public final AtomicBoolean running;
     public final AtomicBoolean paused;
 
-    public SoundPlayer(AudioMaster master, File sound, SourceDataLine output)
+    public SoundPlayer(AudioMaster master, File sound, SourceDataLine output, int index)
             throws UnsupportedAudioFileException, IOException, LineUnavailableException {
         this.master = master;
         this.sound = sound;
         this.output = output;
+        this.index = index;
         logger = Logger.getLogger(this.getClass().getName());
         running = new AtomicBoolean(true);
         paused = new AtomicBoolean(false);
@@ -46,15 +47,12 @@ public class SoundPlayer implements Runnable {
         logger.log(Level.INFO, "Initialized sound player on: \"" + sound.getName() + "\"");
     }
 
-    @Override
     public void run() {
-        thread = Thread.currentThread().getName();
 
         // setup buffer for containing samples of audio to be played
         byte[] buffer = new byte[output.getBufferSize()];
         int bytesRead = 0;
         int bytesWritten = 0;
-        int index = 0;
 
         while (running.get()) { // TODO: update writing sound
 
@@ -66,6 +64,7 @@ public class SoundPlayer implements Runnable {
                     } catch (InterruptedException ie) {
                         logger.log(Level.WARNING, "Failed to pause thread: ", ie);
                         running.compareAndSet(true, false);
+                        paused.compareAndSet(true, false);
                     }
                 }
             }
@@ -105,13 +104,12 @@ public class SoundPlayer implements Runnable {
         }
 
         // remove self from active list
-        master.removePlayer(this);
         logger.log(Level.INFO, "Instance finished: \"" + sound.getName() + "\"");
     }
 
     @Override
     public String toString() {
-        return thread + "/" + sound.getName();
+        return Thread.currentThread().getName() + "/" + sound.getName();
     }
 
 }
