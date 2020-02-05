@@ -26,12 +26,16 @@ import ca.exp.soundboard.util.FileIO;
 
 public class EntryController extends GuiController {
 
+	// --- Text Field Properties --- //
+
 	private static final String defaultTextStyle = "-fx-control-inner-background: white;";
 	private static final String activeTextStyle = "-fx-control-inner-background: cyan;";
 
 	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
     private static final String emptyHotkey = "";
+
+    // --- Working Data --- //
 
 	private EntryListener listener;
 	private NativeKeyEvent nativeEvent;

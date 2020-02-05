@@ -53,11 +53,7 @@ public class LevelsController extends GuiController {
         primarySlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                try {
-                    parent.getModel().getAudio().setGain(0, newValue.floatValue());
-                } catch (LineUnavailableException lue) {
-                    logger.log(Level.WARNING, "Failed to set gain of primary speaker: ", lue);
-                }
+                parent.getModel().getAudio().setGain(0, newValue.floatValue());
             }
         });
 
@@ -65,11 +61,7 @@ public class LevelsController extends GuiController {
         secondarySlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                try {
-                    parent.getModel().getAudio().setGain(1, newValue.floatValue());
-                } catch (LineUnavailableException lue) {
-                    logger.log(Level.WARNING, "Failed to set gain of secondary speaker: ", lue);
-                }
+                parent.getModel().getAudio().setGain(1, newValue.floatValue());
             }
         });
 
@@ -99,6 +91,7 @@ public class LevelsController extends GuiController {
     public void start() {
         logger.log(Level.INFO, "Starting levels controller");
         reset();
+
         AudioMaster audio = parent.getModel().getAudio();
         try {
             init(audio.getGain(0), audio.getGain(1), 0f);

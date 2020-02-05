@@ -24,11 +24,15 @@ import ca.exp.soundboard.model.Entry;
 
 public class MenuController extends GuiController implements ListChangeListener<Entry> {
 
+	// --- Indices groups --- //
+
 	private static final int primaryIndex = 0;
 	private static final int secondaryIndex = 1;
 
 	private static final int[] singleIndices = {primaryIndex};
 	private static final int[] doubleIndices = {primaryIndex, secondaryIndex};
+
+	// --- GUI Layer Data --- //
 
 	private ObservableList<Entry> tableList;
 	private ObservableList<Mixer.Info> audioList;
@@ -150,17 +154,34 @@ public class MenuController extends GuiController implements ListChangeListener<
 
 	@FXML
 	void onEditPressed(ActionEvent event) {
-		parent.entryController().start(getSelectedEntry());
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			parent.entryController().start(getSelectedEntry());
+		} else {
+			// TODO: error state
+		}
 	}
 
 	@FXML
 	void onPlayPressed(ActionEvent event) {
-		playSelected();
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			logger.log(Level.INFO, "Playing entry: " + selected.toString());
+			parent.getModel().getAudio().play(selected.getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
+		} else {
+			logger.log(Level.WARNING, "Cannot play no selection!");
+		}
 	}
 
 	@FXML
 	void onRemovePressed(ActionEvent event) {
-		removeSelected();
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			logger.log(Level.INFO, "Removing selected entry");
+			parent.getModel().getEntries().remove(selected);
+		} else {
+			logger.log(Level.WARNING, "Cannot remove no selection!");
+		}
 	}
 
 	@FXML
@@ -236,35 +257,13 @@ public class MenuController extends GuiController implements ListChangeListener<
 		return secondarySpeakerCheck.isSelected();
 	}
 
-	public boolean playSelected() {
-		logger.log(Level.INFO, "Playing selected entry");
-		Entry selected = getSelectedEntry();
-		if (selected != null) {
-			return parent.playEntry(selected, (secondaryChecked() ? doubleIndices : singleIndices));
-		} else {
-			logger.log(Level.WARNING, "Cannot play no selection!");
-			return false;
-		}
-	}
-
-	public boolean removeSelected() {
-		logger.log(Level.INFO, "Removing selected entry");
-		Entry selected = getSelectedEntry();
-		if (selected != null) {
-			return parent.getModel().getEntries().remove(selected);
-		} else {
-			// TODO report attempt to remove null entry.
-			logger.log(Level.WARNING, "Cannot remove no selection!");
-			return false;
-		}
-	}
-
 	public void closeMenu() {
 		logger.log(Level.INFO, "Main window closed, stopping");
 		try {
 			parent.stop();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Failed to close the application!", e);
+			logger.log(Level.SEVERE, "Failed to close the application, exiting by System.exit()", e);
+			System.exit(1); // TODO: this may cause file system errors if anything is left open
 		}
 	}
 

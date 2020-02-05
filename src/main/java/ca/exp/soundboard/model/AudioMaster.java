@@ -34,14 +34,14 @@ public class AudioMaster {
 		return (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
 	}
 
+	private AudioFormat modDecodeFormat; // TODO format for modified speed, mult samplerate by float in [0,1]
 	public final ThreadGroup audioGroup = new ThreadGroup("Audio");
 
-	private Mixer[] outputs;
 	private ThreadPoolExecutor audioThreadManager;
-	private List<SoundPlayer> active;
 	private Logger logger;
-	private AudioFormat modDecodeFormat; // TODO format for modified speed, mult samplerate by float in [0,1]
 
+	private List<SoundPlayer> active;
+	private Mixer[] outputs;
 	private float[] gains;
 
 	public AudioMaster(int count) {
@@ -52,12 +52,12 @@ public class AudioMaster {
 		this(mixers.length, mixers);
 	}
 
-	public AudioMaster(int count, Mixer... mixers){
+	public AudioMaster(int count, Mixer... mixers) {
 		// extends given array, to prevent an out of bounds exception
 		if (mixers.length < count) mixers = Arrays.copyOf(mixers, count);
 
 		this.outputs = new Mixer[count];
-		active = new CopyOnWriteArrayList<SoundPlayer>();
+		active = new ArrayList<SoundPlayer>();
 		logger = Logger.getLogger(this.getClass().getName());
 		gains = new float[count];
 
