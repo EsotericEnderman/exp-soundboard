@@ -96,24 +96,28 @@ public class SoundboardStage extends Application {
 
 		/// The following handlers split logs by Level, anything below warning goes to System.out, the rest to System.err
 
-		// logging to System.out
-		ImmediateStreamHandler outHand = new ImmediateStreamHandler(System.out, new LogFormatter());
-		outHand.setFilter(new Filter() {
+		// filters for splitting log output to different handlers
+		Filter outFilt = new Filter() {
 			@Override
 			public boolean isLoggable(LogRecord record) {
 				return record.getLevel().intValue() < Level.WARNING.intValue();
 			}
-		});
-		rootLogger.addHandler(outHand);
-
-		// logging to System.err
-		ImmediateStreamHandler errHand = new ImmediateStreamHandler(System.err, new LogFormatter());
-		errHand.setFilter(new Filter() {
+		};
+		Filter errFilt = new Filter() {
 			@Override
 			public boolean isLoggable(LogRecord record) {
 				return !(record.getLevel().intValue() < Level.WARNING.intValue());
 			}
-		});
+		};
+
+		// logging to System.out
+		ImmediateStreamHandler outHand = new ImmediateStreamHandler(System.out, new LogFormatter());
+		outHand.setFilter(outFilt);
+		rootLogger.addHandler(outHand);
+
+		// logging to System.err
+		ImmediateStreamHandler errHand = new ImmediateStreamHandler(System.err, new LogFormatter());
+		errHand.setFilter(errFilt);
 		rootLogger.addHandler(errHand);
 
 		// logging System.out to file
@@ -121,12 +125,7 @@ public class SoundboardStage extends Application {
 			// logging to file
 			FileHandler fHand = new FileHandler("stdout.txt");
 			fHand.setFormatter(new LogFormatter());
-			fHand.setFilter(new Filter() {
-				@Override
-				public boolean isLoggable(LogRecord record) {
-					return record.getLevel().intValue() < Level.WARNING.intValue();
-				}
-			});
+			fHand.setFilter(outFilt);
 			rootLogger.addHandler(fHand);
 		} catch (IOException ioe) {
 			rootLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
@@ -137,7 +136,7 @@ public class SoundboardStage extends Application {
 			// logging to file
 			FileHandler fHand = new FileHandler("stderr.txt");
 			fHand.setFormatter(new LogFormatter());
-			fHand.setLevel(Level.WARNING);
+			fHand.setFilter(errFilt);
 			rootLogger.addHandler(fHand);
 		} catch (IOException ioe) {
 			rootLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
