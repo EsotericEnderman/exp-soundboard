@@ -32,30 +32,6 @@ public class SoundboardStage extends Application {
 
 	static Logger rootLogger = Logger.getLogger("");
 
-	/**
-	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
-	 * @return A list containing all devices with valid output
-	 */
-	public static List<Mixer.Info> getValidMixers() {
-
-		// list all mixers
-		Mixer device;
-		Line.Info[] sourceInfos;
-		Mixer.Info[] deviceInfos = AudioSystem.getMixerInfo();
-		List<Mixer.Info> choices = new ArrayList<Mixer.Info>();
-		for (int i = 0; i < deviceInfos.length; i++) {
-			device = AudioSystem.getMixer(deviceInfos[i]);
-			sourceInfos = device.getSourceLineInfo();
-
-			// keep mixers with 2 or more source lines / output lines
-			if (sourceInfos.length > 1) {
-				choices.add(deviceInfos[i]);
-			}
-		}
-
-		return choices;
-	}
-
 	private SoundboardModel model;
 	private Logger logger;
 

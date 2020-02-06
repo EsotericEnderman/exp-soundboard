@@ -45,6 +45,20 @@ public class AudioMaster {
 		return (FloatControl) source.getControl(FloatControl.Type.MASTER_GAIN);
 	}
 
+	public static List<Mixer.Info> getValidMixers() {
+
+		Mixer.Info[] base = AudioSystem.getMixerInfo();
+		List<Mixer.Info> out = new ArrayList<Mixer.Info>();
+
+		// keep only usable mixers
+		Mixer mix;
+		for (Mixer.Info inf : base) {
+			mix = AudioSystem.getMixer(inf);
+			if (mix.isLineSupported(standardDataLine)) out.add(inf);
+		}
+		return out;
+	}
+
 	public static boolean isFileSupported(File target) {
 		try {
 			AudioSystem.getAudioFileFormat(target);

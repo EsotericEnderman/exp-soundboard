@@ -23,7 +23,7 @@ public class SoundPlayer implements Runnable {
     public final AtomicBoolean paused;
 
     public SoundPlayer(AudioMaster master, File sound, SourceDataLine output, int index)
-            throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+            throws UnsupportedAudioFileException, IOException {
         this.master = master;
         this.sound = sound;
         this.output = output;
@@ -42,6 +42,7 @@ public class SoundPlayer implements Runnable {
             }
         } catch (UnsupportedAudioFileException uafe) {
             logger.log(Level.INFO, "Target file: \"" + sound.getName() + "\" is unsupported natively, using converted format");
+            throw uafe;
         }
 
         logger.log(Level.INFO, "Initialized sound player on: \"" + sound.getName() + "\"");
