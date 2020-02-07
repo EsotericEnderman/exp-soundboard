@@ -175,7 +175,7 @@ public class AudioMaster {
 		return outputs[index];
 	}
 
-	public void setOutput(int index, Mixer.Info outputInfo) throws IllegalArgumentException, NullPointerException {
+	public void setOutput(int index, Mixer.Info outputInfo) throws IllegalArgumentException {
 		outputs[index] = AudioSystem.getMixer(outputInfo);
 	}
 
@@ -190,50 +190,55 @@ public class AudioMaster {
 
 		// mark all to wait, wait until they are all at waiting
 		// update all their gains, marking them as playing and notifying them when done
-
 		logger.log(Level.INFO, "Pausing all sounds for gain update");
 		List<PlayerState> updating = new ArrayList<PlayerState>();
 		for (SoundPlayer player : active) {
-			if (player.state.get() == PlayerState.PLAYING) {
-				player.state.compareAndSet(PlayerState.PLAYING, PlayerState.WAIT);
-				while(player.state.get() != PlayerState.WAITING); // TODO: check replacing with a hot potato wait (one waits for notify, then the other)
-				player.updateGain(gain);
-				player.state.compareAndSet(PlayerState.WAITING, PlayerState.PLAYING);
-				player.state.notify();
-			} else {
-				player.updateGain(gain);
+			if (index == player.index) {
+				if (player.state.get() == PlayerState.PLAYING) {
+					player.state.compareAndSet(PlayerState.PLAYING, PlayerState.WAIT);
+					while(player.state.get() != PlayerState.WAITING); // TODO: check replacing with a hot potato wait (one waits for notify, then the other)
+					if (!player.updateGain(gain));
+					player.state.compareAndSet(PlayerState.WAITING, PlayerState.PLAYING);
+					synchronized (player.state) {
+						player.state.notify();
+					}
+				} else {
+					player.updateGain(gain);
+				}
 			}
 		}
 	}
 
-	// --- Player methods --- //
-
-
 	// --- Global Audio Controls --- //
 
 	public void stopAll() {
-		logger.log(Level.INFO, "Stopping all playing sounds");
+		logger.log(Level.INFO, "Halting all playing sounds");
 		for (SoundPlayer player : active) {
 			player.state.compareAndSet(PlayerState.PLAYING, PlayerState.FINISHED); // TODO: shouldn't have concurrency errors, needs verification
-			logger.log(Level.INFO, "Removed thread: \"" + player + "\"");
+			logger.log(Level.INFO, "Halted thread: \"" + player + "\"");
 		}
-		active.clear();
 	}
 
 	public void pauseAll() {
 		logger.log(Level.INFO, "Pausing all playing sounds");
 		for (SoundPlayer player : active) {
-			player.state.compareAndSet(PlayerState.PLAYING, PlayerState.PAUSED);
-			logger.log(Level.INFO, "Paused thread: \"" + player + "\"");
+			if (player.state.get() == PlayerState.PLAYING) {
+				player.state.compareAndSet(PlayerState.PLAYING, PlayerState.PAUSED);
+				logger.log(Level.INFO, "Paused thread: \"" + player + "\"");
+			}
 		}
 	}
 
 	public void resumeAll() {
 		logger.log(Level.INFO, "Unpausing all paused sounds");
 		for (SoundPlayer player : active) {
-			player.state.compareAndSet(PlayerState.PAUSED, PlayerState.PLAYING);
-			player.state.notify();
-			logger.log(Level.INFO, "Unpaused thead: \"" + player + "\"");
+			if (player.state.get() == PlayerState.PAUSED) {
+				player.state.compareAndSet(PlayerState.PAUSED, PlayerState.PLAYING);
+				synchronized (player.state) {
+					player.state.notify();
+				}
+				logger.log(Level.INFO, "Unpaused thead: \"" + player + "\"");
+			}
 		}
 	}
 
