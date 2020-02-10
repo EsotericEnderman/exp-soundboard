@@ -69,10 +69,10 @@ public class AudioMaster {
 	}
 
 	public static boolean startMP3Decoder() {
-		InputStream loaderfile = AudioMaster.class.getClassLoader().getResourceAsStream("loader.mp3");
+		InputStream loaderFile = AudioMaster.class.getClassLoader().getResourceAsStream("loader.mp3");
 		try {
-			AudioSystem.getAudioFileFormat(loaderfile);
-			AudioInputStream stream = AudioSystem.getAudioInputStream(loaderfile);
+			AudioSystem.getAudioFileFormat(loaderFile);
+			AudioInputStream stream = AudioSystem.getAudioInputStream(loaderFile);
 			stream.close();
 			return true;
 		} catch (UnsupportedAudioFileException | IOException e) {
@@ -80,7 +80,7 @@ public class AudioMaster {
 		}
 	}
 
-	private AudioFormat modDecodeFormat; // TODO format for modified speed, mult samplerate by float in [0,1]
+	//private AudioFormat modDecodeFormat; // TODO format for modified speed, mult samplerate by float in [0,1]
 	public final ThreadGroup audioGroup = new ThreadGroup("Audio");
 
 	private ThreadPoolExecutor audioThreadManager;
@@ -90,15 +90,8 @@ public class AudioMaster {
 	private Mixer[] outputs;
 	private float[] gains;
 
-	public AudioMaster(int count) {
-		this(count, new Mixer[0]);
-	}
-
-	public AudioMaster(Mixer... mixers) {
-		this(mixers.length, mixers);
-	}
-
 	public AudioMaster(int count, Mixer... mixers) {
+		if (count < 1) throw new IllegalArgumentException("Number of outputs must be a positive non-zero number");
 
 		// setup mixers, copying in the given
 		int min = mixers.length < count ? mixers.length : count;

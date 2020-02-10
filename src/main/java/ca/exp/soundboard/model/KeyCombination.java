@@ -78,11 +78,11 @@ public class KeyCombination {
 
     // --- Serialization --- //
 
-    static final int netiveKeySize = Integer.BYTES * 5 + Character.BYTES; // size of all relevant nativeKey fields in bytes
+    static final int nativeKeySize = Integer.BYTES * 5 + Character.BYTES; // size of all relevant nativeKey fields in bytes
 
     public static KeyCombination fromData(byte[] data) {
         // reads from a byte array each nativeKey field, in reverse order to the other method
-        ByteBuffer buffer = ByteBuffer.allocate(netiveKeySize);
+        ByteBuffer buffer = ByteBuffer.allocate(nativeKeySize);
         buffer.put(data);
 
         int raw = buffer.getInt();
@@ -99,7 +99,7 @@ public class KeyCombination {
     public static byte[] toData(KeyCombination combo) {
         // assembles all relevant nativeKey fields into a byte array
         NativeKeyEvent key = combo.getNative();
-        ByteBuffer buffer = ByteBuffer.allocate(netiveKeySize);
+        ByteBuffer buffer = ByteBuffer.allocate(nativeKeySize);
 
         buffer.putInt(key.getRawCode());
         buffer.putInt(key.getKeyCode());
@@ -128,17 +128,6 @@ public class KeyCombination {
         this.nativeKeyEvent = nativeKeyEvent;
     }
 
-    public boolean equals(KeyCombination obj) {
-        NativeKeyEvent compare = obj.getNative();
-        if (nativeKeyEvent.getRawCode() != compare.getRawCode()) return false;
-        if (nativeKeyEvent.getKeyCode() != compare.getKeyCode()) return false;
-        if (nativeKeyEvent.getKeyChar() != compare.getKeyChar()) return false;
-        if (nativeKeyEvent.getKeyLocation() != compare.getKeyLocation()) return false;
-        if (nativeKeyEvent.getID() != compare.getID()) return false;
-        if (nativeKeyEvent.getModifiers() != compare.getModifiers()) return false;
-        return true;
-    }
-
     @Override
     public String toString() {
         return asReadable(nativeKeyEvent);
@@ -151,5 +140,27 @@ public class KeyCombination {
 
     public byte[] asData() {
         return KeyCombination.toData(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        KeyCombination that = (KeyCombination) o;
+        NativeKeyEvent compare = that.getNative();
+        if (nativeKeyEvent.getRawCode() != compare.getRawCode()) return false;
+        if (nativeKeyEvent.getKeyCode() != compare.getKeyCode()) return false;
+        if (nativeKeyEvent.getKeyChar() != compare.getKeyChar()) return false;
+        if (nativeKeyEvent.getKeyLocation() != compare.getKeyLocation()) return false;
+        if (nativeKeyEvent.getID() != compare.getID()) return false;
+        if (nativeKeyEvent.getModifiers() != compare.getModifiers()) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return nativeKeyEvent.hashCode();
     }
 }
