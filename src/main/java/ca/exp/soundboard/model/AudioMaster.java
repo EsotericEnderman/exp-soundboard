@@ -9,7 +9,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.sound.sampled.*;
 
@@ -118,7 +117,7 @@ public class AudioMaster {
 		audioThreadManager.setCorePoolSize(10);
 		audioThreadManager.prestartCoreThread();
 
-		logger.log(Level.INFO, "Initialized " + this.getClass().getName() + " with " + count + " outputs");
+		logger.info( "Initialized " + this.getClass().getName() + " with " + count + " outputs");
 	}
 
 	public void play(File sound, int... indices) throws LineUnavailableException, UnsupportedAudioFileException, IOException, IllegalArgumentException {
@@ -153,7 +152,7 @@ public class AudioMaster {
 			// make a thread for each output
 			players[i] = new SoundPlayer(this, sound, speakers[i], index);
 			active.add(players[i]);
-			logger.log(Level.INFO, "Dispatching thread to play: \"" + sound.getName() + "\" on " + speaker.getMixerInfo().getName());
+			logger.info( "Dispatching thread to play: \"" + sound.getName() + "\" on " + speaker.getMixerInfo().getName());
 		}
 
 		// send threads to player
@@ -205,32 +204,32 @@ public class AudioMaster {
 	// --- Global Audio Controls --- //
 
 	public void stopAll() {
-		logger.log(Level.INFO, "Halting all playing sounds");
+		logger.info( "Halting all playing sounds");
 		for (SoundPlayer player : active) {
 			player.state.compareAndSet(PlayerState.PLAYING, PlayerState.FINISHED); // TODO: shouldn't have concurrency errors, needs verification
-			logger.log(Level.INFO, "Halted thread: \"" + player + "\"");
+			logger.info( "Halted thread: \"" + player + "\"");
 		}
 	}
 
 	public void pauseAll() {
-		logger.log(Level.INFO, "Pausing all playing sounds");
+		logger.info( "Pausing all playing sounds");
 		for (SoundPlayer player : active) {
 			if (player.state.get() == PlayerState.PLAYING) {
 				player.state.compareAndSet(PlayerState.PLAYING, PlayerState.PAUSED);
-				logger.log(Level.INFO, "Paused thread: \"" + player + "\"");
+				logger.info( "Paused thread: \"" + player + "\"");
 			}
 		}
 	}
 
 	public void resumeAll() {
-		logger.log(Level.INFO, "Unpausing all paused sounds");
+		logger.info( "Unpausing all paused sounds");
 		for (SoundPlayer player : active) {
 			if (player.state.get() == PlayerState.PAUSED) {
 				player.state.compareAndSet(PlayerState.PAUSED, PlayerState.PLAYING);
 				synchronized (player.state) {
 					player.state.notify();
 				}
-				logger.log(Level.INFO, "Unpaused thead: \"" + player + "\"");
+				logger.info( "Unpaused thead: \"" + player + "\"");
 			}
 		}
 	}

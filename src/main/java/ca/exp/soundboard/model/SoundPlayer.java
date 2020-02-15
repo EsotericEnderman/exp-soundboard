@@ -35,7 +35,6 @@ public class SoundPlayer implements Runnable {
         this.index = index;
         logger = Logger.getLogger(this.getClass().getName());
         state = new AtomicReference<PlayerState>(PlayerState.RESETTING);
-        name = Thread.currentThread().getName() + "/" + sound.getName();
 
         // grab formats from file
         try {
@@ -45,16 +44,17 @@ public class SoundPlayer implements Runnable {
                 clip = AudioSystem.getAudioInputStream(AudioMaster.decodeFormat, clip);
             }
         } catch (UnsupportedAudioFileException uafe) {
-            logger.log(Level.INFO, "Target file: \"" + sound.getName() + "\" is unsupported");
+            logger.info( "Target file: \"" + sound.getName() + "\" is unsupported");
             throw uafe;
         }
 
-        logger.log(Level.INFO, "Initialized sound player on: \"" + sound.getName() + "\"");
+        logger.info( "Initialized sound player on: \"" + sound.getName() + "\"");
     }
 
     public void run() {
 
         // setup buffer for containing samples of audio to be played
+        name = Thread.currentThread().getName() + "/" + sound.getName();
         byte[] buffer = new byte[output.getBufferSize()];
         int bytesRead = 0;
         int bytesWritten = 0;
@@ -70,13 +70,13 @@ public class SoundPlayer implements Runnable {
                     break;
                 case READY:
                     state.compareAndSet(PlayerState.READY, PlayerState.PLAYING);
-                    logger.log(Level.INFO, "Starting playback");
+                    logger.info( "Starting playback");
                     /*try {
                         synchronized (state) {
                             state.wait();
                         }
                         state.compareAndSet(PlayerState.READY, PlayerState.PLAYING);
-                        logger.log(Level.INFO, "Starting playback");
+                        logger.info( "Starting playback");
                     } catch (InterruptedException ie) {
                         logger.log(Level.WARNING, "Failed to wait for starting signal", ie);
                     }*/
@@ -96,23 +96,23 @@ public class SoundPlayer implements Runnable {
                         bytesWritten = output.write(buffer, 0, bytesRead);
 
                         if (bytesWritten < bytesRead) {
-                            logger.log(Level.WARNING, "Line closed before stream was finished!");
+                            logger.warning( "Line closed before stream was finished!");
                             state.compareAndSet(PlayerState.PLAYING, PlayerState.FINISHED);
                             break;
                         }
                     } else {
                         // once there is nothing left to write
-                        logger.log(Level.INFO, "Reached end of stream");
+                        logger.info( "Reached end of stream");
                         state.compareAndSet(PlayerState.PLAYING, PlayerState.FINISHED);
                     }
                     break;
                 case PAUSED:
                     try {
-                        logger.log(Level.INFO, "Paused");
+                        logger.info( "Paused");
                         synchronized (state) {
                             state.wait();
                         }
-                        logger.log(Level.INFO, "Unpaused");
+                        logger.info( "Unpaused");
                     } catch (InterruptedException ie) {
                         logger.log(Level.WARNING, "Failed to pause thread: ", ie);
                         state.compareAndSet(PlayerState.PAUSED, PlayerState.FINISHED);
@@ -120,12 +120,12 @@ public class SoundPlayer implements Runnable {
                     break;
                 case WAIT:
                     try {
-                        logger.log(Level.INFO, "Waiting for signal");
+                        logger.info( "Waiting for signal");
                         synchronized (state) {
                             state.compareAndSet(PlayerState.WAIT, PlayerState.WAITING);
                             state.wait();
                         }
-                        logger.log(Level.INFO, "Finished waiting");
+                        logger.info( "Finished waiting");
                         // waiting is done, continue playing
                     } catch (InterruptedException ie) {
                         logger.log(Level.WARNING, "Failed to wait: ", ie);
@@ -134,11 +134,11 @@ public class SoundPlayer implements Runnable {
                     break;
                 case WAITING:
                     try {
-                        logger.log(Level.INFO, "Resuming wait for signal");
+                        logger.info( "Resuming wait for signal");
                         synchronized (state) {
                             state.wait();
                         }
-                        logger.log(Level.INFO, "Finished waiting");
+                        logger.info( "Finished waiting");
                     } catch (InterruptedException ie) {
                         logger.log(Level.WARNING, "Failed to continue waiting: ", ie);
                         state.compareAndSet(PlayerState.WAITING, PlayerState.FINISHED);
@@ -147,7 +147,7 @@ public class SoundPlayer implements Runnable {
                 case FINISHED:
                     // close remaining stream, clean buffer and release access to resource
                     try {
-                        logger.log(Level.INFO, "Stopping and cleaning up");
+                        logger.info( "Stopping and cleaning up");
                         clip.close();
                         output.drain();
                         output.flush();
@@ -167,7 +167,7 @@ public class SoundPlayer implements Runnable {
             }
         }
 
-        logger.log(Level.INFO, "Instance finished: \"" + sound.getName() + "\"");
+        logger.info( "Instance finished: \"" + sound.getName() + "\"");
     }
 
     @Override

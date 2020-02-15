@@ -160,7 +160,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 		if (selected != null) {
 			parent.entryController().start(getSelectedEntry());
 		} else {
-			// TODO: error state
+			logger.warning("Cannot edit no selection!");
 		}
 	}
 
@@ -168,14 +168,14 @@ public class MenuController extends GuiController implements ListChangeListener<
 	void onPlayPressed(ActionEvent event) {
 		Entry selected = getSelectedEntry();
 		if (selected != null) {
-			logger.log(Level.INFO, "Playing entry: \'" + selected.toString() + "\'");
+			logger.info( "Playing entry: \'" + selected.toString() + "\'");
 			try {
 				parent.getModel().getAudio().play(selected.getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
 			} catch (LineUnavailableException | UnsupportedAudioFileException | IOException | IllegalArgumentException e) {
 				logger.log(Level.WARNING, "Failed to play target file!", e);
 			}
 		} else {
-			logger.log(Level.WARNING, "Cannot play no selection!");
+			logger.warning( "Cannot play no selection!");
 		}
 	}
 
@@ -183,10 +183,10 @@ public class MenuController extends GuiController implements ListChangeListener<
 	void onRemovePressed(ActionEvent event) {
 		Entry selected = getSelectedEntry();
 		if (selected != null) {
-			logger.log(Level.INFO, "Removing selected entry");
+			logger.info( "Removing selected entry");
 			parent.getModel().getEntries().remove(selected);
 		} else {
-			logger.log(Level.WARNING, "Cannot remove no selection!");
+			logger.warning( "Cannot remove no selection!");
 		}
 	}
 
@@ -264,7 +264,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	}
 
 	public void closeMenu() {
-		logger.log(Level.INFO, "Main window closed, stopping");
+		logger.info( "Main window closed, stopping");
 		try {
 			parent.stop();
 		} catch (Exception e) {
@@ -274,12 +274,12 @@ public class MenuController extends GuiController implements ListChangeListener<
 	}
 
 	public void setPrimarySpeaker(Mixer.Info request) {
-		logger.log(Level.INFO, "Selected " + request.getName() + " as primary speaker");
+		logger.info( "Selected " + request.getName() + " as primary speaker");
 		parent.getModel().getAudio().setOutput(primaryIndex, request);
 	}
 
 	public void setSecondarySpeaker(Mixer.Info request) {
-		logger.log(Level.INFO, "Selected " + request.getName() + " as secondary speaker");
+		logger.info( "Selected " + request.getName() + " as secondary speaker");
 		parent.getModel().getAudio().setOutput(secondaryIndex, request);
 	}
 
@@ -291,20 +291,20 @@ public class MenuController extends GuiController implements ListChangeListener<
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/collections/ListChangeListener.Change.html
 		while (change.next()) {
 			if (change.wasPermutated()) {
-				logger.log(Level.INFO, "Reflecting entry list permutation in GUI");
+				logger.info( "Reflecting entry list permutation in GUI");
 				for (int i = change.getFrom(); i < change.getTo(); ++i) {
 					// permutate // TODO use this
 				}
 			} else if (change.wasUpdated()) {
-				logger.log(Level.INFO, "Reflecting entry list update in GUI");
+				logger.info( "Reflecting entry list update in GUI");
 				// update item // TODO use this
 			} else {
 				for (Entry remitem : change.getRemoved()) {
-					logger.log(Level.INFO, "Reflecting entry list reduction in GUI");
+					logger.info( "Reflecting entry list reduction in GUI");
 					tableList.remove(remitem);
 				}
 				for (Entry additem: change.getAddedSubList()) {
-					logger.log(Level.INFO, "Reflecting entry list expansion in GUI");
+					logger.info( "Reflecting entry list expansion in GUI");
 					tableList.add(additem);
 				}
 			}
@@ -314,7 +314,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	@Override
 	void preload(SoundboardStage parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
-		logger.log(Level.INFO, "Initializing main menu controller");
+		logger.info( "Initializing main menu controller");
 
 		// Set up each column in the table to pull the appropriate data from an Entry within
 		// the table's internal list.
@@ -385,7 +385,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	}
 
 	public void reset() {
-		logger.log(Level.INFO, "Resetting GUI elements");
+		logger.info( "Resetting GUI elements");
 
 		// The zero-th element is preselected to prevent the user from starting with a null audio device.
 		init(AudioSystem.getMixerInfo(), parent.getModel().getEntries(), 0, 0, false, false, false);

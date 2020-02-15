@@ -78,7 +78,7 @@ public abstract class GuiController {
     public abstract void stop();
 
     public void forceStop() {
-        logger.log(Level.INFO, "Force stopping " + this.getClass().getName());
+        logger.info( "Force stopping " + this.getClass().getName());
         stage.close();
         active = false;
     }

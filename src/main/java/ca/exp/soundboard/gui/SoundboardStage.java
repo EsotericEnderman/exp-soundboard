@@ -148,7 +148,7 @@ public class SoundboardStage extends Application {
 		logger = Logger.getLogger(this.getClass().getName());
 		FXMLLoader loader;
 
-		logger.log(Level.INFO, "Loading GUI controllers");
+		logger.info( "Loading GUI controllers");
 
 		// load fxml files and controllers, pass to fields
 		loader = new FXMLLoader();
@@ -179,7 +179,7 @@ public class SoundboardStage extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		logger.log(Level.INFO, "Initializing GUI controllers");
+		logger.info( "Initializing GUI controllers");
 
 		// init JavaFX objects (can only be done in JavaFX thread), initialize with arguments
 		menuScene = new Scene(mainMenu);

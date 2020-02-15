@@ -34,7 +34,7 @@ public class SoundboardModel {
         logger = Logger.getLogger(this.getClass().getName());
         modelPreferences = Preferences.userRoot().node(this.getClass().getCanonicalName());
 
-        logger.log(Level.INFO, "Initialized " + this.getClass().getName() + " with " + speakerCount + " outputs");
+        logger.info( "Initialized " + this.getClass().getName() + " with " + speakerCount + " outputs");
     }
 
     public AudioMaster getAudio() {
