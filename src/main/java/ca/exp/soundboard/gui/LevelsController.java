@@ -97,8 +97,14 @@ public class LevelsController extends GuiController {
 
     @Override
     public void stop() {
-        logger.log(Level.INFO, "Closing levels controller");
-        stage.close();
-        active = false;
+        if (active == true) {
+            logger.info( "Closing levels controller");
+            parent.getModel().getAudio().updateGain();
+            parent.getModel().getAudio().updateGain();
+            stage.close();
+            active = false;
+        } else {
+            logger.info("Cannot close closed controller!");
+        }
     }
 }

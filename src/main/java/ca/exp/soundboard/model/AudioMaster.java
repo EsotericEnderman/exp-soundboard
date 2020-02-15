@@ -179,24 +179,22 @@ public class AudioMaster {
 
 	public void setGain(int index, float gain) {
 		gains[index] = gain;
+	}
 
-		// mark all to wait, wait until they are all at waiting
-		// update all their gains, marking them as playing and notifying them when done
-		logger.log(Level.INFO, "Pausing all sounds for gain update");
+	public void updateGain() {
+		logger.info( "Pausing all sounds for gain update");
 		List<PlayerState> updating = new ArrayList<PlayerState>();
 		for (SoundPlayer player : active) {
-			if (index == player.index) {
-				if (player.state.get() == PlayerState.PLAYING) {
-					player.state.compareAndSet(PlayerState.PLAYING, PlayerState.WAIT);
-					while(player.state.get() != PlayerState.WAITING); // TODO: check replacing with a hot potato wait (one waits for notify, then the other)
-					if (!player.updateGain(gain));
-					player.state.compareAndSet(PlayerState.WAITING, PlayerState.PLAYING);
-					synchronized (player.state) {
-						player.state.notify();
-					}
-				} else {
-					player.updateGain(gain);
+			if (player.state.get() == PlayerState.PLAYING) {
+				player.state.compareAndSet(PlayerState.PLAYING, PlayerState.WAIT);
+				while(player.state.get() != PlayerState.WAITING); // TODO: check replacing with a hot potato wait (one waits for notify, then the other)
+				if (!player.updateGain(gains[player.index]));
+				player.state.compareAndSet(PlayerState.WAITING, PlayerState.PLAYING);
+				synchronized (player.state) {
+					player.state.notify();
 				}
+			} else {
+				player.updateGain(gains[player.index]);
 			}
 		}
 	}
