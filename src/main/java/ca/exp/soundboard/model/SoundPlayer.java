@@ -21,7 +21,7 @@ public class SoundPlayer implements Runnable {
     private SourceDataLine output;
     private AudioInputStream clip;
     private AudioFormat clipFormat;
-    private final String name;
+    private String name;
     public final int index;
 
     public final AtomicReference<PlayerState> state;
