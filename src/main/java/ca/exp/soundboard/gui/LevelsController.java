@@ -6,11 +6,13 @@ import java.util.logging.Level;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Slider;
 import javafx.stage.Stage;
 import ca.exp.soundboard.model.AudioMaster;
+import javafx.stage.WindowEvent;
 
 import javax.sound.sampled.LineUnavailableException;
 
@@ -69,6 +71,13 @@ public class LevelsController extends GuiController {
                 // TODO update mic injector with new gain newValue.floatValue()
             }
         });
+
+        // overwrites default behaviour from GuiController, calls a regular stop
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent event) {
+                stop();
+            }
+        });
     }
 
     public void reset() {
@@ -97,7 +106,7 @@ public class LevelsController extends GuiController {
 
     @Override
     public void stop() {
-        if (active == true) {
+        if (active) {
             logger.info( "Closing levels controller");
             parent.getModel().getAudio().updateGain();
             parent.getModel().getAudio().updateGain();
