@@ -61,5 +61,6 @@ stderr.txt.lck
 .scala_dependencies
 .worksheet
 
+# Intellij Project Files
 /.idea/workspace.xml
 /.idea/libraries/

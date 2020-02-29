@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/EXP-Remake/EXP-Remake.iml" filepath="$PROJECT_DIR$/EXP-Remake/EXP-Remake.iml" />
+      <module fileurl="file://$PROJECT_DIR$/EXP-Rewrite/EXP-Rewrite.iml" filepath="$PROJECT_DIR$/EXP-Rewrite/EXP-Rewrite.iml" />
       <module fileurl="file://$PROJECT_DIR$/EXP-soundboard.iml" filepath="$PROJECT_DIR$/EXP-soundboard.iml" />
     </modules>
   </component>
