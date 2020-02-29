@@ -33,9 +33,9 @@
             <artifactId>guava</artifactId>
             <version>18.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/it.sauronsoftware/jave -->
+        <!-- https://mvnrepository.com/artifact/com.github.dadiyang/jave -->
         <dependency>
-            <groupId>it.sauronsoftware</groupId>
+            <groupId>com.github.dadiyang</groupId>
             <artifactId>jave</artifactId>
             <version>1.0.2</version>
         </dependency>
@@ -57,12 +57,13 @@
             <artifactId>mp3spi</artifactId>
             <version>1.9.5-1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.tritonus/tritonus-share -->
+        <!-- https://mvnrepository.com/artifact/com.googlecode.soundlibs/tritonus-share -->
         <dependency>
-            <groupId>org.tritonus</groupId>
+            <groupId>com.googlecode.soundlibs</groupId>
             <artifactId>tritonus-share</artifactId>
-            <version>0.3.6</version>
+            <version>0.3.7-1</version>
         </dependency>
+
     </dependencies>
     <parent>
         <artifactId>exp-soundboard</artifactId>

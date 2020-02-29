@@ -15,7 +15,8 @@
     <orderEntry type="library" name="Maven: com.1stleg:jnativehook:2.0.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.2.4" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
-    <orderEntry type="library" name="Maven: it.sauronsoftware:jave:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: com.github.dadiyang:jave:1.0.2" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" name="Maven: javazoom:jlayer:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.miglayout:miglayout-swing:5.0" level="project" />
     <orderEntry type="library" name="Maven: com.miglayout:miglayout-core:5.0" level="project" />
@@ -23,6 +24,5 @@
     <orderEntry type="library" name="Maven: com.googlecode.soundlibs:jlayer:1.0.1-1" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:3.8.2" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.soundlibs:tritonus-share:0.3.7-1" level="project" />
-    <orderEntry type="library" name="Maven: org.tritonus:tritonus-share:0.3.6" level="project" />
   </component>
 </module>
