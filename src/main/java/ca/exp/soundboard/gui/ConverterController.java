@@ -130,7 +130,7 @@ public class ConverterController extends GuiController {
 	@Override
 	void preload(SoundboardStage parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
-		logger.log(Level.INFO, "Initializing converter controller");
+		logger.info( "Initializing converter controller");
 
 		chooser = new FileChooser();
 		chooser.getExtensionFilters().addAll(FileIO.standard_audio, FileIO.all_files);

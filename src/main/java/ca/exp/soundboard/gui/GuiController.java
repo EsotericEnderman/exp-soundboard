@@ -61,7 +61,6 @@ public abstract class GuiController {
 
         // set default action on close button to be force stop
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
             public void handle(WindowEvent event) {
                 forceStop();
             }
@@ -79,7 +78,7 @@ public abstract class GuiController {
     public abstract void stop();
 
     public void forceStop() {
-        logger.log(Level.INFO, "Force stopping " + this.getClass().getName());
+        logger.info( "Force stopping " + this.getClass().getName());
         stage.close();
         active = false;
     }

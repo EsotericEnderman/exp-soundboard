@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.*;
 
 import ca.exp.soundboard.util.ImmediateStreamHandler;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
@@ -30,30 +31,6 @@ import javax.sound.sampled.*;
 public class SoundboardStage extends Application {
 
 	static Logger rootLogger = Logger.getLogger("");
-
-	/**
-	 * Poll the system for all available audio devices, only keep ones who have a valid output (SourceLine)
-	 * @return A list containing all devices with valid output
-	 */
-	public static List<Mixer.Info> getValidMixers() {
-
-		// list all mixers
-		Mixer device;
-		Line.Info[] sourceInfos;
-		Mixer.Info[] deviceInfos = AudioSystem.getMixerInfo();
-		List<Mixer.Info> choices = new ArrayList<Mixer.Info>();
-		for (int i = 0; i < deviceInfos.length; i++) {
-			device = AudioSystem.getMixer(deviceInfos[i]);
-			sourceInfos = device.getSourceLineInfo();
-
-			// keep mixers with 2 or more source lines / output lines
-			if (sourceInfos.length > 1) {
-				choices.add(deviceInfos[i]);
-			}
-		}
-
-		return choices;
-	}
 
 	private SoundboardModel model;
 	private Logger logger;
@@ -96,24 +73,26 @@ public class SoundboardStage extends Application {
 
 		/// The following handlers split logs by Level, anything below warning goes to System.out, the rest to System.err
 
-		// logging to System.out
-		ImmediateStreamHandler outHand = new ImmediateStreamHandler(System.out, new LogFormatter());
-		outHand.setFilter(new Filter() {
-			@Override
+		// filters for splitting log output to different handlers
+		Filter outFilt = new Filter() {
 			public boolean isLoggable(LogRecord record) {
 				return record.getLevel().intValue() < Level.WARNING.intValue();
 			}
-		});
+		};
+		Filter errFilt = new Filter() {
+			public boolean isLoggable(LogRecord record) {
+				return !(record.getLevel().intValue() < Level.WARNING.intValue());
+			}
+		};
+
+		// logging to System.out
+		ImmediateStreamHandler outHand = new ImmediateStreamHandler(System.out, new LogFormatter());
+		outHand.setFilter(outFilt);
 		rootLogger.addHandler(outHand);
 
 		// logging to System.err
 		ImmediateStreamHandler errHand = new ImmediateStreamHandler(System.err, new LogFormatter());
-		errHand.setFilter(new Filter() {
-			@Override
-			public boolean isLoggable(LogRecord record) {
-				return !(record.getLevel().intValue() < Level.WARNING.intValue());
-			}
-		});
+		errHand.setFilter(errFilt);
 		rootLogger.addHandler(errHand);
 
 		// logging System.out to file
@@ -121,15 +100,11 @@ public class SoundboardStage extends Application {
 			// logging to file
 			FileHandler fHand = new FileHandler("stdout.txt");
 			fHand.setFormatter(new LogFormatter());
-			fHand.setFilter(new Filter() {
-				@Override
-				public boolean isLoggable(LogRecord record) {
-					return record.getLevel().intValue() < Level.WARNING.intValue();
-				}
-			});
+			fHand.setFilter(outFilt);
 			rootLogger.addHandler(fHand);
 		} catch (IOException ioe) {
 			rootLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
+			// TODO: exit if failed to log to file? raise to user?
 		}
 
 		// logging System.err to file
@@ -137,7 +112,7 @@ public class SoundboardStage extends Application {
 			// logging to file
 			FileHandler fHand = new FileHandler("stderr.txt");
 			fHand.setFormatter(new LogFormatter());
-			fHand.setLevel(Level.WARNING);
+			fHand.setFilter(errFilt);
 			rootLogger.addHandler(fHand);
 		} catch (IOException ioe) {
 			rootLogger.log(Level.SEVERE, "Failed starting log to stdout.txt", ioe);
@@ -149,7 +124,6 @@ public class SoundboardStage extends Application {
 
 		// Adding a filter to chop off the extra line ending off of jnativehook logs
 		nativeLogger.setFilter(new Filter() {
-			@Override
 			public boolean isLoggable(LogRecord record) {
 				String in = record.getMessage();
 				String out = in.substring(0, in.length() - 1);
@@ -166,6 +140,7 @@ public class SoundboardStage extends Application {
 	public void init() throws Exception {
 		super.init();
 		startNativeKey();
+		AudioMaster.startMP3Decoder();
 
 		// TODO look into calling getParameters() here
 
@@ -173,7 +148,7 @@ public class SoundboardStage extends Application {
 		logger = Logger.getLogger(this.getClass().getName());
 		FXMLLoader loader;
 
-		logger.log(Level.INFO, "Loading GUI controllers");
+		logger.info( "Loading GUI controllers");
 
 		// load fxml files and controllers, pass to fields
 		loader = new FXMLLoader();
@@ -204,12 +179,13 @@ public class SoundboardStage extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		logger.log(Level.INFO, "Initializing GUI controllers");
+		logger.info( "Initializing GUI controllers");
 
 		// init JavaFX objects (can only be done in JavaFX thread), initialize with arguments
 		menuScene = new Scene(mainMenu);
 		menuStage = primaryStage;
 		menuStage.setScene(menuScene);
+		//menuStage.setOnCloseRequest(e -> Platform.exit());
 		menuController.preload(this, menuStage, menuScene);
 		model.getEntries().addListener(menuController);
 
@@ -245,13 +221,11 @@ public class SoundboardStage extends Application {
 	}
 
 	@Override
-	public void stop() throws Exception { // TODO: each controller reports it's being force closed twice?
+	public void stop() throws Exception {
 		super.stop();
-		menuController.forceStop();
-		entryController.forceStop();
-		settingsController.forceStop();
-		converterController.forceStop();
 		stopNativeKey();
+		Platform.exit();
+		System.exit(0);
 	}
 
 	private static void startNativeKey() {
@@ -259,6 +233,7 @@ public class SoundboardStage extends Application {
 			GlobalScreen.registerNativeHook();
 		} catch (NativeHookException nhe) {
 			rootLogger.log(Level.SEVERE, "Failed to register jnativehook!", nhe);
+			// TODO: exit on failure? report to user? relaunch?
 		}
 	}
 
@@ -292,22 +267,6 @@ public class SoundboardStage extends Application {
 
 	public SoundboardModel getModel() {
 		return model;
-	}
-
-	// Convenience method, makes the code for playing audio from a controller smaller
-	public boolean playEntry(Entry entry, int[] indices) {
-		try {
-			AudioMaster master = getModel().getAudio();
-			File target = entry.getFile();
-
-			// If the secondary check box is checked, return indices 0 and 1, otherwise just 0
-			master.play(target, indices);
-			logger.log(Level.INFO, "Played audio file: \"" + entry.getFile().getName() + "\"");
-			return true;
-		} catch (IOException | LineUnavailableException | UnsupportedAudioFileException | NullPointerException e) {
-			logger.log(Level.WARNING, "Error playing audio file: " + entry.getFile().getName() , e);
-			return false;
-		}
 	}
 
 	/**

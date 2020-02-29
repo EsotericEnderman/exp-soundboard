@@ -6,11 +6,13 @@ import java.util.logging.Level;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Slider;
 import javafx.stage.Stage;
 import ca.exp.soundboard.model.AudioMaster;
+import javafx.stage.WindowEvent;
 
 import javax.sound.sampled.LineUnavailableException;
 
@@ -51,33 +53,29 @@ public class LevelsController extends GuiController {
 
         // setup primary slider to change gain on primary speaker
         primarySlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                try {
-                    parent.getModel().getAudio().setGain(0, newValue.floatValue());
-                } catch (LineUnavailableException lue) {
-                    logger.log(Level.WARNING, "Failed to set gain of primary speaker: ", lue);
-                }
+                parent.getModel().getAudio().setGain(0, newValue.floatValue());
             }
         });
 
         // setup secondary slider to change gain on secondary speaker
         secondarySlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                try {
-                    parent.getModel().getAudio().setGain(1, newValue.floatValue());
-                } catch (LineUnavailableException lue) {
-                    logger.log(Level.WARNING, "Failed to set gain of secondary speaker: ", lue);
-                }
+                parent.getModel().getAudio().setGain(1, newValue.floatValue());
             }
         });
 
         // setup tertiary slider to change gain on mic injector
         injectorSlider.valueProperty().addListener(new ChangeListener<Number>() {
-            @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
                 // TODO update mic injector with new gain newValue.floatValue()
+            }
+        });
+
+        // overwrites default behaviour from GuiController, calls a regular stop
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent event) {
+                stop();
             }
         });
     }
@@ -99,21 +97,23 @@ public class LevelsController extends GuiController {
     public void start() {
         logger.log(Level.INFO, "Starting levels controller");
         reset();
+
         AudioMaster audio = parent.getModel().getAudio();
-        try {
-            init(audio.getGain(0), audio.getGain(1), 0f);
-        } catch (LineUnavailableException lue) {
-            logger.log(Level.WARNING, "Failed to fetch speaker gain from audio controller: ", lue);
-        } finally {
-            stage.show();
-            active = true;
-        }
+        init(audio.getGain(0), audio.getGain(1), 0f);
+        stage.show();
+        active = true;
     }
 
     @Override
     public void stop() {
-        logger.log(Level.INFO, "Closing levels controller");
-        stage.close();
-        active = false;
+        if (active) {
+            logger.info( "Closing levels controller");
+            parent.getModel().getAudio().updateGain();
+            parent.getModel().getAudio().updateGain();
+            stage.close();
+            active = false;
+        } else {
+            logger.info("Cannot close closed controller!");
+        }
     }
 }

@@ -23,17 +23,17 @@ public class SettingsListener implements NativeKeyListener {
         }
 
         logger = Logger.getLogger(this.getClass().getName());
-        logger.log(Level.INFO, "Settings Listener initialized");
+        logger.info( "Settings Listener initialized");
     }
 
     public void listenOn(SettingsController settings) {
-        logger.log(Level.INFO, "Listening for new hotkey");
+        logger.info( "Listening for new hotkey");
         GlobalScreen.addNativeKeyListener(this);
         this.settings = settings;
     }
 
     public void stopListening() {
-        logger.log(Level.INFO, "Stopping hotkey listening");
+        logger.info( "Stopping hotkey listening");
         GlobalScreen.removeNativeKeyListener(this);
         settings = null;
     }

@@ -6,7 +6,9 @@ import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
 
 /**
- * A slight modification of <tt>ConsoleHandler</> to work on streams other than <tt><System.err/tt>
+ * A slight modification of <tt>ConsoleHandler</> to work on streams other than <tt><System.err/tt>.
+ * Less efficient than <tt>ConsoleHandler</> since a flush is made every publish, but much better log
+ * retention on fatal crashes.
  */
 public class ImmediateStreamHandler extends StreamHandler {
 

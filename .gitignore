@@ -60,4 +60,6 @@ stderr.txt.lck
 .cache-main
 .scala_dependencies
 .worksheet
+
 /.idea/workspace.xml
+/.idea/libraries/

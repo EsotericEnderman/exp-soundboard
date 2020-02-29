@@ -1,11 +1,13 @@
 package ca.exp.soundboard.gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.*;
 
 import javax.sound.sampled.*;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,11 +26,15 @@ import ca.exp.soundboard.model.Entry;
 
 public class MenuController extends GuiController implements ListChangeListener<Entry> {
 
+	// --- Indices groups --- //
+
 	private static final int primaryIndex = 0;
 	private static final int secondaryIndex = 1;
 
 	private static final int[] singleIndices = {primaryIndex};
 	private static final int[] doubleIndices = {primaryIndex, secondaryIndex};
+
+	// --- GUI Layer Data --- //
 
 	private ObservableList<Entry> tableList;
 	private ObservableList<Mixer.Info> audioList;
@@ -150,17 +156,38 @@ public class MenuController extends GuiController implements ListChangeListener<
 
 	@FXML
 	void onEditPressed(ActionEvent event) {
-		parent.entryController().start(getSelectedEntry());
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			parent.entryController().start(getSelectedEntry());
+		} else {
+			logger.warning("Cannot edit no selection!");
+		}
 	}
 
 	@FXML
 	void onPlayPressed(ActionEvent event) {
-		playSelected();
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			logger.info( "Playing entry: \'" + selected.toString() + "\'");
+			try {
+				parent.getModel().getAudio().play(selected.getFile(), (secondaryChecked() ? doubleIndices : singleIndices));
+			} catch (LineUnavailableException | UnsupportedAudioFileException | IOException | IllegalArgumentException e) {
+				logger.log(Level.WARNING, "Failed to play target file!", e);
+			}
+		} else {
+			logger.warning( "Cannot play no selection!");
+		}
 	}
 
 	@FXML
 	void onRemovePressed(ActionEvent event) {
-		removeSelected();
+		Entry selected = getSelectedEntry();
+		if (selected != null) {
+			logger.info( "Removing selected entry");
+			parent.getModel().getEntries().remove(selected);
+		} else {
+			logger.warning( "Cannot remove no selection!");
+		}
 	}
 
 	@FXML
@@ -236,45 +263,23 @@ public class MenuController extends GuiController implements ListChangeListener<
 		return secondarySpeakerCheck.isSelected();
 	}
 
-	public boolean playSelected() {
-		logger.log(Level.INFO, "Playing selected entry");
-		Entry selected = getSelectedEntry();
-		if (selected != null) {
-			return parent.playEntry(selected, (secondaryChecked() ? doubleIndices : singleIndices));
-		} else {
-			logger.log(Level.WARNING, "Cannot play no selection!");
-			return false;
-		}
-	}
-
-	public boolean removeSelected() {
-		logger.log(Level.INFO, "Removing selected entry");
-		Entry selected = getSelectedEntry();
-		if (selected != null) {
-			return parent.getModel().getEntries().remove(selected);
-		} else {
-			// TODO report attempt to remove null entry.
-			logger.log(Level.WARNING, "Cannot remove no selection!");
-			return false;
-		}
-	}
-
 	public void closeMenu() {
-		logger.log(Level.INFO, "Main window closed, stopping");
+		logger.info( "Main window closed, stopping");
 		try {
 			parent.stop();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Failed to close the application!", e);
+			logger.log(Level.SEVERE, "Failed to close the application, exiting by System.exit()", e);
+			System.exit(1); // TODO: this may cause file system errors if anything is left open
 		}
 	}
 
 	public void setPrimarySpeaker(Mixer.Info request) {
-		logger.log(Level.INFO, "Selected " + request.getName() + " as primary speaker");
+		logger.info( "Selected " + request.getName() + " as primary speaker");
 		parent.getModel().getAudio().setOutput(primaryIndex, request);
 	}
 
 	public void setSecondarySpeaker(Mixer.Info request) {
-		logger.log(Level.INFO, "Selected " + request.getName() + " as secondary speaker");
+		logger.info( "Selected " + request.getName() + " as secondary speaker");
 		parent.getModel().getAudio().setOutput(secondaryIndex, request);
 	}
 
@@ -286,18 +291,20 @@ public class MenuController extends GuiController implements ListChangeListener<
 		// https://docs.oracle.com/javase/8/javafx/api/javafx/collections/ListChangeListener.Change.html
 		while (change.next()) {
 			if (change.wasPermutated()) {
+				logger.info( "Reflecting entry list permutation in GUI");
 				for (int i = change.getFrom(); i < change.getTo(); ++i) {
 					// permutate // TODO use this
 				}
 			} else if (change.wasUpdated()) {
+				logger.info( "Reflecting entry list update in GUI");
 				// update item // TODO use this
 			} else {
 				for (Entry remitem : change.getRemoved()) {
-					logger.log(Level.INFO, "Reflecting entry list reduction in GUI");
+					logger.info( "Reflecting entry list reduction in GUI");
 					tableList.remove(remitem);
 				}
 				for (Entry additem: change.getAddedSubList()) {
-					logger.log(Level.INFO, "Reflecting entry list expansion in GUI");
+					logger.info( "Reflecting entry list expansion in GUI");
 					tableList.add(additem);
 				}
 			}
@@ -307,7 +314,7 @@ public class MenuController extends GuiController implements ListChangeListener<
 	@Override
 	void preload(SoundboardStage parent, Stage stage, Scene scene) {
 		super.preload(parent, stage, scene);
-		logger.log(Level.INFO, "Initializing main menu controller");
+		logger.info( "Initializing main menu controller");
 
 		// Set up each column in the table to pull the appropriate data from an Entry within
 		// the table's internal list.
@@ -331,7 +338,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 
 		// Setup a factory to properly pull data from Mixer.Info to display in a combobox
 		Callback<ListView<Mixer.Info>, ListCell<Mixer.Info>> cellFactory = new Callback<ListView<Mixer.Info>, ListCell<Mixer.Info>>() {
-			@Override
 			public ListCell<Mixer.Info> call(ListView<Mixer.Info> param) {
 				return new ListCell<Mixer.Info>() {
 					@Override
@@ -355,7 +361,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 		primarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		primarySpeakerCombo.setCellFactory(cellFactory);
 		primarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
-			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
 				setPrimarySpeaker(newValue);
 			}
@@ -366,7 +371,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 		secondarySpeakerCombo.setButtonCell(cellFactory.call(null));
 		secondarySpeakerCombo.setCellFactory(cellFactory);
 		secondarySpeakerCombo.valueProperty().addListener(new ChangeListener<Mixer.Info>() {
-			@Override
 			public void changed(ObservableValue<? extends Mixer.Info> observable, Mixer.Info oldValue, Mixer.Info newValue) {
 				setSecondarySpeaker(newValue);
 			}
@@ -374,7 +378,6 @@ public class MenuController extends GuiController implements ListChangeListener<
 
 		// overwrites default behaviour from GuiController, closes the entire program when this window is closed
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-			@Override
 			public void handle(WindowEvent event) {
 				closeMenu();
 			}
@@ -382,23 +385,14 @@ public class MenuController extends GuiController implements ListChangeListener<
 	}
 
 	public void reset() {
-		logger.log(Level.INFO, "Resetting GUI elements");
-
-		audioList.clear();
-	    tableList.clear();
+		logger.info( "Resetting GUI elements");
 
 		// The zero-th element is preselected to prevent the user from starting with a null audio device.
-		primarySpeakerCombo.getSelectionModel().select(0);
-		secondarySpeakerCombo.getSelectionModel().select(0);
-
-		secondarySpeakerCheck.setSelected(false);
-
-		injectorCheck.setSelected(false);
-		pttHoldCheck.setSelected(false);
+		init(AudioSystem.getMixerInfo(), parent.getModel().getEntries(), 0, 0, false, false, false);
     }
 
-	private void init(Entry[] entries, int primaryIndex, int secondaryIndex, boolean secondaryCheck, boolean injector, boolean pttHold) {
-		audioList.addAll(SoundboardStage.getValidMixers());
+	private void init(Mixer.Info[] devices, Collection<? extends Entry> entries, int primaryIndex, int secondaryIndex, boolean secondaryCheck, boolean injector, boolean pttHold) {
+		audioList.addAll(devices);
 		tableList.addAll(entries);
 
 		primarySpeakerCombo.getSelectionModel().select(primaryIndex);

@@ -27,7 +27,6 @@ public class SettingsController extends GuiController {
 	private static final String defaultPress = "Press any key or key Combo...";
 	private static final String emptyHotkey = "";
 
-
 	private SettingsListener listener;
 	private TextField selectedField; // TODO: swap Object with TextField
 	private NativeKeyEvent workingHotkey;

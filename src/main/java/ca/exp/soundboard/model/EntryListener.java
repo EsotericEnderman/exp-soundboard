@@ -21,17 +21,17 @@ public class EntryListener implements NativeKeyListener {
 		}
 
 		logger = Logger.getLogger(this.getClass().getName());
-		logger.log(Level.INFO, "Entry Listener initialized");
+		logger.info( "Entry Listener initialized");
 	}
 
 	public void listenOn(EntryController display) {
-		logger.log(Level.INFO, "Listening for new hotkey");
+		logger.info( "Listening for new hotkey");
 		GlobalScreen.addNativeKeyListener(this);
 		this.display = display;
 	}
 
 	public void stopListening() {
-		logger.log(Level.INFO, "Stopping hotkey listening");
+		logger.info( "Stopping hotkey listening");
 		GlobalScreen.removeNativeKeyListener(this);
 		display = null;
 	}
