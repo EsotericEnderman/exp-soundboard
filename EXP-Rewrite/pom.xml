@@ -8,6 +8,62 @@
     <groupId>ca.exp.soundboard.rewrite</groupId>
     <artifactId>exp-rewrite</artifactId>
     <packaging>jar</packaging>
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.apple/AppleJavaExtensions -->
+        <dependency>
+            <groupId>com.apple</groupId>
+            <artifactId>AppleJavaExtensions</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook -->
+        <dependency>
+            <groupId>com.1stleg</groupId>
+            <artifactId>jnativehook</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/it.sauronsoftware/jave -->
+        <dependency>
+            <groupId>it.sauronsoftware</groupId>
+            <artifactId>jave</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javazoom/jlayer -->
+        <dependency>
+            <groupId>javazoom</groupId>
+            <artifactId>jlayer</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.miglayout/miglayout-swing -->
+        <dependency>
+            <groupId>com.miglayout</groupId>
+            <artifactId>miglayout-swing</artifactId>
+            <version>5.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.googlecode.soundlibs/mp3spi -->
+        <dependency>
+            <groupId>com.googlecode.soundlibs</groupId>
+            <artifactId>mp3spi</artifactId>
+            <version>1.9.5-1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.tritonus/tritonus-share -->
+        <dependency>
+            <groupId>org.tritonus</groupId>
+            <artifactId>tritonus-share</artifactId>
+            <version>0.3.6</version>
+        </dependency>
+    </dependencies>
     <parent>
         <artifactId>exp-soundboard</artifactId>
         <groupId>ca.exp.soundboard</groupId>
@@ -17,6 +73,29 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <!-- Build Settings -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>java</executable>
+                    <classpathScope>compile</classpathScope>
+                    <mainClass>ca.exp.soundboard.rewrite.gui.SoundboardFrame</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <!-- Extra Project Information -->
     <name>EXP-Soundboard/Rewrite</name>

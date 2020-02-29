@@ -6,14 +6,16 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="EXP-Rewrite" />
-        <module name="EXP-Remake" />
+        <module name="exp-remake" />
+        <module name="exp-rewrite" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="exp-remake" target="1.8" />
       <module name="EXP-Remake" target="1.8" />
+      <module name="exp-rewrite" target="1.8" />
       <module name="EXP-Rewrite" target="1.8" />
-      <module name="EXP-soundboard" target="1.5" />
+      <module name="EXP-soundboard" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
