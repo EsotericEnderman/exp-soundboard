@@ -11,11 +11,6 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-target/
-stdout.txt
-stdout.txt.lck
-stderr.txt
-stderr.txt.lck
 
 # External tool builders
 .externalToolBuilders/
@@ -60,7 +55,3 @@ stderr.txt.lck
 .cache-main
 .scala_dependencies
 .worksheet
-
-# Intellij Project Files
-/.idea/workspace.xml
-/.idea/libraries/
