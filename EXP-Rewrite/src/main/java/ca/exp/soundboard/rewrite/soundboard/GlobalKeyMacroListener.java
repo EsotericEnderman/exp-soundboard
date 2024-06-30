@@ -20,7 +20,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
         int pressed = e.getKeyCode();
         Utils.submitNativeKeyPressTime(NativeKeyEvent.getKeyText(pressed), e.getWhen());
         boolean alreadyPressed = false;
-        for (Iterator localIterator = this.pressedKeys.iterator(); localIterator.hasNext(); ) {
+        for (Iterator<Integer> localIterator = this.pressedKeys.iterator(); localIterator.hasNext(); ) {
             int i = ((Integer) localIterator.next()).intValue();
             if (pressed == i) {
                 alreadyPressed = true;
@@ -56,7 +56,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
     }
 
     public boolean isSpeedModKeyHeld() {
-        for (Iterator localIterator = this.pressedKeys.iterator(); localIterator.hasNext(); ) {
+        for (Iterator<Integer> localIterator = this.pressedKeys.iterator(); localIterator.hasNext(); ) {
             int key = ((Integer) localIterator.next()).intValue();
             if (key == Utils.slowKey) {
                 return true;
@@ -66,7 +66,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
     }
 
     public ArrayList<Integer> getPressedNativeKeys() {
-        ArrayList<Integer> array = new ArrayList();
+        ArrayList<Integer> array = new ArrayList<>();
         for (Integer i : this.pressedKeys) {
             array.add(new Integer(i.intValue()));
         }
@@ -78,7 +78,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
         if (isSpeedModKeyHeld()) {
             modspeed = true;
         }
-        ArrayList<SoundboardEntry> potential = new ArrayList();
+        ArrayList<SoundboardEntry> potential = new ArrayList<>();
         for (SoundboardEntry entry : SoundboardFrame.soundboard.getSoundboardEntries()) {
             int[] actKeys = entry.getActivationKeys();
             if ((actKeys.length > 0) && (entry.matchesPressed(this.pressedKeys))) {

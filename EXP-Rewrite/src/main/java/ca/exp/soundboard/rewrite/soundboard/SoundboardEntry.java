@@ -30,7 +30,7 @@ public class SoundboardEntry {
         int j = (arrayOfInt = this.activationKeysNumbers).length;
         for (int i = 0; i < j; i++) {
             int actkey = arrayOfInt[i];
-            for (Iterator localIterator = pressedKeys.iterator(); localIterator.hasNext(); ) {
+            for (Iterator<Integer> localIterator = pressedKeys.iterator(); localIterator.hasNext(); ) {
                 int presskey = ((Integer) localIterator.next()).intValue();
                 if (actkey == presskey) {
                     keysRemaining--;

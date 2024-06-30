@@ -133,11 +133,11 @@ public class SettingsFrame extends JFrame {
 
         JLabel lblMicrophone = new JLabel("Microphone:");
 
-        this.micComboBox = new JComboBox();
+        this.micComboBox = new JComboBox<>();
 
         JLabel lblVirtualAudioCable = new JLabel("Virtual Audio Cable:");
 
-        this.vacComboBox = new JComboBox();
+        this.vacComboBox = new JComboBox<>();
 
         JLabel lblUseMicInjector = new JLabel(
                 "*Use Mic Injector when your using a virtual audio cable as your input on other software.");
@@ -441,7 +441,7 @@ public class SettingsFrame extends JFrame {
     }
 
     private class PttKeysNativeKeyInputGetter implements KeyListener {
-        HashSet<Integer> pressedkeys = new HashSet();
+        HashSet<Integer> pressedkeys = new HashSet<>();
 
         private PttKeysNativeKeyInputGetter() {
         }

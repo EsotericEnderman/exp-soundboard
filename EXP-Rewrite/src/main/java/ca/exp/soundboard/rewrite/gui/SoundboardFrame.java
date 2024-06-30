@@ -83,7 +83,7 @@ public class SoundboardFrame extends JFrame {
 
         macInit();
 
-        this.secondarySpeakerComboBox = new JComboBox();
+        this.secondarySpeakerComboBox = new JComboBox<>();
         this.secondarySpeakerComboBox.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == 1) {
@@ -93,7 +93,7 @@ public class SoundboardFrame extends JFrame {
 
             }
         });
-        this.primarySpeakerComboBox = new JComboBox();
+        this.primarySpeakerComboBox = new JComboBox<>();
         this.primarySpeakerComboBox.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == 1) {
@@ -159,10 +159,10 @@ public class SoundboardFrame extends JFrame {
                 new String[]{"Sound Clip", "HotKeys"}) {
             private static final long serialVersionUID = 1L;
 
-            Class[] columnTypes = {String.class, String.class};
+            Class<?>[] columnTypes = {String.class, String.class};
             boolean[] columnEditables = new boolean[2];
 
-            public Class getColumnClass(int columnIndex) {
+            public Class<?> getColumnClass(int columnIndex) {
                 return this.columnTypes[columnIndex];
             }
 
@@ -364,10 +364,10 @@ public class SoundboardFrame extends JFrame {
                 new DefaultTableModel(entryArray, new String[]{"Sound Clip", "HotKeys", "File Locations", "Index"}) {
                     private static final long serialVersionUID = 1L;
 
-                    Class[] columnTypes = {String.class, String.class, String.class, Integer.TYPE};
+                    Class<?>[] columnTypes = {String.class, String.class, String.class, Integer.TYPE};
                     boolean[] columnEditables = new boolean[4];
 
-                    public Class getColumnClass(int columnIndex) {
+                    public Class<?> getColumnClass(int columnIndex) {
                         return this.columnTypes[columnIndex];
                     }
 
