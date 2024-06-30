@@ -6,8 +6,6 @@ import javax.swing.*;
 import java.io.File;
 
 public class AudioConverter {
-    private static final String mp3 = "libmp3lame";
-    private static final String wav = "pcm_s16le";
     private static final Integer mp3bitrate = new Integer(256000);
     private static final Integer channels = new Integer(2);
     private static final Integer samplerate = new Integer(44100);

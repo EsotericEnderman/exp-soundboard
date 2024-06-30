@@ -27,7 +27,6 @@ public class Utils {
     public static final float modifiedSpeedMax = 2.0F;
     public static final AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4,
             44100.0F, false);
-    private static final String prefsName = "Expenosa's SoundboardStage";
     public static AudioFormat modifiedPlaybackFormat;
     public static int stopKey = 19;
     public static int slowKey = 35;

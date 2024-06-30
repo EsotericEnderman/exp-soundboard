@@ -10,7 +10,6 @@ import java.net.URISyntaxException;
 
 public class UpdateConfirmFrame extends JFrame {
     private static final long serialVersionUID = -6700862565543741036L;
-    private static final String url = "https://sourceforge.net/projects/expsoundboard/";
     private JTextPane textPane;
 
     public UpdateConfirmFrame(String updateNotes) {

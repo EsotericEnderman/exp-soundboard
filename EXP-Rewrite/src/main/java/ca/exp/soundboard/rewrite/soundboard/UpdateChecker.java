@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UpdateChecker implements Runnable {
-    private static final String updatelink = "http://sourceforge.net/projects/expsoundboard/files/";
 
     public static String getUpdateNotes() {
         boolean internetconnection = false;

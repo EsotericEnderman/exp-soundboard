@@ -21,7 +21,6 @@ public class SettingsController extends GuiController {
 	private static final String defaultTextStyle = "-fx-control-inner-background: white;";
 	private static final String activeTextStyle = "-fx-control-inner-background: cyan;";
 
-	private static final String defaultSelect = "None Selected";
 	private static final String defaultPress = "Press any key or key Combo...";
 	private static final String emptyHotkey = "";
 
@@ -210,10 +209,6 @@ public class SettingsController extends GuiController {
 
 	@Override
 	public void reset() {
-
-	}
-
-	private void init() {
 
 	}
 

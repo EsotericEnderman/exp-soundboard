@@ -21,8 +21,6 @@ public class ConverterController extends GuiController {
 	private static final String defaultProgress = "N/A";
 
 	private FileChooser chooser;
-	private File inputFile;
-	private File outputFile;
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
@@ -106,7 +104,6 @@ public class ConverterController extends GuiController {
 		File selectedFile = chooser.showSaveDialog(stage);
 		if (selectedFile != null) {
 			outputText.setText(selectedFile.getAbsolutePath());
-			outputFile = selectedFile;
 		}
 	}
 
@@ -115,7 +112,6 @@ public class ConverterController extends GuiController {
 		File selectedFile = chooser.showOpenDialog(stage);
 		if (selectedFile != null) {
 			inputText.setText(selectedFile.getAbsolutePath());
-			inputFile = selectedFile;
 		}
 	}
 

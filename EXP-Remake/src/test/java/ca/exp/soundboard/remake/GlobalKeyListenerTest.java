@@ -30,8 +30,6 @@ public class GlobalKeyListenerTest implements NativeKeyListener {
 	}
 	
 	public String keyToReadable(NativeKeyEvent nativeEvent) {
-		String param = nativeEvent.paramString();
-		String[] params = param.split(",");
 		return null;
 	}
 

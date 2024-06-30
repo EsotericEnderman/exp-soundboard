@@ -7,8 +7,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 public class MicInjector extends Thread {
-    private static final int INTERNAL_BUFFER_SIZE = 8192;
-    private static final int bufferSize = 512;
     private static float fFrameRate = 44100.0F;
     private static final AudioFormat signedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, fFrameRate, 16, 2,
             4, fFrameRate, false);
@@ -16,7 +14,6 @@ public class MicInjector extends Thread {
     public static final DataLine.Info sourceDataLineInfo = new DataLine.Info(SourceDataLine.class, signedFormat, 8192);
     private static float gainLevel;
     private final byte[] inputBuffer;
-    private final long driftinterval = 1800000L;
     Mixer inputMixer;
     Mixer outputMixer;
     FloatControl gainControl;
@@ -27,7 +24,6 @@ public class MicInjector extends Thread {
     private TargetDataLine targetDataLine;
     private int bytesRead;
     private boolean bypass;
-    private boolean fadeOut;
     private boolean muted = false;
     private boolean run = false;
     private long nextDrift;
@@ -69,18 +65,6 @@ public class MicInjector extends Thread {
         return mixerNames.toArray(returnarray);
     }
 
-    private static float findLevel(byte[] buffer) {
-        double dB = 0.0D;
-        for (int i = 0; i < buffer.length; i++) {
-            dB = 20.0D * Math.log10(Math.abs(buffer[i] / 32767.0D));
-            if ((dB == Double.NEGATIVE_INFINITY) || (dB == Double.NaN)) { // (dB == NaN.0D)) { // TODO: fix this value
-                dB = -90.0D;
-            }
-        }
-        float level = (float) dB + 91.0F;
-        return level;
-    }
-
     public static float getdB(byte[] buffer) {
         double dB = 0.0D;
         short[] shortArray = new short[buffer.length / 2];
@@ -118,7 +102,6 @@ public class MicInjector extends Thread {
         String[] arrayOfString1;
         int j = (arrayOfString1 = mixers).length;
         for (int i = 0; i < j; i++) {
-            String x = arrayOfString1[i];
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
             for (int k = 0; k < m; k++) {
@@ -136,7 +119,6 @@ public class MicInjector extends Thread {
         String[] arrayOfString1;
         int j = (arrayOfString1 = mixers).length;
         for (int i = 0; i < j; i++) {
-            String x = arrayOfString1[i];
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
             for (int k = 0; k < m; k++) {
@@ -177,7 +159,6 @@ public class MicInjector extends Thread {
         this.gainControl.setValue(gainLevel);
         System.out.println(this.targetDataLine.getLineInfo().toString());
         System.out.println("Buffer size is " + this.targetDataLine.getBufferSize());
-        this.fadeOut = true;
     }
 
     private synchronized void clearLines() {
@@ -191,33 +172,6 @@ public class MicInjector extends Thread {
 
     protected void write() {
         this.sourceDataLine.write(this.inputBuffer, 0, this.bytesRead);
-    }
-
-    private void writeFadeIn() {
-        this.sourceDataLine.write(this.inputBuffer, 0, this.bytesRead);
-        if (this.gainControl.getValue() < this.userVolume) {
-            if (this.gainControl.getValue() < -20.0F) {
-                this.gainControl.setValue(-20.0F);
-            }
-            this.gainControl.shift(this.gainControl.getValue(), this.gainControl.getValue() + 1.0F, 10000000);
-        }
-        if (this.gainControl.getValue() >= this.userVolume) {
-            resetGain();
-        }
-    }
-
-    private void writeFadeOut() {
-        this.sourceDataLine.write(this.inputBuffer, 0, this.bytesRead);
-        if (this.fadeOut) {
-            if (this.gainControl.getValue() > -70.0F) {
-                this.gainControl.setValue(this.gainControl.getValue() - 0.1F);
-            }
-            if (this.gainControl.getValue() <= -69.9F) {
-                this.gainControl.setValue(-80.0F);
-                this.fadeOut = false;
-                System.out.println("Fade OUT off!");
-            }
-        }
     }
 
     public void run() {
@@ -243,14 +197,12 @@ public class MicInjector extends Thread {
     }
 
     synchronized void setFadeOut(boolean fadeOut) {
-        this.fadeOut = fadeOut;
     }
 
     synchronized void setMute(boolean mute) {
         this.muted = mute;
         if (this.muted) {
             this.bypass = false;
-            this.fadeOut = true;
         }
     }
 

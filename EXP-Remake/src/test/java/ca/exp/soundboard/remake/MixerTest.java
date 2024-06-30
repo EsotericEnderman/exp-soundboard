@@ -4,8 +4,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MixerTest {
 

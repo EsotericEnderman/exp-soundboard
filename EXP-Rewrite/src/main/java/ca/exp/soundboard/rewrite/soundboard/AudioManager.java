@@ -5,7 +5,6 @@ import javax.swing.*;
 import java.io.File;
 
 public class AudioManager {
-    private static final int INTERNAL_BUFFER_SIZE = 8192;
     private static float firstOutputGain;
     private static float secondOutputGain;
     public final DataLine.Info standardDataLineInfo;
@@ -76,7 +75,6 @@ public class AudioManager {
         String[] arrayOfString1;
         int j = (arrayOfString1 = mixers).length;
         for (int i = 0; i < j; i++) {
-            String x = arrayOfString1[i];
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
             for (int k = 0; k < m; k++) {
@@ -102,7 +100,6 @@ public class AudioManager {
         String[] arrayOfString1;
         int j = (arrayOfString1 = mixers).length;
         for (int i = 0; i < j; i++) {
-            String x = arrayOfString1[i];
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
             for (int k = 0; k < m; k++) {

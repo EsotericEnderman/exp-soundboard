@@ -182,7 +182,6 @@ public class AudioMaster {
 
 	public void updateGain() {
 		logger.info( "Pausing all sounds for gain update");
-		List<PlayerState> updating = new ArrayList<PlayerState>();
 		for (SoundPlayer player : active) {
 			if (player.state.get() == PlayerState.PLAYING) {
 				player.state.compareAndSet(PlayerState.PLAYING, PlayerState.WAIT);

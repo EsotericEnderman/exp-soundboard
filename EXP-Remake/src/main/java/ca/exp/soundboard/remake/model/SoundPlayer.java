@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 public class SoundPlayer implements Runnable {
 
-    private AudioMaster master;
     private Logger logger;
 
     private File sound;
@@ -24,7 +23,6 @@ public class SoundPlayer implements Runnable {
 
     public SoundPlayer(AudioMaster master, File sound, SourceDataLine output, int index)
             throws UnsupportedAudioFileException, IOException {
-        this.master = master;
         this.sound = sound;
         this.output = output;
         this.index = index;
