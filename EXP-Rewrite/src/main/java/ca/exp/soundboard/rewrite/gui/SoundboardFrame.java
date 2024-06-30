@@ -4,7 +4,6 @@ import ca.exp.soundboard.rewrite.converter.ConverterFrame;
 import ca.exp.soundboard.rewrite.soundboard.*;
 import com.apple.eawt.Application;
 import com.google.gson.Gson;
-import exp.soundboard.*;
 import net.miginfocom.swing.MigLayout;
 import org.jnativehook.GlobalScreen;
 
