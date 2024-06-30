@@ -72,8 +72,7 @@ public class AudioManager {
 
     public synchronized void setPrimaryOutputMixer(String mixerName) {
         String[] mixers = Utils.getMixerNames(this.standardDataLineInfo);
-        String[] arrayOfString1;
-        int j = (arrayOfString1 = mixers).length;
+        int j = mixers.length;
         for (int i = 0; i < j; i++) {
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
@@ -97,8 +96,7 @@ public class AudioManager {
 
     public synchronized void setSecondaryOutputMixer(String mixerName) {
         String[] mixers = Utils.getMixerNames(this.standardDataLineInfo);
-        String[] arrayOfString1;
-        int j = (arrayOfString1 = mixers).length;
+        int j = mixers.length;
         for (int i = 0; i < j; i++) {
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;

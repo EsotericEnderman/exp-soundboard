@@ -115,11 +115,10 @@ public class Soundboard {
             soundboardEntriesClone = (ArrayList<SoundboardEntry>) soundboardEntries.clone();
             pttKeysClone = (ArrayList<Integer>) pttkeys.clone();
             String key = null;
-            int j;
             int i;
             for (SoundboardEntry entry : soundboardEntries) {
                 int[] arrayOfInt;
-                j = (arrayOfInt = entry.getActivationKeys()).length;
+                arrayOfInt = entry.getActivationKeys();
                 i = 0;
                 //continue;
                 int actKey = arrayOfInt[i];

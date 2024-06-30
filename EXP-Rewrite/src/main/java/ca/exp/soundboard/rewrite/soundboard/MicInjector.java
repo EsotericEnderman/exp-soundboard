@@ -99,8 +99,7 @@ public class MicInjector extends Thread {
 
     public synchronized void setInputMixer(String mixerName) {
         String[] mixers = getMixerNames(targetDataLineInfo);
-        String[] arrayOfString1;
-        int j = (arrayOfString1 = mixers).length;
+        int j = mixers.length;
         for (int i = 0; i < j; i++) {
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
@@ -116,8 +115,7 @@ public class MicInjector extends Thread {
 
     public synchronized void setOutputMixer(String mixerName) {
         String[] mixers = getMixerNames(sourceDataLineInfo);
-        String[] arrayOfString1;
-        int j = (arrayOfString1 = mixers).length;
+        int j = mixers.length;
         for (int i = 0; i < j; i++) {
             Mixer.Info[] arrayOfInfo;
             int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
