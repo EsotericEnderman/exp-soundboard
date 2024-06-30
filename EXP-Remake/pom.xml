@@ -54,20 +54,26 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
+                        <phase>package</phase>
                         <goals>
-                            <goal>java</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <executable>java</executable>
-                    <classpathScope>compile</classpathScope>
-                    <mainClass>ca.exp.soundboard.remake.gui.SoundboardStage</mainClass>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>ca.exp.soundboard.remake.gui.SoundboardStage</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>
