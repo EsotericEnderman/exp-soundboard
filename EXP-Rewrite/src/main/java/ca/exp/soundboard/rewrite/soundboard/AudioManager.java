@@ -20,16 +20,16 @@ public class AudioManager {
         return firstOutputGain;
     }
 
-    public static void setFirstOutputGain(float firstOutputGain) {
-        firstOutputGain = firstOutputGain;
+    public static void setFirstOutputGain(float gain) {
+        firstOutputGain = gain;
     }
 
     public static float getSecondOutputGain() {
         return secondOutputGain;
     }
 
-    public static void setSecondOutputGain(float secondOutputGain) {
-        secondOutputGain = secondOutputGain;
+    public static void setSecondOutputGain(float gain) {
+        secondOutputGain = gain;
     }
 
     void playSoundClip(File file, boolean halfspeed) {
