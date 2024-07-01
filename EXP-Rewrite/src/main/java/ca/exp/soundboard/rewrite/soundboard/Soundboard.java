@@ -110,6 +110,7 @@ public class Soundboard {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public boolean entriesContainPTTKeys(ArrayList<Integer> pttkeys) {
         if ((!pttkeys.equals(pttKeysClone)) || (hasSoundboardChanged())) {
             soundboardEntriesClone = (ArrayList<SoundboardEntry>) soundboardEntries.clone();
