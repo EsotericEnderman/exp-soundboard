@@ -355,19 +355,20 @@ public class Utils {
     }
 
     public static ArrayList<Integer> stringToIntArrayList(String string) {
-        String arrayString = string.replace('[', ' ').replace(']', ' ').trim();
-        ArrayList<Integer> array = new ArrayList<Integer>();
-        String[] numberstring = arrayString.split(",");
-        String[] arrayOfString1;
-        int j = (arrayOfString1 = numberstring).length;
-        for (int i = 0; i < j; i++) {
-            String s = arrayOfString1[i];
-            if (!s.equals("")) {
-                int i2 = Integer.parseInt(s.trim());
-                array.add(Integer.valueOf(i2));
+        ArrayList<Integer> output = new ArrayList<Integer>();
+
+        String[] integerStringArray = string.replace('[', ' ').replace(']', ' ').trim().split(",");
+
+        for (String integerString : integerStringArray) {
+            String trimmedIntegerString = integerString.trim();
+
+            if (!trimmedIntegerString.equals("")) {
+                int integer = Integer.parseInt(trimmedIntegerString);
+                output.add(integer);
             }
         }
-        return array;
+
+        return output;
     }
 
     public static void submitNativeKeyPressTime(String key, long time) {
