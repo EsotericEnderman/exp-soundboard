@@ -153,6 +153,7 @@ public class SoundboardEntryEditor extends JFrame {
     public SoundboardEntryEditor(SoundboardFrame soundboardframe, SoundboardEntry entry) {
         this(soundboardframe);
 
+        this.soundboardEntry = entry;
         this.soundfile = new File(entry.getFileString());
         this.keyNums = entry.activationKeysNumbers;
         this.selectedSoundClipLabel.setText(entry.getFileString());
