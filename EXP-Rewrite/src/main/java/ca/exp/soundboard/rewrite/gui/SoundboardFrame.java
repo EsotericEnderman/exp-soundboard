@@ -107,6 +107,7 @@ public class SoundboardFrame extends JFrame {
         btnStop.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
+                Utils.stopAllClips();
             }
 
         });
