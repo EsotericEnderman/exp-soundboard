@@ -143,7 +143,7 @@ public class SettingsFrame extends JFrame {
                 "*Use Mic Injector when your using a virtual audio cable as your input on other software.");
         lblUseMicInjector.setFont(new Font("Tahoma", 2, 10));
 
-        JLabel lblVersion = new JLabel("Version: 0.5");
+        JLabel lblVersion = new JLabel("Version: 0.6");
 
         JLabel lblhalfSpeedPlayback = new JLabel("'Modified playback speed' combo key:");
 

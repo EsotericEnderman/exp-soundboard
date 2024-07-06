@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 public class SoundboardFrame extends JFrame {
-    public static final float VERSION = 0.5F;
+    public static final float VERSION = 0.6F;
     public static final Image icon = new ImageIcon(SoundboardFrame.class.getResource("EXP logo.png")).getImage();
     private static final long serialVersionUID = 8934802095461138592L;
     public static Soundboard soundboard;
@@ -78,7 +78,7 @@ public class SoundboardFrame extends JFrame {
         this.audioManager = new AudioManager();
         soundboard = new Soundboard();
         setDefaultCloseOperation(3);
-        setTitle("EXP SoundboardStage vers. 0.5 | ");
+        setTitle("EXP SoundboardStage vers. 0.6 | ");
         setIconImage(icon);
 
         macInit();
@@ -389,7 +389,7 @@ public class SoundboardFrame extends JFrame {
         this.currentSoundboardFile = null;
         soundboard = new Soundboard();
         updateSoundboardTable();
-        setTitle("EXP SoundboardStage vers. 0.5 | ");
+        setTitle("EXP SoundboardStage vers. 0.6 | ");
     }
 
     private void fileOpen() {
@@ -423,7 +423,7 @@ public class SoundboardFrame extends JFrame {
         if (session == 0) {
             File file = fc.getSelectedFile();
             this.currentSoundboardFile = soundboard.saveAsJsonFile(file);
-            setTitle("EXP SoundboardStage vers. 0.5 | " + this.currentSoundboardFile.getName());
+            setTitle("EXP SoundboardStage vers. 0.6 | " + this.currentSoundboardFile.getName());
         }
     }
 
@@ -438,7 +438,7 @@ public class SoundboardFrame extends JFrame {
                 soundboard = sb;
                 updateSoundboardTable();
                 this.currentSoundboardFile = jsonfile;
-                setTitle("EXP SoundboardStage vers. 0.5 | " + this.currentSoundboardFile.getName());
+                setTitle("EXP SoundboardStage vers. 0.6 | " + this.currentSoundboardFile.getName());
             }
         }
     }

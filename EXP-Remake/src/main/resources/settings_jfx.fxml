@@ -171,7 +171,7 @@
             <Separator prefWidth="200.0" />
             <BorderPane prefHeight="200.0" prefWidth="200.0">
                <left>
-                  <Label text="Version: 0.5" BorderPane.alignment="CENTER" />
+                  <Label text="Version: 0.6" BorderPane.alignment="CENTER" />
                </left>
                <right>
                   <Label text="(c) Expenosa. 2014." BorderPane.alignment="CENTER" />
