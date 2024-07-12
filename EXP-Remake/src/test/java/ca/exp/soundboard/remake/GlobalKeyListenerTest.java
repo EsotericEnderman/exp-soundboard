@@ -8,7 +8,7 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
-import com.sun.istack.internal.logging.Logger;
+import com.sun.istack.logging.Logger;
 
 public class GlobalKeyListenerTest implements NativeKeyListener {
 	
