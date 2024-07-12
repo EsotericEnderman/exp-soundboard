@@ -10,8 +10,8 @@
     <version>0.6</version>
 	<packaging>pom</packaging>
     <modules>
-        <module>./exp-rewrite</module>
-		<module>./exp-remake</module>
+		<module>EXP-Remake</module>
+        <module>EXP-Rewrite</module>
 	</modules>
 
 	<!-- Extra Project Information -->
