@@ -55,3 +55,9 @@ local.properties
 .cache-main
 .scala_dependencies
 .worksheet
+
+# Output Files
+stderr.txt
+stderr.txt.lck
+stdout.txt
+stdout.txt.lck
