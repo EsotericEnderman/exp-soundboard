@@ -51,6 +51,12 @@
             <artifactId>tritonus-share</artifactId>
             <version>0.3.7-1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.sun.istack/istack-commons-runtime -->
+        <dependency>
+            <groupId>com.sun.istack</groupId>
+            <artifactId>istack-commons-runtime</artifactId>
+            <version>4.2.0</version>
+        </dependency>
     </dependencies>
     <parent>
         <artifactId>exp-soundboard</artifactId>
