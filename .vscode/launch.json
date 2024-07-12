@@ -1,0 +1,56 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "ByteBufferTest",
+            "request": "launch",
+            "mainClass": "ca.exp.soundboard.remake.ByteBufferTest",
+            "projectName": "exp-remake"
+        },
+        {
+            "type": "java",
+            "name": "GlobalKeyListenerTest",
+            "request": "launch",
+            "mainClass": "ca.exp.soundboard.remake.GlobalKeyListenerTest",
+            "projectName": "exp-remake"
+        },
+        {
+            "type": "java",
+            "name": "MixerTest",
+            "request": "launch",
+            "mainClass": "ca.exp.soundboard.remake.MixerTest",
+            "projectName": "exp-remake"
+        },
+        {
+            "type": "java",
+            "name": "SoundTest",
+            "request": "launch",
+            "mainClass": "ca.exp.soundboard.remake.SoundTest",
+            "projectName": "exp-remake"
+        },
+        {
+            "type": "java",
+            "name": "SoundboardStage",
+            "request": "launch",
+            "mainClass": "ca.exp.soundboard.remake.gui.SoundboardStage",
+            "projectName": "exp-remake"
+        },
+        {
+            "type": "java",
+            "name": "SoundboardFrame",
+            "request": "launch",
+            "mainClass": "ca.exp.soundboard.rewrite.gui.SoundboardFrame",
+            "projectName": "exp-rewrite"
+        }
+    ]
+}
