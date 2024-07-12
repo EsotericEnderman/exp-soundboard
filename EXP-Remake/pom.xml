@@ -8,6 +8,18 @@
     <groupId>ca.exp.soundboard.remake</groupId>
     <artifactId>exp-remake</artifactId>
     <packaging>jar</packaging>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.1stleg/jnativehook -->
         <dependency>
