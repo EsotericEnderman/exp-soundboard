@@ -3,10 +3,17 @@ package ca.exp.soundboard.rewrite.soundboard;
 import com.google.gson.Gson;
 import org.jnativehook.keyboard.NativeKeyEvent;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 
 public class Soundboard {
+
     private static ArrayList<SoundboardEntry> soundboardEntriesClone = new ArrayList<SoundboardEntry>();
     private static boolean containsPPTKey = false;
     private static ArrayList<Integer> pttKeysClone = new ArrayList<Integer>();
@@ -14,25 +21,26 @@ public class Soundboard {
     private ArrayList<SoundboardEntry> soundboardEntries;
 
     public Soundboard() {
-        this.soundboardEntries = new ArrayList<SoundboardEntry>();
+        soundboardEntries = new ArrayList<SoundboardEntry>();
     }
 
     public static Soundboard loadFromJsonFile(File file) {
-        BufferedReader br = null;
+        BufferedReader bufferedReader = null;
         try {
-            br = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            bufferedReader = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException exception) {
+            exception.printStackTrace();
         }
+
         Gson json = new Gson();
 
-        Soundboard sb = json.fromJson(br, Soundboard.class);
+        Soundboard soundboard = json.fromJson(bufferedReader, Soundboard.class);
         try {
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            bufferedReader.close();
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
-        return sb;
+        return soundboard;
     }
 
     public Object[][] getEntriesAsObjectArrayForTable() {
@@ -41,19 +49,20 @@ public class Soundboard {
             SoundboardEntry entry = soundboardEntries.get(i);
             array[i][0] = entry.getFileName();
             array[i][1] = entry.getActivationKeysAsReadableString();
-            array[i][2] = entry.getFileString();
-            array[i][3] = Integer.valueOf(i);
+            array[i][2] = entry.getFilePath();
+            array[i][3] = i;
         }
+
         return array;
     }
 
     public void addEntry(File file, int[] keyNumbers) {
-        this.soundboardEntries.add(new SoundboardEntry(file, keyNumbers));
+        soundboardEntries.add(new SoundboardEntry(file, keyNumbers));
     }
 
-    public SoundboardEntry getEntry(String filename) {
+    public SoundboardEntry getEntry(String fileName) {
         for (SoundboardEntry entry : soundboardEntries) {
-            if (entry.getFileName().equals(filename)) {
+            if (entry.getFileName().equals(fileName)) {
                 return entry;
             }
         }
@@ -64,9 +73,9 @@ public class Soundboard {
         soundboardEntries.remove(index);
     }
 
-    public void removeEntry(String filename) {
+    public void removeEntry(String fileName) {
         for (SoundboardEntry entry : soundboardEntries) {
-            if (entry.getFileName().equals(filename)) {
+            if (entry.getFileName().equals(fileName)) {
                 soundboardEntries.remove(entry);
                 break;
             }
@@ -78,33 +87,37 @@ public class Soundboard {
     }
 
     public File saveAsJsonFile(File file) {
-        String filestring = file.getAbsolutePath();
-        System.out.println(filestring);
-        if (filestring.contains(".")) {
-            filestring = filestring.substring(0, filestring.lastIndexOf('.'));
+        String fileString = file.getAbsolutePath();
+        System.out.println(fileString);
+
+        if (fileString.contains(".")) {
+            fileString = fileString.substring(0, fileString.lastIndexOf('.'));
         }
-        filestring = filestring + ".json";
-        System.out.println("amended: " + filestring);
+
+        fileString = fileString + ".json";
+        System.out.println("amended: " + fileString);
         Gson gson = new Gson();
 
         String json = gson.toJson(this);
-        File realfile = new File(filestring);
+        File realfile = new File(fileString);
         BufferedWriter writer = null;
+
         try {
             writer = new BufferedWriter(new FileWriter(realfile));
             writer.write(json);
             writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
+
         return realfile;
     }
 
     public SoundboardEntry getEntry(int index) {
         try {
             return soundboardEntries.get(index);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
+        } catch (ArrayIndexOutOfBoundsException exception) {
+            exception.printStackTrace();
         }
 
         return null;
@@ -117,19 +130,20 @@ public class Soundboard {
             pttKeysClone = (ArrayList<Integer>) pttkeys.clone();
             String key = null;
             int i;
+
             for (SoundboardEntry entry : soundboardEntries) {
                 int[] arrayOfInt;
                 arrayOfInt = entry.getActivationKeys();
                 i = 0;
-                //continue;
                 int actKey = arrayOfInt[i];
                 key = NativeKeyEvent.getKeyText(actKey).toLowerCase();
-                for (Integer number : pttkeys) {
-                    if (key.equals(KeyEventIntConverter.getKeyEventText(number.intValue()).toLowerCase())) {
+                for (int number : pttkeys) {
+                    if (key.equals(KeyEventIntConverter.getKeyEventText(number).toLowerCase())) {
                         containsPPTKey = true;
                         return true;
                     }
                 }
+
                 i++;
             }
             containsPPTKey = false;
@@ -139,7 +153,7 @@ public class Soundboard {
     }
 
     public boolean hasSoundboardChanged() {
-        if (!this.soundboardEntries.equals(soundboardEntriesClone)) {
+        if (!soundboardEntries.equals(soundboardEntriesClone)) {
             System.out.println("SoundboardStage changed");
             return true;
         }

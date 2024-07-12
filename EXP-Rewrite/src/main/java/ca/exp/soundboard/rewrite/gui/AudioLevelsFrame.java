@@ -3,127 +3,149 @@ package ca.exp.soundboard.rewrite.gui;
 import ca.exp.soundboard.rewrite.soundboard.AudioManager;
 import ca.exp.soundboard.rewrite.soundboard.Utils;
 
-import javax.swing.*;
+import java.awt.Color;
+
+import javax.swing.GroupLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.LayoutStyle;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
 
 public class AudioLevelsFrame extends JFrame {
+
+    private static final String TITLE = "Audio Gain Controls";
+
+    private static final String PRIMARY_OUTPUT_GAIN_LABEL = "Primary Output Gain:";
+    private static final String SECONDARY_OUTPUT_GAIN_LABEL = "Secondary Output Gain:";
+    private static final String MIC_INJECTOR_GAIN_LABEL = "Mic Injector Gain:";
+
     private static final long serialVersionUID = 464347549019590824L;
+
     private static AudioLevelsFrame instance = null;
     private JSlider primarySlider;
     private JSlider secondarySlider;
-    private JSlider micinjectorSlider;
+    private JSlider micInjectorSlider;
 
     private AudioLevelsFrame() {
-        setTitle("Audio Gain Controls");
+        setTitle(TITLE);
         setResizable(false);
         setDefaultCloseOperation(2);
         setIconImage(SoundboardFrame.icon);
 
-        JLabel lblPrimaryOutputGain = new JLabel("Primary Output Gain:");
+        JLabel primaryOutputGainLabel = new JLabel(PRIMARY_OUTPUT_GAIN_LABEL);
 
         int primaryGain = (int) AudioManager.getFirstOutputGain();
         int secondaryGain = (int) AudioManager.getSecondOutputGain();
         int micInjectorGain = (int) Utils.getMicInjectorGain();
 
-        this.primarySlider = new JSlider();
-        this.primarySlider.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                if (!AudioLevelsFrame.this.primarySlider.getValueIsAdjusting()) {
-                    float gain = AudioLevelsFrame.this.primarySlider.getValue();
+        primarySlider = new JSlider();
+        primarySlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent event) {
+                if (!primarySlider.getValueIsAdjusting()) {
+                    float gain = primarySlider.getValue();
                     AudioManager.setFirstOutputGain(gain);
                 }
             }
         });
-        this.primarySlider.setMajorTickSpacing(6);
-        this.primarySlider.setPaintLabels(true);
-        this.primarySlider.setPaintTicks(true);
-        this.primarySlider.setSnapToTicks(true);
-        this.primarySlider.setMinorTickSpacing(1);
-        this.primarySlider.setValue(0);
-        this.primarySlider.setMinimum(-66);
-        this.primarySlider.setMaximum(6);
+
+        primarySlider.setMajorTickSpacing(6);
+        primarySlider.setPaintLabels(true);
+        primarySlider.setPaintTicks(true);
+        primarySlider.setSnapToTicks(true);
+        primarySlider.setMinorTickSpacing(1);
+        primarySlider.setValue(0);
+        primarySlider.setMinimum(-66);
+        primarySlider.setMaximum(6);
 
         JSeparator separator = new JSeparator();
         separator.setForeground(Color.BLACK);
 
-        JLabel lblSecondaryOutputGain = new JLabel("Secondary Output Gain:");
+        JLabel lblSecondaryOutputGain = new JLabel(SECONDARY_OUTPUT_GAIN_LABEL);
 
-        this.secondarySlider = new JSlider();
-        this.secondarySlider.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                if (!AudioLevelsFrame.this.secondarySlider.getValueIsAdjusting()) {
-                    float gain = AudioLevelsFrame.this.secondarySlider.getValue();
+        secondarySlider = new JSlider();
+        secondarySlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent event) {
+                if (!secondarySlider.getValueIsAdjusting()) {
+                    float gain = secondarySlider.getValue();
                     AudioManager.setSecondOutputGain(gain);
                 }
             }
         });
-        this.secondarySlider.setValue(0);
-        this.secondarySlider.setSnapToTicks(true);
-        this.secondarySlider.setPaintTicks(true);
-        this.secondarySlider.setPaintLabels(true);
-        this.secondarySlider.setMinorTickSpacing(1);
-        this.secondarySlider.setMinimum(-66);
-        this.secondarySlider.setMaximum(6);
-        this.secondarySlider.setMajorTickSpacing(6);
 
-        JSeparator separator_1 = new JSeparator();
-        separator_1.setForeground(Color.BLACK);
+        secondarySlider.setValue(0);
+        secondarySlider.setSnapToTicks(true);
+        secondarySlider.setPaintTicks(true);
+        secondarySlider.setPaintLabels(true);
+        secondarySlider.setMinorTickSpacing(1);
+        secondarySlider.setMinimum(-66);
+        secondarySlider.setMaximum(6);
+        secondarySlider.setMajorTickSpacing(6);
 
-        JLabel lblMicInjectorGain = new JLabel("Mic Injector Gain:");
+        JSeparator jSeparator = new JSeparator();
+        jSeparator.setForeground(Color.BLACK);
 
-        this.micinjectorSlider = new JSlider();
-        this.micinjectorSlider.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                if (!AudioLevelsFrame.this.micinjectorSlider.getValueIsAdjusting()) {
-                    float gain = AudioLevelsFrame.this.micinjectorSlider.getValue();
+        JLabel micInjectorGainLabel = new JLabel(MIC_INJECTOR_GAIN_LABEL);
+
+        micInjectorSlider = new JSlider();
+        micInjectorSlider.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent event) {
+                if (!micInjectorSlider.getValueIsAdjusting()) {
+                    float gain = micInjectorSlider.getValue();
                     Utils.setMicInjectorGain(gain);
                 }
             }
         });
-        this.micinjectorSlider.setValue(0);
-        this.micinjectorSlider.setSnapToTicks(true);
-        this.micinjectorSlider.setPaintTicks(true);
-        this.micinjectorSlider.setPaintLabels(true);
-        this.micinjectorSlider.setMinorTickSpacing(1);
-        this.micinjectorSlider.setMinimum(-66);
-        this.micinjectorSlider.setMaximum(6);
-        this.micinjectorSlider.setMajorTickSpacing(6);
-        GroupLayout groupLayout = new GroupLayout(getContentPane());
-        groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addGroup(groupLayout.createSequentialGroup()
-                        .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addGroup(groupLayout.createSequentialGroup().addContainerGap()
-                                        .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                .addComponent(separator, -1, 424, 32767)
-                                                .addComponent(this.primarySlider, -1, 424, 32767)
-                                                .addComponent(lblPrimaryOutputGain).addComponent(lblSecondaryOutputGain)
-                                                .addComponent(this.secondarySlider, -2, 424, -2)))
-                                .addGroup(groupLayout.createSequentialGroup().addGap(11).addComponent(separator_1, -1,
-                                        423, 32767))
-                                .addGroup(groupLayout.createSequentialGroup().addContainerGap()
-                                        .addComponent(lblMicInjectorGain))
-                                .addGroup(groupLayout.createSequentialGroup().addContainerGap()
-                                        .addComponent(this.micinjectorSlider, -2, 424, -2)))
-                        .addContainerGap()));
 
-        groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(groupLayout
-                .createSequentialGroup().addContainerGap().addComponent(lblPrimaryOutputGain)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.primarySlider, -2, -1, -2)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(separator, -2, 2, -2)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(lblSecondaryOutputGain)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(this.secondarySlider, -2, 45, -2)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(separator_1, -2, 2, -2)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(lblMicInjectorGain)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(this.micinjectorSlider, -2, 45, -2).addContainerGap(38, 32767)));
+        micInjectorSlider.setValue(0);
+        micInjectorSlider.setSnapToTicks(true);
+        micInjectorSlider.setPaintTicks(true);
+        micInjectorSlider.setPaintLabels(true);
+        micInjectorSlider.setMinorTickSpacing(1);
+        micInjectorSlider.setMinimum(-66);
+        micInjectorSlider.setMaximum(6);
+        micInjectorSlider.setMajorTickSpacing(6);
+
+        GroupLayout groupLayout = new GroupLayout(getContentPane());
+        groupLayout.setHorizontalGroup(
+                groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                                .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                        .addComponent(separator, -1, 424, 32767)
+                                                        .addComponent(primarySlider, -1, 424, 32767)
+                                                        .addComponent(primaryOutputGainLabel)
+                                                        .addComponent(lblSecondaryOutputGain)
+                                                        .addComponent(secondarySlider, -2, 424, -2)))
+                                        .addGroup(groupLayout.createSequentialGroup().addGap(11)
+                                                .addComponent(jSeparator, -1, 423, 32767))
+                                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                                .addComponent(micInjectorGainLabel))
+                                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                                .addComponent(micInjectorSlider, -2, 424, -2)))
+                                .addContainerGap()));
+
+        groupLayout.setVerticalGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(
+                groupLayout
+                        .createSequentialGroup().addContainerGap().addComponent(primaryOutputGainLabel)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(primarySlider, -2, -1, -2)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(separator, -2, 2, -2)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(lblSecondaryOutputGain)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(secondarySlider, -2, 45, -2)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(jSeparator, -2, 2, -2)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED).addComponent(micInjectorGainLabel)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(micInjectorSlider, -2, 45, -2).addContainerGap(38, 32767)));
 
         getContentPane().setLayout(groupLayout);
 
-        this.primarySlider.setValue(primaryGain);
-        this.secondarySlider.setValue(secondaryGain);
-        this.micinjectorSlider.setValue(micInjectorGain);
+        primarySlider.setValue(primaryGain);
+        secondarySlider.setValue(secondaryGain);
+        micInjectorSlider.setValue(micInjectorGain);
 
         pack();
         setVisible(true);
@@ -136,6 +158,7 @@ public class AudioLevelsFrame extends JFrame {
             instance.setVisible(true);
             instance.requestFocus();
         }
+
         return instance;
     }
 

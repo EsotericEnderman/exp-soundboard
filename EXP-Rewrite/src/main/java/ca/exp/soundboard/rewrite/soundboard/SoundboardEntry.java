@@ -10,28 +10,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class SoundboardEntry {
+
     public int[] activationKeysNumbers;
-    private String file;
+    private String filePath;
 
     public SoundboardEntry(File file, int[] keys) {
-        Path p = Paths.get(file.getAbsolutePath());
-        this.file = p.toAbsolutePath().toString();
-        this.activationKeysNumbers = keys;
-        if (this.activationKeysNumbers == null) {
-            this.activationKeysNumbers = new int[0];
+        Path page = Paths.get(file.getAbsolutePath());
+        filePath = page.toAbsolutePath().toString();
+
+        activationKeysNumbers = keys;
+        if (activationKeysNumbers == null) {
+            activationKeysNumbers = new int[0];
         }
     }
 
     public boolean matchesPressed(ArrayList<Integer> pressedKeys) {
-        int keysRemaining = this.activationKeysNumbers.length;
-        if (keysRemaining == 0)
+        int keysRemaining = activationKeysNumbers.length;
+
+        if (keysRemaining == 0) {
             return false;
-        int[] arrayOfInt;
-        int j = (arrayOfInt = this.activationKeysNumbers).length;
-        for (int i = 0; i < j; i++) {
-            int actkey = arrayOfInt[i];
-            for (Iterator<Integer> localIterator = pressedKeys.iterator(); localIterator.hasNext(); ) {
-                int presskey = ((Integer) localIterator.next()).intValue();
+        }
+
+        for (int actkey : activationKeysNumbers) {
+            for (Iterator<Integer> localIterator = pressedKeys.iterator(); localIterator.hasNext();) {
+                int presskey = localIterator.next();
+
                 if (actkey == presskey) {
                     keysRemaining--;
                 }
@@ -41,86 +44,78 @@ public class SoundboardEntry {
         return keysRemaining <= 0;
     }
 
-    /*
-     * public int matchesHowManyPressed(ArrayList<Integer> pressedKeys) { int
-     * matches = 0; int j; int i; for (Iterator localIterator =
-     * pressedKeys.iterator(); localIterator.hasNext(); i < j) { int key =
-     * ((Integer)localIterator.next()).intValue(); int[] arrayOfInt; j = (arrayOfInt
-     * = this.activationKeysNumbers).length;i = 0; continue;int hotkey =
-     * arrayOfInt[i]; if (key == hotkey) { matches++; } i++; }
-     *
-     *
-     *
-     *
-     * return matches; }
-     */
-
     public int matchesHowManyPressed(ArrayList<Integer> pressedKeys) {
         int matches = 0;
+
         for (int i = 0; i < pressedKeys.size(); i++) {
-            int[] arrayOfInt;
-            int len = (arrayOfInt = this.activationKeysNumbers).length;
-            int key = pressedKeys.get(i).intValue();
-            if (i < len) {
-                int hotkey = arrayOfInt[i];
+            int key = pressedKeys.get(i);
+            int keyCount = activationKeysNumbers.length;
+
+            if (i < keyCount) {
+                int hotkey = activationKeysNumbers[i];
+
                 if (key == hotkey) {
                     matches++;
                 }
             }
         }
+
         return matches;
     }
 
-    public void play(AudioManager audio, boolean moddedspeed) {
+    public void play(AudioManager audioManager, boolean moddedSpeed) {
         File file = toFile();
-        audio.playSoundClip(file, moddedspeed);
+        audioManager.playSoundClip(file, moddedSpeed);
     }
 
     public File toFile() {
-        File f = new File(this.file);
-        if (!f.exists()) {
-            Path p = Paths.get(this.file);
-            return p.toFile();
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            Path path = Paths.get(filePath);
+            return path.toFile();
         }
-        return f;
+
+        return file;
     }
 
     public void setFile(File file) {
         try {
-            this.file = new String(file.getAbsolutePath().getBytes(Utils.fileEncoding));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            filePath = new String(file.getAbsolutePath().getBytes(Utils.fileEncoding));
+        } catch (UnsupportedEncodingException exception) {
+            exception.printStackTrace();
         }
     }
 
-    public String getFileString() {
-        return this.file;
+    public String getFilePath() {
+        return filePath;
     }
 
     public String getFileName() {
-        char seperator = File.separatorChar;
-        return this.file.substring(this.file.lastIndexOf(seperator) + 1);
+        char separator = File.separatorChar;
+        return filePath.substring(filePath.lastIndexOf(separator) + 1);
     }
 
     public int[] getActivationKeys() {
-        return this.activationKeysNumbers;
+        return activationKeysNumbers;
     }
 
     public void setActivationKeys(int[] activationKeys) {
-        this.activationKeysNumbers = activationKeys;
+        activationKeysNumbers = activationKeys;
     }
 
     public String getActivationKeysAsReadableString() {
-        String s = "";
-        if (this.activationKeysNumbers.length == 0)
-            return s;
-        int[] arrayOfInt;
-        int j = (arrayOfInt = getActivationKeys()).length;
-        for (int i = 0; i < j; i++) {
-            int i2 = arrayOfInt[i];
-            s = s.concat(NativeKeyEvent.getKeyText(i2) + "+");
+        String activationKey = "";
+
+        if (activationKeysNumbers.length == 0) {
+            return activationKey;
         }
-        s = s.substring(0, s.length() - 1);
-        return s;
+
+        for (int integer : getActivationKeys()) {
+            activationKey = activationKey.concat(NativeKeyEvent.getKeyText(integer) + "+");
+        }
+
+        activationKey = activationKey.substring(0, activationKey.length() - 1);
+        return activationKey;
     }
 }

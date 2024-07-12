@@ -29,16 +29,32 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 public class Utils {
-    public static final int BUFFERSIZE = 2048;
-    public static final float STANDARDSAMPLERATE = 44100.0F;
 
-    public static final Preferences preferences = Preferences.userRoot().node("Expenosa's SoundboardStage");
+    public static final int BUFFER_SIZE = 2048;
+    public static final float STANDARD_SAMPLE_RATE = 44100.0F;
 
-    public static final float modifiedSpeedIncrements = 0.05F;
-    public static final float modifiedSpeedMin = 0.1F;
-    public static final float modifiedSpeedMax = 2.0F;
+    public static final float MODIFIED_SPEED_INCREMENT = 0.05F;
+    public static final float MODIFIED_SPEED_DECREMENT = 0.05F;
+    public static final float MINIMUM_MODIFIED_SPEED = 0.1F;
+    public static final float MAXIMUM_MODIFIED_SPEED = 2.0F;
 
-    public static final AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, 44100.0F, false);
+    private static final int SAMPLE_SIZE_IN_BITS = 16;
+    private static final int CHANNEL_COUNT = 2;
+    private static final int FRAME_SIZE = 4;
+
+    private static final InputStream loaderfile = ClipPlayer.class.getResourceAsStream("loader.mp3");
+
+    public static final String PREFERENCES_NODE_NAME = "Expenosa's SoundboardStage";
+
+    public static final Preferences PREFERENCES = Preferences.userRoot().node(PREFERENCES_NODE_NAME);
+
+    public static final AudioFormat AUDIO_FORMAT = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4, 44100.0F, false);
+
+    private static final String GLOBAL_HOTKEY_ERROR = "Error occured whilst initiating global hotkeys";
+
+    private static final String ALERT_MESSAGE = "Alert!";
+    private static final String UNSUPPORTED_FORMAT_MESSAGE = "Unsupported Format";
+    private static final String PUSH_TO_TALK_KEY_CONFLICT = "A soundboard entry is using a key that conflicts with a 'Push to Talk' key. \n Disable 'Auto-hold PTT keys', or edit the entry or PTT keys.";
 
     public static AudioFormat modifiedPlaybackFormat;
 
@@ -48,21 +64,23 @@ public class Utils {
     public static int modspeeddownKey = 37;
     private static int overlapSwitchKey = 36;
 
-    public static MicInjector micInjector = new MicInjector();
-    public static boolean autoPTThold = true;
-    public static String fileEncoding = System.getProperty("file.encoding");
     public static boolean overlapSameClipWhilePlaying = true;
+    public static boolean autoPTThold = true;
+    private static boolean playAll = true;
+
+    public static MicInjector micInjector = new MicInjector();
+    public static String fileEncoding = System.getProperty("file.encoding");
     private static ThreadGroup clipPlayerThreadGroup = new ThreadGroup("Clip Player Group");
-    private static boolean PLAYALL = true;
     private static float modifiedPlaybackSpeed;
     private static Robot robot;
-    private static ArrayList<Integer> pttKeys = new ArrayList<Integer>();
+    private static ArrayList<Integer> pttKeys = new ArrayList<>();
     private static int currentlyPlayingClipCount = 0;
 
-    private static ConcurrentHashMap<String, Long> lastNativeKeyPressMap = new ConcurrentHashMap<String, Long>();
-    private static ConcurrentHashMap<String, Long> lastRobotKeyPressMap = new ConcurrentHashMap<String, Long>();
+    private static ConcurrentHashMap<String, Long> lastNativeKeyPressMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Long> lastRobotKeyPressMap = new ConcurrentHashMap<>();
 
-    public static void playNewSoundClipThreaded(File file, final SourceDataLine primarySpeaker, final SourceDataLine secondarySpeaker) {
+    public static void playNewSoundClipThreaded(File file, final SourceDataLine primarySpeaker,
+            final SourceDataLine secondarySpeaker) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 Utils.ClipPlayer clipPlayer = new Utils.ClipPlayer(file, primarySpeaker, secondarySpeaker);
@@ -97,7 +115,7 @@ public class Utils {
     }
 
     public static void stopAllClips() {
-        PLAYALL = false;
+        playAll = false;
         zeroCurrentClipCount();
     }
 
@@ -161,8 +179,6 @@ public class Utils {
     }
 
     public static void startMp3Decoder() {
-        InputStream loaderfile = ClipPlayer.class.getResourceAsStream("loader.mp3");
-
         try {
             AudioSystem.getAudioFileFormat(loaderfile);
             AudioInputStream stream = AudioSystem.getAudioInputStream(loaderfile);
@@ -178,7 +194,7 @@ public class Utils {
         } catch (NativeHookException exception) {
             System.err.println("There was a problem registering the native hook.");
             System.err.println(exception.getMessage());
-            JOptionPane.showMessageDialog(null, "Error: " + exception.getMessage(), "Error occured whilst initiating global hotkeys", 0);
+            JOptionPane.showMessageDialog(null, exception.getMessage(), GLOBAL_HOTKEY_ERROR, 0);
         }
 
         return true;
@@ -216,8 +232,8 @@ public class Utils {
     public static synchronized void setModifiedPlaybackSpeed(float speed) {
         modifiedPlaybackSpeed = speed;
 
-        float newSampleRate = 44100.0F * speed;
-        modifiedPlaybackFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, newSampleRate, 16, 2, 4, newSampleRate, false);
+        float newSampleRate = STANDARD_SAMPLE_RATE * speed;
+        modifiedPlaybackFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, newSampleRate, SAMPLE_SIZE_IN_BITS, CHANNEL_COUNT, FRAME_SIZE, newSampleRate, false);
     }
 
     public static int getModspeedupKey() {
@@ -245,10 +261,10 @@ public class Utils {
     }
 
     public static void incrementModSpeedUp() {
-        float speed = modifiedPlaybackSpeed + 0.05F;
+        float speed = modifiedPlaybackSpeed + MODIFIED_SPEED_INCREMENT;
 
-        if (speed > 2.0F) {
-            speed = 2.0F;
+        if (speed > MAXIMUM_MODIFIED_SPEED) {
+            speed = MAXIMUM_MODIFIED_SPEED;
         }
 
         setModifiedPlaybackSpeed(speed);
@@ -259,10 +275,10 @@ public class Utils {
     }
 
     public static void decrementModSpeedDown() {
-        float speed = modifiedPlaybackSpeed - 0.05F;
+        float speed = modifiedPlaybackSpeed - MODIFIED_SPEED_DECREMENT;
 
-        if (speed < 0.1F) {
-            speed = 0.1F;
+        if (speed < MINIMUM_MODIFIED_SPEED) {
+            speed = MINIMUM_MODIFIED_SPEED;
         }
 
         setModifiedPlaybackSpeed(speed);
@@ -310,8 +326,8 @@ public class Utils {
         for (int key : pttKeys) {
             boolean pressedAlready = false;
 
-            for (Integer nativekey : pressed) {
-                if (KeyEventIntConverter.getKeyEventText(key).toLowerCase().equals(NativeKeyEvent.getKeyText(nativekey.intValue()).toLowerCase())) {
+            for (int nativekey : pressed) {
+                if (KeyEventIntConverter.getKeyEventText(key).toLowerCase().equals(NativeKeyEvent.getKeyText(nativekey).toLowerCase())) {
                     pressedAlready = true;
                     break;
                 }
@@ -336,10 +352,10 @@ public class Utils {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     JOptionPane.showMessageDialog(
-                        null,
-                        "A soundboard entry is using a key that conflicts with a 'Push to Talk' key. \n Disable 'Auto-hold PTT keys', or edit the entry or PTT keys.",
-                        "Alert!",
-                        0
+                            null,
+                            PUSH_TO_TALK_KEY_CONFLICT,
+                            ALERT_MESSAGE,
+                            0
                     );
                 }
             });
@@ -443,8 +459,8 @@ public class Utils {
         long human = getLastNativeKeyPressTimeForKey(keyname);
         long robot = getLastRobotKeyPressTimeForKey(keyname);
 
-		return robot == human;
-	}
+        return robot == human;
+    }
 
     public static boolean isOverlapSameClipWhilePlaying() {
         return overlapSameClipWhilePlaying;
@@ -502,31 +518,31 @@ public class Utils {
         }
 
         public void run() {
-            playSoundClip(this.file, this.primarySpeaker, this.secondarySpeaker);
+            playSoundClip(file, primarySpeaker, secondarySpeaker);
         }
 
         public void stopPlaying() {
-            System.out.println("Stopping clip: " + this.file.getName());
+            System.out.println("Stopping clip: " + file.getName());
 
-            this.playing = false;
+            playing = false;
         }
 
         private void playSoundClip(File file, SourceDataLine primarySpeaker, SourceDataLine secondarySpeaker) {
-            Utils.PLAYALL = true;
+            Utils.playAll = true;
 
             AudioInputStream clip = null;
-            AudioFormat clipformat = null;
+            AudioFormat clipFormat = null;
 
             try {
                 clip = AudioSystem.getAudioInputStream(file);
-                clipformat = clip.getFormat();
+                clipFormat = clip.getFormat();
 
-                if (!clipformat.equals(Utils.format)) {
-                    clip = AudioSystem.getAudioInputStream(Utils.format, clip);
+                if (!clipFormat.equals(Utils.AUDIO_FORMAT)) {
+                    clip = AudioSystem.getAudioInputStream(Utils.AUDIO_FORMAT, clip);
                 }
             } catch (UnsupportedAudioFileException exception) {
                 exception.printStackTrace();
-                JOptionPane.showMessageDialog(null, file.getName() + " uses an unsupported format.", "Unsupported Format", 0);
+                JOptionPane.showMessageDialog(null, file.getName() + " uses an unsupported format.", UNSUPPORTED_FORMAT_MESSAGE, 0);
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
@@ -537,7 +553,7 @@ public class Utils {
                 byte[] buffer = new byte[2048]; // TODO: fix character
                 int bytesRead = 0;
 
-                while (this.playing && Utils.PLAYALL) {
+                while (playing && Utils.playAll) {
                     try {
                         bytesRead = clip.read(buffer, 0, 2048);
                     } catch (IOException exception) {
@@ -555,7 +571,7 @@ public class Utils {
                     }
 
                     if (bytesRead < 2048) {
-                        this.playing = false;
+                        playing = false;
                     }
                 }
 

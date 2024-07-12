@@ -4,10 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Basic Information -->
     <groupId>ca.exp.soundboard.rewrite</groupId>
     <artifactId>exp-rewrite</artifactId>
     <packaging>jar</packaging>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.apple/AppleJavaExtensions -->
         <dependency>
@@ -63,7 +63,6 @@
             <artifactId>tritonus-share</artifactId>
             <version>0.3.7-1</version>
         </dependency>
-
     </dependencies>
     <parent>
         <artifactId>exp-soundboard</artifactId>
@@ -71,11 +70,9 @@
         <version>0.6</version>
     </parent>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>22</maven.compiler.source>
+        <maven.compiler.target>22</maven.compiler.target>
     </properties>
-
-    <!-- Build Settings -->
     <build>
         <plugins>
             <plugin>
@@ -103,8 +100,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- Extra Project Information -->
     <name>EXP-Soundboard/Rewrite</name>
-
 </project>

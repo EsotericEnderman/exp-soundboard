@@ -1,51 +1,57 @@
 package ca.exp.soundboard.rewrite.cache;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class TreadedByteBuffer {
-    private ArrayList<byte[]> fBytes;
-    private HashMap<String, Integer> fIndexTracker;
-    private int fBufferSize;
 
-    public TreadedByteBuffer(int aBufferSize) {
-        this.fBufferSize = aBufferSize;
-        this.fIndexTracker = new HashMap<String, Integer>();
-        this.fBytes = new ArrayList<byte[]>();
+    private ArrayList<byte[]> bytes;
+    private HashMap<String, Integer> indexTracker;
+    private int bufferSize;
+
+    public TreadedByteBuffer(int bufferSize) {
+        this.bufferSize = bufferSize;
+
+        indexTracker = new HashMap<>();
+        bytes = new ArrayList<>();
     }
 
-    public void concat(byte[] aByteArray, int aBytesRead) {
-        if (aByteArray.length == this.fBufferSize) {
-            this.fBytes.add(aByteArray);
+    public void concat(byte[] byteArray, int bytesRead) {
+        if (byteArray.length == bufferSize) {
+            bytes.add(byteArray);
         } else {
-            byte[] bytes = java.util.Arrays.copyOfRange(aByteArray, 0, aBytesRead - 1);
-            this.fBytes.add(bytes);
+            byteArray = Arrays.copyOfRange(byteArray, 0, bytesRead - 1);
+            bytes.add(byteArray);
         }
     }
 
     public byte[] getNext(String uuid) {
-        if (!this.fIndexTracker.containsKey(uuid)) {
-            this.fIndexTracker.put(uuid, Integer.valueOf(0));
+        if (!indexTracker.containsKey(uuid)) {
+            indexTracker.put(uuid, 0);
         }
 
-        int index = this.fIndexTracker.get(uuid).intValue();
-        byte[] returnArray = this.fBytes.get(index);
-        if (returnArray.length != this.fBufferSize)
-            this.fIndexTracker.remove(uuid);
+        int index = indexTracker.get(uuid);
+        byte[] returnArray = bytes.get(index);
+
+        if (returnArray.length != bufferSize) {
+            indexTracker.remove(uuid);
+        }
+
         return returnArray;
     }
 
     public long getCurrentBufferedSizeRounded() {
-        int arraySize = this.fBytes.size();
-        long bytesBuffered = arraySize * this.fBufferSize;
+        int arraySize = bytes.size();
+        long bytesBuffered = arraySize * bufferSize;
         return bytesBuffered;
     }
 
     public int getBufferSize() {
-        return this.fBufferSize;
+        return bufferSize;
     }
 
     public void clear() {
-        this.fBytes.clear();
+        bytes.clear();
     }
 }

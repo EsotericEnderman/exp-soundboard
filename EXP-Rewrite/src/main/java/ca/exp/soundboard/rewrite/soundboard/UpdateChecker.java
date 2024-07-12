@@ -6,59 +6,63 @@ import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class UpdateChecker implements Runnable {
 
+    private static final String UPDATE_URL_STRING = "http://sourceforge.net/projects/expsoundboard/files/";
+
     public static String getUpdateNotes() {
-        boolean internetconnection = false;
+        boolean hasInternetConnection = false;
         BufferedReader reader = null;
+
         try {
-            URL url = new URL("http://sourceforge.net/projects/expsoundboard/files/");
+            URI uri = new URI(UPDATE_URL_STRING);
+            URL url = uri.toURL();
             reader = new BufferedReader(new InputStreamReader(url.openStream()));
-            internetconnection = true;
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, ex);
+            hasInternetConnection = true;
+        } catch (IOException | URISyntaxException exception) {
+            Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, exception);
         }
 
-        if (internetconnection) {
-            System.out.println("UpdateChecker: System has Internet Connection.");
-            boolean versionfound = false;
+        if (hasInternetConnection) {
+            boolean newVersionFound = false;
 
             String patchlist = "";
-            boolean changelogFound = false;
+            boolean changeLogFound = false;
+
             try {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // String line;
-                    if (!changelogFound) {
+                String line = reader.readLine();
+
+                while (line != null) {
+                    if (!changeLogFound) {
                         if (line.startsWith("CHANGELOG")) {
-                            changelogFound = true;
+                            changeLogFound = true;
                         }
-                    } else if (changelogFound) {
-                        if ((line.startsWith("vers.")) && (!versionfound)) {
-                            versionfound = true;
+                    } else if (changeLogFound) {
+                        if (line.startsWith("vers.") && !newVersionFound) {
+                            newVersionFound = true;
                             patchlist = patchlist + '\n' + line;
                         } else {
-                            if ((versionfound) && (line.startsWith("vers."))) {
+                            if (newVersionFound && line.startsWith("vers.")) {
                                 reader.close();
                                 return patchlist;
                             }
+
                             patchlist = patchlist + '\n' + line;
                         }
                     }
                 }
+
                 reader.close();
-            } catch (IOException ex) {
-                Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException exception) {
+                Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, exception);
             }
         }
-        System.out.println("UpdateChecker: System does not have Internet Connection.");
 
         return "Update notes could not be found";
     }
@@ -66,37 +70,32 @@ public class UpdateChecker implements Runnable {
     public static boolean isUpdateAvailable() {
         boolean internetconnection = false;
         BufferedReader reader = null;
+
         try {
-            URL url = new URL("http://sourceforge.net/projects/expsoundboard/files/");
+            URI uri = new URI(UPDATE_URL_STRING);
+            URL url = uri.toURL();
             reader = new BufferedReader(new InputStreamReader(url.openStream()));
             internetconnection = true;
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (IOException | URISyntaxException ex) {
             Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         if (internetconnection) {
-            System.out.println("UpdateChecker: System has Internet Connection.");
-
             boolean changelogFound = false;
             try {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // String line;
+                String line = reader.readLine();
+                while (line != null) {
                     if (!changelogFound) {
                         if (line.startsWith("CHANGELOG")) {
                             changelogFound = true;
                         }
-                    } else if ((changelogFound) && (line.startsWith("vers."))) {
+                    } else if (changelogFound && line.startsWith("vers.")) {
                         String version = line.substring(line.indexOf('.') + 1, line.lastIndexOf(':')).trim();
                         float versionNo = Float.parseFloat(version);
                         if (versionNo > 0.5F) {
-                            System.out.println("UpdateChecker: New version available!");
                             reader.close();
                             return true;
                         }
-                        System.out.println("UpdateChecker: Currently up to date!");
                         reader.close();
                         return false;
                     }
@@ -107,7 +106,6 @@ public class UpdateChecker implements Runnable {
                 Logger.getLogger(UpdateChecker.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println("UpdateChecker: System does not have Internet Connection.");
 
         return false;
     }

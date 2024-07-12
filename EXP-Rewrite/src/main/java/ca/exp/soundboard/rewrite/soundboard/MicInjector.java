@@ -1,17 +1,28 @@
 package ca.exp.soundboard.rewrite.soundboard;
 
-import javax.sound.sampled.*;
-import javax.swing.*;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.TargetDataLine;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.swing.JOptionPane;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 public class MicInjector extends Thread {
-    private static float fFrameRate = 44100.0F;
-    private static final AudioFormat signedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, fFrameRate, 16, 2,
-            4, fFrameRate, false);
+
+    private static float frameRate = 44100.0F;
+
+    private static final AudioFormat signedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, frameRate, 16, 2, 4, frameRate, false);
     public static final DataLine.Info targetDataLineInfo = new DataLine.Info(TargetDataLine.class, signedFormat, 8192);
     public static final DataLine.Info sourceDataLineInfo = new DataLine.Info(SourceDataLine.class, signedFormat, 8192);
+
+    private static final String LINE_UNAVAILABLE_EXCEPTION_MESSAGE = "Line Unavailable Exception";
+
     private static float gainLevel;
     private final byte[] inputBuffer;
     Mixer inputMixer;
@@ -29,9 +40,9 @@ public class MicInjector extends Thread {
     private long nextDrift;
 
     MicInjector() {
-        this.inputBuffer = new byte[512]; // TODO: fix character
-        this.inputLineName = "none selected";
-        this.outputLineName = "none selected";
+        inputBuffer = new byte[512]; // TODO: fix character
+        inputLineName = "none selected";
+        outputLineName = "none selected";
     }
 
     public static synchronized float getGain() {
@@ -40,41 +51,42 @@ public class MicInjector extends Thread {
 
     public synchronized void setGain(float level) {
         gainLevel = level;
-        if (this.gainControl != null) {
-            this.gainControl.setValue(level);
+        if (gainControl != null) {
+            gainControl.setValue(level);
         }
     }
 
     public static String[] getMixerNames(DataLine.Info lineInfo) {
         ArrayList<String> mixerNames = new ArrayList<String>();
         Mixer.Info[] info = AudioSystem.getMixerInfo();
-        Mixer.Info[] arrayOfInfo1;
-        int j = (arrayOfInfo1 = info).length;
-        for (int i = 0; i < j; i++) {
-            Mixer.Info elem = arrayOfInfo1[i];
-            Mixer mixer = AudioSystem.getMixer(elem);
+
+        for (Mixer.Info mixerInfo : info) {
+            Mixer mixer = AudioSystem.getMixer(mixerInfo);
             try {
                 if (mixer.isLineSupported(lineInfo)) {
-                    mixerNames.add(elem.getName());
+                    mixerNames.add(mixerInfo.getName());
                 }
-            } catch (NullPointerException e) {
-                System.err.println(e);
+            } catch (NullPointerException exception) {
+                System.err.println(exception);
             }
         }
-        String[] returnarray = new String[mixerNames.size()];
-        return mixerNames.toArray(returnarray);
+
+        String[] returnArray = new String[mixerNames.size()];
+        return mixerNames.toArray(returnArray);
     }
 
     public static float getdB(byte[] buffer) {
         double dB = 0.0D;
         short[] shortArray = new short[buffer.length / 2];
         ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortArray);
+
         for (int i = 0; i < shortArray.length; i++) {
             dB = 20.0D * Math.log10(Math.abs(shortArray[i] / 32767.0D));
             if ((dB == Double.NEGATIVE_INFINITY) || (dB == Double.NaN)) { // (dB == NaN.0D)) { // TODO: fix this value
                 dB = -90.0D;
             }
         }
+
         float level = (float) dB + 91.0F;
         return level;
     }
@@ -83,9 +95,10 @@ public class MicInjector extends Thread {
     public static short[] byteToShortArray(byte[] byteArray) {
         short[] shortArray = new short[byteArray.length / 2];
         for (int i = 0; i < shortArray.length; i++) {
-            int ub1 = byteArray[(i * 2 + 0)] & 0xFF;
-            int ub2 = byteArray[(i * 2 + 1)] & 0xFF;
-            shortArray[i] = ((short) ((ub2 << 8) + ub1));
+            int byteA = byteArray[(i * 2 + 0)] & 0xFF;
+            int byteB = byteArray[(i * 2 + 1)] & 0xFF;
+
+            shortArray[i] = ((short) ((byteB << 8) + byteA));
         }
         return shortArray;
     }
@@ -99,14 +112,12 @@ public class MicInjector extends Thread {
 
     public synchronized void setInputMixer(String mixerName) {
         String[] mixers = getMixerNames(targetDataLineInfo);
-        int j = mixers.length;
-        for (int i = 0; i < j; i++) {
-            Mixer.Info[] arrayOfInfo;
-            int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
-            for (int k = 0; k < m; k++) {
-                Mixer.Info mixerInfo = arrayOfInfo[k];
+        int mixerCount = mixers.length;
+
+        for (int i = 0; i < mixerCount; i++) {
+            for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
                 if (mixerName.equals(mixerInfo.getName())) {
-                    this.inputMixer = AudioSystem.getMixer(mixerInfo);
+                    inputMixer = AudioSystem.getMixer(mixerInfo);
                     return;
                 }
             }
@@ -115,14 +126,11 @@ public class MicInjector extends Thread {
 
     public synchronized void setOutputMixer(String mixerName) {
         String[] mixers = getMixerNames(sourceDataLineInfo);
-        int j = mixers.length;
-        for (int i = 0; i < j; i++) {
-            Mixer.Info[] arrayOfInfo;
-            int m = (arrayOfInfo = AudioSystem.getMixerInfo()).length;
-            for (int k = 0; k < m; k++) {
-                Mixer.Info mixerInfo = arrayOfInfo[k];
+        int mixerCount = mixers.length;
+        for (int i = 0; i < mixerCount; i++) {
+            for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo()) {
                 if (mixerName.equals(mixerInfo.getName())) {
-                    this.outputMixer = AudioSystem.getMixer(mixerInfo);
+                    outputMixer = AudioSystem.getMixer(mixerInfo);
                     return;
                 }
             }
@@ -130,64 +138,67 @@ public class MicInjector extends Thread {
     }
 
     public synchronized void setupGate() {
-        if (this.targetDataLine != null) {
+        if (targetDataLine != null) {
             clearLines();
         }
+
         try {
-            this.targetDataLine = ((TargetDataLine) this.inputMixer.getLine(targetDataLineInfo));
-            this.inputLineName = this.inputMixer.getMixerInfo().getName();
-            this.targetDataLine.open(signedFormat, 8192);
-            this.targetDataLine.start();
+            targetDataLine = ((TargetDataLine) inputMixer.getLine(targetDataLineInfo));
+            inputLineName = inputMixer.getMixerInfo().getName();
+            targetDataLine.open(signedFormat, 8192);
+            targetDataLine.start();
         } catch (LineUnavailableException ex) {
             JOptionPane.showMessageDialog(null,
-                    "Selected Input Line " + this.inputLineName + " is currently unavailable.",
-                    "Line Unavailable Exception", 0);
+                    "Selected Input Line " + inputLineName + " is currently unavailable.",
+                    LINE_UNAVAILABLE_EXCEPTION_MESSAGE, 0);
         }
+
         try {
-            this.sourceDataLine = ((SourceDataLine) this.outputMixer.getLine(sourceDataLineInfo));
-            this.outputLineName = this.outputMixer.getMixerInfo().getName();
-            this.sourceDataLine.open(signedFormat, 8192);
-            this.sourceDataLine.start();
+            sourceDataLine = ((SourceDataLine) outputMixer.getLine(sourceDataLineInfo));
+            outputLineName = outputMixer.getMixerInfo().getName();
+            sourceDataLine.open(signedFormat, 8192);
+            sourceDataLine.start();
         } catch (LineUnavailableException ex) {
             JOptionPane.showMessageDialog(null,
-                    "Selected Output Line " + this.outputLineName + " is currently unavailable.",
-                    "Line Unavailable Exception", 0);
+                    "Selected Output Line " + outputLineName + " is currently unavailable.",
+                    LINE_UNAVAILABLE_EXCEPTION_MESSAGE, 0);
         }
-        this.gainControl = ((FloatControl) this.sourceDataLine.getControl(FloatControl.Type.MASTER_GAIN));
-        this.gainControl.setValue(gainLevel);
-        System.out.println(this.targetDataLine.getLineInfo().toString());
-        System.out.println("Buffer size is " + this.targetDataLine.getBufferSize());
+
+        gainControl = ((FloatControl) sourceDataLine.getControl(FloatControl.Type.MASTER_GAIN));
+        gainControl.setValue(gainLevel);
+        System.out.println(targetDataLine.getLineInfo().toString());
+        System.out.println("Buffer size is " + targetDataLine.getBufferSize());
     }
 
     private synchronized void clearLines() {
-        this.targetDataLine.close();
-        this.sourceDataLine.close();
+        targetDataLine.close();
+        sourceDataLine.close();
     }
 
     protected void read() {
-        this.bytesRead = this.targetDataLine.read(this.inputBuffer, 0, 512);
+        bytesRead = targetDataLine.read(inputBuffer, 0, 512);
     }
 
     protected void write() {
-        this.sourceDataLine.write(this.inputBuffer, 0, this.bytesRead);
+        sourceDataLine.write(inputBuffer, 0, bytesRead);
     }
 
     public void run() {
         setupGate();
-        this.run = true;
-        this.nextDrift = (System.currentTimeMillis() + 1800000L);
-        while (this.run) {
+        run = true;
+        nextDrift = (System.currentTimeMillis() + 1800000L);
+        while (run) {
             read();
             write();
 
-            if (System.currentTimeMillis() > this.nextDrift) {
+            if (System.currentTimeMillis() > nextDrift) {
                 driftReset();
             }
         }
     }
 
     public boolean isRunning() {
-        return this.run;
+        return run;
     }
 
     synchronized void setBypass(boolean bypass) {
@@ -198,53 +209,54 @@ public class MicInjector extends Thread {
     }
 
     synchronized void setMute(boolean mute) {
-        this.muted = mute;
-        if (this.muted) {
-            this.bypass = false;
+        muted = mute;
+        if (muted) {
+            bypass = false;
         }
     }
 
     boolean isMuted() {
-        return this.muted;
+        return muted;
     }
 
     public void resetGain() {
-        this.gainControl.setValue(this.userVolume);
+        gainControl.setValue(userVolume);
     }
 
     public boolean isBypassing() {
-        return this.bypass;
+        return bypass;
     }
 
     public String getSelectedInputLineName() {
-        return this.inputLineName;
+        return inputLineName;
     }
 
     public String getSelectedOutputLineName() {
-        return this.outputLineName;
+        return outputLineName;
     }
 
     public void stopRunning() {
-        this.run = false;
+        run = false;
     }
 
     private synchronized void driftReset() {
-        if (System.currentTimeMillis() > this.nextDrift) {
-            this.nextDrift = (System.currentTimeMillis() + 1800000L);
+        if (System.currentTimeMillis() > nextDrift) {
+            nextDrift = (System.currentTimeMillis() + 1800000L);
             try {
-                this.targetDataLine.open(signedFormat, 8192);
-                this.targetDataLine.start();
+                targetDataLine.open(signedFormat, 8192);
+                targetDataLine.start();
             } catch (LineUnavailableException ex) {
                 JOptionPane.showMessageDialog(null, "Selected Input Line is currently unavailable",
-                        "Line Unavailable Exception", 0);
+                        LINE_UNAVAILABLE_EXCEPTION_MESSAGE, 0);
             }
             try {
-                this.sourceDataLine.open(signedFormat, 8192);
-                this.sourceDataLine.start();
+                sourceDataLine.open(signedFormat, 8192);
+                sourceDataLine.start();
             } catch (LineUnavailableException ex) {
                 JOptionPane.showMessageDialog(null, "Selected Output Line is currently unavailable.",
-                        "Line Unavailable Exception", 0);
+                        LINE_UNAVAILABLE_EXCEPTION_MESSAGE, 0);
             }
+
             System.out.println("DriftReset");
         }
     }

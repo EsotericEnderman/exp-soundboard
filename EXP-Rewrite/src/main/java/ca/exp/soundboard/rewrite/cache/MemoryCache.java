@@ -8,57 +8,69 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryCache {
+
+    private static final long MEGABYTES_TO_BYTES = 1000000L;
+
+    private ConcurrentHashMap<String, SoftReference<BufferedFile>> map;
     private long maxCacheBytes;
-    private ConcurrentHashMap<String, SoftReference<BufferedFile>> fMap;
 
     public MemoryCache(int maxMegabytes) {
-        this.fMap = new ConcurrentHashMap<String, SoftReference<BufferedFile>>();
-        this.maxCacheBytes = (maxMegabytes * 1000000);
+        map = new ConcurrentHashMap<String, SoftReference<BufferedFile>>();
+        maxCacheBytes = (maxMegabytes * MEGABYTES_TO_BYTES);
     }
 
-    public BufferedFile getBufferedFile(File file, int aBufferSize) {
-        if (!this.fMap.containsKey(file.toString())) {
-            BufferedFile bf = new BufferedFile(file, aBufferSize);
-            SoftReference<BufferedFile> srbf = new SoftReference<BufferedFile>(bf);
-            this.fMap.put(file.toString(), srbf);
+    public BufferedFile getBufferedFile(File file, int bufferSize) {
+        if (!map.containsKey(file.toString())) {
+            BufferedFile bufferedFile = new BufferedFile(file, bufferSize);
+            SoftReference<BufferedFile> sortPreference = new SoftReference<>(bufferedFile);
+
+            map.put(file.toString(), sortPreference);
             cacheMaintainance();
         }
-        BufferedFile bf = this.fMap.get(file.toString()).get();
-        if (bf != null) {
-            return bf;
+
+        BufferedFile bufferedFile = map.get(file.toString()).get();
+
+        if (bufferedFile != null) {
+            return bufferedFile;
         }
-        this.fMap.remove(file.toString());
-        return getBufferedFile(file, aBufferSize);
+
+        map.remove(file.toString());
+        return getBufferedFile(file, bufferSize);
     }
 
     private void cacheMaintainance() {
         long currentSize = 0L;
-        HashMap<String, Long> timeMap = new HashMap<String, Long>();
-        for (SoftReference<BufferedFile> sf : this.fMap.values()) {
-            BufferedFile bf = null;
-            if ((bf = sf.get()) != null) {
-                currentSize += bf.getCurrentBufferedSizeRounded();
-                timeMap.put(bf.getFile().toString(), Long.valueOf(bf.getLastCallTime()));
+        HashMap<String, Long> timeMap = new HashMap<>();
+
+        for (SoftReference<BufferedFile> sortReference : map.values()) {
+            BufferedFile bufferedFile = sortReference.get();
+
+            if (bufferedFile != null) {
+                currentSize += bufferedFile.getCurrentBufferedSizeRounded();
+                timeMap.put(bufferedFile.getFile().toString(), bufferedFile.getLastCallTimeMS());
             }
         }
-        while (currentSize > this.maxCacheBytes) {
+
+        while (currentSize > maxCacheBytes) {
             removeOldestEntry(timeMap);
         }
     }
 
-    private synchronized void removeOldestEntry(HashMap<String, Long> aTimeMap) {
+    private synchronized void removeOldestEntry(HashMap<String, Long> timeMap) {
         int oldest = 0;
         long oldestTime = 0L;
-        ArrayList<Map.Entry<String, Long>> times = new ArrayList<Map.Entry<String, Long>>(aTimeMap.entrySet());
+
+        ArrayList<Map.Entry<String, Long>> times = new ArrayList<>(timeMap.entrySet());
+
         for (int i = 0; i < times.size(); i++) {
             if (i == 0) {
-                oldestTime = times.get(0).getValue().longValue();
-            } else if (times.get(i).getValue().longValue() < oldestTime) {
-                oldestTime = times.get(i).getValue().longValue();
+                oldestTime = times.get(0).getValue();
+            } else if (times.get(i).getValue() < oldestTime) {
+                oldestTime = times.get(i).getValue();
                 oldest = i;
             }
         }
 
-        this.fMap.remove(times.get(oldest).getKey());
+        map.remove(times.get(oldest).getKey());
     }
 }

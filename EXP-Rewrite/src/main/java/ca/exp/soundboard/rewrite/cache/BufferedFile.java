@@ -1,71 +1,87 @@
 package ca.exp.soundboard.rewrite.cache;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class BufferedFile extends TreadedByteBuffer {
-    private final long fFileSize;
-    private HashMap<String, Long> fReadingTracker;
-    private File fFile;
-    private BufferedInputStream fBufferedInput = null;
-    private byte[] fByteBuffer;
-    private long fLastCallMs;
 
-    public BufferedFile(File file, int aBufferSize) {
-        super(aBufferSize);
-        this.fFileSize = file.length();
-        this.fReadingTracker = new HashMap<String, Long>();
+    private File file;
+
+    private final long fileSize;
+
+    private long lastCallMS;
+
+    private HashMap<String, Long> readingTracker;
+    private BufferedInputStream bufferedInput = null;
+    private byte[] byteBuffer;
+
+    public File getFile() {
+        return file;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public long getLastCallTimeMS() {
+        return lastCallMS;
+    }
+
+    public BufferedFile(File file, int bufferSize) {
+        super(bufferSize);
+
+        fileSize = file.length();
+        readingTracker = new HashMap<>();
+
         try {
-            this.fBufferedInput = new BufferedInputStream(new FileInputStream(this.fFile));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            bufferedInput = new BufferedInputStream(new FileInputStream(file));
+        } catch (FileNotFoundException exception) {
+            exception.printStackTrace();
         }
-        this.fByteBuffer = new byte[aBufferSize];
-        this.fLastCallMs = System.currentTimeMillis();
+
+        byteBuffer = new byte[bufferSize];
+        lastCallMS = System.currentTimeMillis();
     }
 
     public byte[] readNextBytes(String uuid) {
-        this.fLastCallMs = System.currentTimeMillis();
-        if (!this.fReadingTracker.containsKey(uuid)) {
-            this.fReadingTracker.put(uuid, Long.valueOf(0L));
+        lastCallMS = System.currentTimeMillis();
+
+        if (!readingTracker.containsKey(uuid)) {
+            readingTracker.put(uuid, 0L);
         }
-        long totalRead = this.fReadingTracker.get(uuid).longValue();
-        if (totalRead >= this.fFileSize) {
+
+        long totalRead = readingTracker.get(uuid);
+
+        if (totalRead >= fileSize) {
             try {
-                this.fBufferedInput.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+                bufferedInput.close();
+            } catch (IOException exception) {
+                exception.printStackTrace();
             }
         }
 
-        if (getCurrentBufferedSizeRounded() < this.fFileSize) {
+        if (getCurrentBufferedSizeRounded() < fileSize) {
             int bytesRead = 0;
-            try {
-                bytesRead = this.fBufferedInput.read(this.fByteBuffer);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (bytesRead > 0) {
 
-                concat(this.fByteBuffer, bytesRead);
+            try {
+                bytesRead = bufferedInput.read(byteBuffer);
+            } catch (IOException exception) {
+                exception.printStackTrace();
             }
-            long prevRead = this.fReadingTracker.get(uuid).longValue();
-            this.fReadingTracker.put(uuid, Long.valueOf(prevRead + bytesRead));
+
+            if (bytesRead > 0) {
+                concat(byteBuffer, bytesRead);
+            }
+
+            long prevRead = readingTracker.get(uuid).longValue();
+            readingTracker.put(uuid, Long.valueOf(prevRead + bytesRead));
         }
 
         byte[] returnBytes = getNext(uuid);
         return returnBytes;
-    }
-
-    public long getFileSize() {
-        return this.fFileSize;
-    }
-
-    public long getLastCallTime() {
-        return this.fLastCallMs;
-    }
-
-    public File getFile() {
-        return this.fFile;
     }
 }

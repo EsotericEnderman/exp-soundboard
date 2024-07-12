@@ -8,27 +8,29 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class GlobalKeyMacroListener implements NativeKeyListener {
+
     SoundboardFrame soundboardFrame;
     ArrayList<Integer> pressedKeys;
 
-    public GlobalKeyMacroListener(SoundboardFrame frame) {
-        this.soundboardFrame = frame;
-        this.pressedKeys = new ArrayList<Integer>();
+    public GlobalKeyMacroListener(SoundboardFrame soundboardFrame) {
+        this.soundboardFrame = soundboardFrame;
+
+        pressedKeys = new ArrayList<Integer>();
     }
 
-    public void nativeKeyPressed(NativeKeyEvent e) {
-        int pressed = e.getKeyCode();
-        Utils.submitNativeKeyPressTime(NativeKeyEvent.getKeyText(pressed), e.getWhen());
+    public void nativeKeyPressed(NativeKeyEvent event) {
+        int pressed = event.getKeyCode();
+        Utils.submitNativeKeyPressTime(NativeKeyEvent.getKeyText(pressed), event.getWhen());
         boolean alreadyPressed = false;
-        for (Iterator<Integer> localIterator = this.pressedKeys.iterator(); localIterator.hasNext(); ) {
-            int i = ((Integer) localIterator.next()).intValue();
+        for (Iterator<Integer> localIterator = pressedKeys.iterator(); localIterator.hasNext();) {
+            int i = localIterator.next();
             if (pressed == i) {
                 alreadyPressed = true;
                 break;
             }
         }
         if (!alreadyPressed) {
-            this.pressedKeys.add(Integer.valueOf(pressed));
+            pressedKeys.add(pressed);
         }
         if (pressed == Utils.stopKey) {
             Utils.stopAllClips();
@@ -43,11 +45,11 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
         checkMacros();
     }
 
-    public void nativeKeyReleased(NativeKeyEvent e) {
-        int released = e.getKeyCode();
-        for (int i = 0; i < this.pressedKeys.size(); i++) {
-            if (released == this.pressedKeys.get(i).intValue()) {
-                this.pressedKeys.remove(i);
+    public void nativeKeyReleased(NativeKeyEvent event) {
+        int released = event.getKeyCode();
+        for (int i = 0; i < pressedKeys.size(); i++) {
+            if (released == pressedKeys.get(i)) {
+                pressedKeys.remove(i);
             }
         }
     }
@@ -56,8 +58,8 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
     }
 
     public boolean isSpeedModKeyHeld() {
-        for (Iterator<Integer> localIterator = this.pressedKeys.iterator(); localIterator.hasNext(); ) {
-            int key = ((Integer) localIterator.next()).intValue();
+        for (Iterator<Integer> localIterator = pressedKeys.iterator(); localIterator.hasNext();) {
+            int key = localIterator.next();
             if (key == Utils.slowKey) {
                 return true;
             }
@@ -65,50 +67,56 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     public ArrayList<Integer> getPressedNativeKeys() {
-        ArrayList<Integer> array = new ArrayList<>();
-        for (Integer i : this.pressedKeys) {
-            array.add(new Integer(i.intValue()));
-        }
-        return array;
+        return (ArrayList<Integer>) pressedKeys.clone();
     }
 
     private void checkMacros() {
-        boolean modspeed = false;
+        boolean modSpeed = false;
+
         if (isSpeedModKeyHeld()) {
-            modspeed = true;
+            modSpeed = true;
         }
-        ArrayList<SoundboardEntry> potential = new ArrayList<>();
+
+        ArrayList<SoundboardEntry> potentialCopies = new ArrayList<>();
+
         for (SoundboardEntry entry : SoundboardFrame.soundboard.getSoundboardEntries()) {
             int[] actKeys = entry.getActivationKeys();
-            if ((actKeys.length > 0) && (entry.matchesPressed(this.pressedKeys))) {
-                potential.add(entry);
+
+            if (actKeys.length > 0 && entry.matchesPressed(pressedKeys)) {
+                potentialCopies.add(entry);
             }
         }
 
-        if (potential.size() == 1) {
-            potential.get(0).play(this.soundboardFrame.audioManager, modspeed);
+        if (potentialCopies.size() == 1) {
+            potentialCopies.get(0).play(soundboardFrame.audioManager, modSpeed);
         } else {
             int highest = 0;
-            ArrayList<SoundboardEntry> potentialCopy = new ArrayList<SoundboardEntry>(potential);
-            for (SoundboardEntry p : potentialCopy) {
-                int matches = p.matchesHowManyPressed(this.pressedKeys);
+
+            ArrayList<SoundboardEntry> potentialCopiesList = new ArrayList<SoundboardEntry>(potentialCopies);
+
+            for (SoundboardEntry soundBoardEntry : potentialCopiesList) {
+                int matches = soundBoardEntry.matchesHowManyPressed(pressedKeys);
+
                 if (matches > highest) {
                     highest = matches;
                 } else if (matches < highest) {
-                    potential.remove(p);
+                    potentialCopies.remove(soundBoardEntry);
                 }
             }
-            potentialCopy = new ArrayList<SoundboardEntry>(potential);
-            for (SoundboardEntry p : potentialCopy) {
-                int matches = p.matchesHowManyPressed(this.pressedKeys);
+            potentialCopiesList = new ArrayList<SoundboardEntry>(potentialCopies);
+
+            for (SoundboardEntry potentialCopy : potentialCopiesList) {
+                int matches = potentialCopy.matchesHowManyPressed(pressedKeys);
+
                 if (matches < highest) {
-                    potential.remove(p);
+                    potentialCopies.remove(potentialCopy);
                 }
             }
 
-            for (SoundboardEntry p : potential) {
-                p.play(this.soundboardFrame.audioManager, modspeed);
+            for (SoundboardEntry potentialCopy : potentialCopies) {
+                potentialCopy.play(soundboardFrame.audioManager, modSpeed);
             }
         }
     }

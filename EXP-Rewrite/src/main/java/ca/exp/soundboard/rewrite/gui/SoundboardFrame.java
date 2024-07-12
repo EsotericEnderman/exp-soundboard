@@ -23,7 +23,43 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 public class SoundboardFrame extends JFrame {
+
     public static final float VERSION = 0.6F;
+
+    private static final String TITLE = "EXP SoundboardStage vers. " + VERSION + " | ";
+    private static final String LOOK_AND_FEEL = "Nimbus";
+
+    private static final int DEFAULT_CLOSE_OPERATION = 3;
+
+    private static final String STOP_ALL_BUTTON = "Stop All";
+    private static final String USE_CHECKBOX = "Use";
+    private static final String ADD_BUTTON = "Add";
+    private static final String USE_MIC_INJECTOR_CHECKBOX = "Use Mic Injector (see Option -> Settings)";
+    private static final String FIRST_OUTPUT_LABEL = "1st Output (e.g. your speakers)";
+    private static final String SECOND_OUTPUT_LABEL = "2nd Output (e.g. virtual audio cable \"input\")(optional)";
+    private static final String AUTO_HOLD_PTT_KEYS = "Auto-hold PTT key(s)";
+    private static final String REMOVE_BUTTON = "Remove";
+    private static final String EDIT_BUTTON = "Edit";
+    private static final String PLAY_BUTTON = "Play";
+
+    private static final String FILE_MENU = "File";
+    private static final String NEW_MENU_ITEM = "New";
+    private static final String OPEN_MENU_ITEM = "Open";
+    private static final String SAVE_MENU_ITEM = "Save";
+    private static final String SAVE_AS_MENU_ITEM = "Save as...";
+    private static final String SOURCEFORGE_PAGE_MENU_ITEM = "Sourceforge page";
+
+    private static final String PROJECT_LINK = "https://sourceforge.net/projects/expsoundboard/";
+
+    private static final String QUIT_MENU_ITEM = "Quit";
+    
+    private static final String OPTION_MENU = "Option";
+    private static final String SETTINGS_MENU_ITEM = "Settings";
+    private static final String AUDIO_LEVELS_MENU_ITEM = "Audio Levels";
+    private static final String AUDIO_CONVERTER_MENU_ITEM = "Audio Converter";
+
+    private static final String AUDIO_CONVERTER_NOT_SUPPORTED_MESSAGE = "Audio Converter currently not supported on Mac OS X";
+
     public static final Image icon = new ImageIcon(SoundboardFrame.class.getResource("EXP logo.png")).getImage();
     private static final long serialVersionUID = 8934802095461138592L;
     public static Soundboard soundboard;
@@ -50,309 +86,306 @@ public class SoundboardFrame extends JFrame {
 
     public SoundboardFrame() {
         addWindowListener(new WindowAdapter() {
-
-            public void windowClosing(WindowEvent e) {
-                SoundboardFrame.this.exit();
+            public void windowClosing(WindowEvent exception) {
+                exit();
             }
         });
+
         try {
-            UIManager.LookAndFeelInfo[] arrayOfLookAndFeelInfo;
-            int j = (arrayOfLookAndFeelInfo = UIManager.getInstalledLookAndFeels()).length;
-            for (int i = 0; i < j; i++) {
-                UIManager.LookAndFeelInfo info = arrayOfLookAndFeelInfo[i];
-                if ("Nimbus".equals(info.getName())) {
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if (LOOK_AND_FEEL.equals(info.getName())) {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(SoundboardFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(SoundboardFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(SoundboardFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(SoundboardFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException exception) {
+            Logger.getLogger(SoundboardFrame.class.getName()).log(Level.SEVERE, null, exception);
         }
+
         filechooser = new JFileChooser();
-        this.audioManager = new AudioManager();
+        audioManager = new AudioManager();
         soundboard = new Soundboard();
-        setDefaultCloseOperation(3);
-        setTitle("EXP SoundboardStage vers. 0.6 | ");
+
+        setDefaultCloseOperation(DEFAULT_CLOSE_OPERATION);
+        setTitle(TITLE);
         setIconImage(icon);
 
         macInit();
 
-        this.secondarySpeakerComboBox = new JComboBox<>();
-        this.secondarySpeakerComboBox.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == 1) {
-                    String name = (String) SoundboardFrame.this.secondarySpeakerComboBox.getSelectedItem();
-                    SoundboardFrame.this.audioManager.setSecondaryOutputMixer(name);
+        secondarySpeakerComboBox = new JComboBox<>();
+        secondarySpeakerComboBox.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent itemEvent) {
+                if (itemEvent.getStateChange() == 1) {
+                    String name = (String) secondarySpeakerComboBox.getSelectedItem();
+                    audioManager.setSecondaryOutputMixer(name);
                 }
-
             }
         });
-        this.primarySpeakerComboBox = new JComboBox<>();
-        this.primarySpeakerComboBox.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == 1) {
-                    String name = (String) SoundboardFrame.this.primarySpeakerComboBox.getSelectedItem();
-                    SoundboardFrame.this.audioManager.setPrimaryOutputMixer(name);
-                }
 
+        primarySpeakerComboBox = new JComboBox<>();
+        primarySpeakerComboBox.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent itemEvent) {
+                if (itemEvent.getStateChange() == 1) {
+                    String name = (String) primarySpeakerComboBox.getSelectedItem();
+                    audioManager.setPrimaryOutputMixer(name);
+                }
             }
         });
-        JButton btnStop = new JButton("Stop All");
-        btnStop.addActionListener(new ActionListener() {
 
-            public void actionPerformed(ActionEvent e) {
+        JButton stopButton = new JButton(STOP_ALL_BUTTON);
+        stopButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
                 Utils.stopAllClips();
             }
-
         });
-        this.useSecondaryCheckBox = new JCheckBox("Use");
-        this.useSecondaryCheckBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SoundboardFrame.this.audioManager
-                        .setUseSecondary(SoundboardFrame.this.useSecondaryCheckBox.isSelected());
+
+        useSecondaryCheckBox = new JCheckBox(USE_CHECKBOX);
+        useSecondaryCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                audioManager.setUseSecondary(useSecondaryCheckBox.isSelected());
             }
-
         });
+
         JScrollPane scrollPane = new JScrollPane();
 
-        JButton btnAdd = new JButton("Add");
-        btnAdd.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new SoundboardEntryEditor(SoundboardFrame.this.thisFrameInstance);
+        JButton addButton = new JButton(ADD_BUTTON);
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                new SoundboardEntryEditor(thisFrameInstance);
             }
 
         });
-        this.useMicInjectorCheckBox = new JCheckBox("Use Mic Injector (see Option -> Settings)");
-        this.useMicInjectorCheckBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SoundboardFrame.useMicInjector = SoundboardFrame.this.useMicInjectorCheckBox.isSelected();
-                SoundboardFrame.this.updateMicInjector();
+
+        useMicInjectorCheckBox = new JCheckBox(USE_MIC_INJECTOR_CHECKBOX);
+        useMicInjectorCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                SoundboardFrame.useMicInjector = useMicInjectorCheckBox.isSelected();
+                updateMicInjector();
             }
-
         });
-        JLabel lblstOutputeg = new JLabel("1st Output (e.g. your speakers)");
-        lblstOutputeg.setForeground(Color.DARK_GRAY);
 
-        JLabel lblndOutputeg = new JLabel("2nd Output (e.g. virtual audio cable \"input\")(optional)");
-        lblndOutputeg.setForeground(Color.DARK_GRAY);
+        JLabel firstoutputLabel = new JLabel(FIRST_OUTPUT_LABEL);
+        firstoutputLabel.setForeground(Color.DARK_GRAY);
 
-        JSeparator separator_4 = new JSeparator();
+        JLabel secondOutputLabel = new JLabel(SECOND_OUTPUT_LABEL);
+        secondOutputLabel.setForeground(Color.DARK_GRAY);
 
-        this.autoPptCheckBox = new JCheckBox("Auto-hold PTT key(s)");
-        this.autoPptCheckBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                boolean selected = SoundboardFrame.this.autoPptCheckBox.isSelected();
+        JSeparator separatorD = new JSeparator();
+
+        autoPptCheckBox = new JCheckBox(AUTO_HOLD_PTT_KEYS);
+        autoPptCheckBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                boolean selected = autoPptCheckBox.isSelected();
                 Utils.setAutoPTThold(selected);
             }
-
         });
-        this.table = new JTable();
-        this.table.setSelectionMode(0);
-        this.table.setAutoCreateRowSorter(true);
-        this.table.setModel(new DefaultTableModel(new Object[][]{new Object[2]},
 
-                new String[]{"Sound Clip", "HotKeys"}) {
+        table = new JTable();
+        table.setSelectionMode(0);
+        table.setAutoCreateRowSorter(true);
+        table.setModel(new DefaultTableModel(new Object[][] { new Object[2] }, new String[] { "Sound Clip", "HotKeys" }) {
             private static final long serialVersionUID = 1L;
 
-            Class<?>[] columnTypes = {String.class, String.class};
+            Class<?>[] columnTypes = { String.class, String.class };
             boolean[] columnEditables = new boolean[2];
 
             public Class<?> getColumnClass(int columnIndex) {
-                return this.columnTypes[columnIndex];
+                return columnTypes[columnIndex];
             }
 
             public boolean isCellEditable(int row, int column) {
-                return this.columnEditables[column];
+                return columnEditables[column];
             }
         });
-        scrollPane.setViewportView(this.table);
+
+        scrollPane.setViewportView(table);
         getContentPane().setLayout(new MigLayout("gapx  2:4:5, gapy 2:4:5, fillx",
                 "[][][][6px][20px][6px][2px][10px][53px][6px][][24px][2px][43px]",
                 "[grow,fill][23px][14px][20px][14px][23px][2px][23px]"));
 
-        JButton btnRemove = new JButton("Remove");
-        btnRemove.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                int selected = SoundboardFrame.this.table.getSelectedRow();
+        JButton removeButton = new JButton(REMOVE_BUTTON);
+
+        removeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                int selected = table.getSelectedRow();
+
                 if (selected > -1) {
-                    int index = SoundboardFrame.this.getSelectedEntryIndex();
+                    int index = getSelectedEntryIndex();
                     SoundboardFrame.soundboard.removeEntry(index);
-                    SoundboardFrame.this.updateSoundboardTable();
-                    if (index >= SoundboardFrame.this.table.getRowCount()) {
+                    updateSoundboardTable();
+
+                    if (index >= table.getRowCount()) {
                         index--;
                     }
+
                     if (index >= 0) {
-                        SoundboardFrame.this.table.setRowSelectionInterval(index, index);
+                        table.setRowSelectionInterval(index, index);
                     }
                 }
             }
         });
-        getContentPane().add(btnRemove, "cell 1 1,alignx left,aligny top");
+        getContentPane().add(removeButton, "cell 1 1,alignx left,aligny top");
 
-        JButton btnEdit = new JButton("Edit");
-        btnEdit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                int selected = SoundboardFrame.this.table.getSelectedRow();
+        JButton editButton = new JButton(EDIT_BUTTON);
+        editButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                int selected = table.getSelectedRow();
+
                 if (selected > -1) {
-                    int index = SoundboardFrame.this.getSelectedEntryIndex();
+                    int index = getSelectedEntryIndex();
                     System.out.println("index " + index);
                     SoundboardEntry entry = SoundboardFrame.soundboard.getEntry(index);
-                    new SoundboardEntryEditor(SoundboardFrame.this.thisFrameInstance, entry);
+
+                    new SoundboardEntryEditor(thisFrameInstance, entry);
                 }
             }
         });
-        getContentPane().add(btnEdit, "cell 2 1,alignx left,aligny top");
+        getContentPane().add(editButton, "cell 2 1,alignx left,aligny top");
 
-        JButton btnPlay = new JButton("Play");
+        JButton btnPlay = new JButton(PLAY_BUTTON);
         btnPlay.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int selected = SoundboardFrame.this.table.getSelectedRow();
+            public void actionPerformed(ActionEvent event) {
+                int selected = table.getSelectedRow();
                 if (selected > -1) {
-                    int index = SoundboardFrame.this.getSelectedEntryIndex();
+                    int index = getSelectedEntryIndex();
                     SoundboardEntry entry = SoundboardFrame.soundboard.getEntry(index);
                     if (SoundboardFrame.macroListener.isSpeedModKeyHeld()) {
-                        entry.play(SoundboardFrame.this.audioManager, true);
+                        entry.play(audioManager, true);
                     } else {
-                        entry.play(SoundboardFrame.this.audioManager, false);
+                        entry.play(audioManager, false);
                     }
                 }
             }
         });
+
         getContentPane().add(btnPlay, "cell 10 1,alignx right,aligny top");
-        getContentPane().add(this.useMicInjectorCheckBox, "cell 0 7 7 1,alignx left,aligny top");
-        getContentPane().add(this.autoPptCheckBox, "cell 8 7 6 1,alignx right,aligny top");
-        getContentPane().add(separator_4, "cell 0 6 14 1,growx,aligny top");
+        getContentPane().add(useMicInjectorCheckBox, "cell 0 7 7 1,alignx left,aligny top");
+        getContentPane().add(autoPptCheckBox, "cell 8 7 6 1,alignx right,aligny top");
+        getContentPane().add(separatorD, "cell 0 6 14 1,growx,aligny top");
         getContentPane().add(scrollPane, "cell 0 0 14 1,grow");
-        getContentPane().add(this.primarySpeakerComboBox, "cell 0 3 14 1,growx,aligny top");
-        getContentPane().add(this.secondarySpeakerComboBox, "cell 0 5 12 1,growx,aligny center");
-        getContentPane().add(this.useSecondaryCheckBox, "cell 13 5,alignx left,aligny top");
-        getContentPane().add(btnAdd, "cell 0 1,alignx left,aligny top");
-        getContentPane().add(btnStop, "cell 11 1 3 1,alignx right,aligny top");
-        getContentPane().add(lblndOutputeg, "cell 0 4 7 1,alignx left,aligny top");
-        getContentPane().add(lblstOutputeg, "cell 0 2 7 1,alignx left,aligny top");
+        getContentPane().add(primarySpeakerComboBox, "cell 0 3 14 1,growx,aligny top");
+        getContentPane().add(secondarySpeakerComboBox, "cell 0 5 12 1,growx,aligny center");
+        getContentPane().add(useSecondaryCheckBox, "cell 13 5,alignx left,aligny top");
+        getContentPane().add(addButton, "cell 0 1,alignx left,aligny top");
+        getContentPane().add(stopButton, "cell 11 1 3 1,alignx right,aligny top");
+        getContentPane().add(secondOutputLabel, "cell 0 4 7 1,alignx left,aligny top");
+        getContentPane().add(firstoutputLabel, "cell 0 2 7 1,alignx left,aligny top");
 
-        this.menuBar = new JMenuBar();
-        setJMenuBar(this.menuBar);
+        menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
 
-        JMenu mnFile = new JMenu("File");
-        this.menuBar.add(mnFile);
+        JMenu fileMenu = new JMenu(FILE_MENU);
+        menuBar.add(fileMenu);
 
-        JMenuItem mntmNew = new JMenuItem("New");
-        mntmNew.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SoundboardFrame.this.fileNew();
+        JMenuItem newMenuItem = new JMenuItem(NEW_MENU_ITEM);
+        newMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                fileNew();
             }
         });
-        mnFile.add(mntmNew);
+        fileMenu.add(newMenuItem);
 
-        JMenuItem mntmOpen = new JMenuItem("Open");
-        mntmOpen.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SoundboardFrame.this.fileOpen();
+        JMenuItem openMenuItem = new JMenuItem(OPEN_MENU_ITEM);
+        openMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                fileOpen();
             }
         });
-        mnFile.add(mntmOpen);
+        fileMenu.add(openMenuItem);
 
         JSeparator separator = new JSeparator();
-        mnFile.add(separator);
+        fileMenu.add(separator);
 
-        JMenuItem mntmSave = new JMenuItem("Save");
-        mntmSave.setAccelerator(KeyStroke.getKeyStroke(83, 2));
-        mntmSave.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SoundboardFrame.this.fileSave();
+        JMenuItem saveMenuItem = new JMenuItem(SAVE_MENU_ITEM);
+        saveMenuItem.setAccelerator(KeyStroke.getKeyStroke(83, 2));
+        saveMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                fileSave();
             }
         });
-        mnFile.add(mntmSave);
+        fileMenu.add(saveMenuItem);
 
-        JMenuItem mntmSaveAs = new JMenuItem("Save As...");
-        mntmSaveAs.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                SoundboardFrame.this.fileSaveAs();
+        JMenuItem saveAsMenuItem = new JMenuItem(SAVE_AS_MENU_ITEM);
+        saveAsMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                fileSaveAs();
             }
         });
-        mnFile.add(mntmSaveAs);
+        fileMenu.add(saveAsMenuItem);
 
-        JSeparator separator_3 = new JSeparator();
-        mnFile.add(separator_3);
+        JSeparator jSeparatorB = new JSeparator();
+        fileMenu.add(jSeparatorB);
 
-        JMenuItem mntmProjectPage = new JMenuItem("Sourceforge Page");
-        mntmProjectPage.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
+        JMenuItem projectPageMenuItem = new JMenuItem(SOURCEFORGE_PAGE_MENU_ITEM);
+        projectPageMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
                 try {
-                    Desktop.getDesktop().browse(new URI("https://sourceforge.net/projects/expsoundboard/"));
-                } catch (IOException | URISyntaxException e) {
-                    e.printStackTrace();
+                    Desktop.getDesktop().browse(new URI(PROJECT_LINK));
+                } catch (IOException | URISyntaxException exception) {
+                    exception.printStackTrace();
                 }
             }
         });
-        mnFile.add(mntmProjectPage);
+        fileMenu.add(projectPageMenuItem);
 
-        JSeparator separator_1 = new JSeparator();
-        mnFile.add(separator_1);
+        JSeparator separatorA = new JSeparator();
+        fileMenu.add(separatorA);
 
-        JMenuItem mntmQuit = new JMenuItem("Quit");
-        mntmQuit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                SoundboardFrame.this.exit();
+        JMenuItem quitMenuItem = new JMenuItem(QUIT_MENU_ITEM);
+        quitMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                exit();
             }
         });
-        mnFile.add(mntmQuit);
+        fileMenu.add(quitMenuItem);
 
-        JMenu mnEdit = new JMenu("Option");
-        this.menuBar.add(mnEdit);
+        JMenu editMenu = new JMenu(OPTION_MENU);
+        menuBar.add(editMenu);
 
-        JMenuItem mntmSettings = new JMenuItem("Settings");
-        mntmSettings.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                SoundboardFrame.this.getSettingsMenu();
+        JMenuItem settingsMenuItem = new JMenuItem(SETTINGS_MENU_ITEM);
+        settingsMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                getSettingsMenu();
             }
         });
-        mnEdit.add(mntmSettings);
+        editMenu.add(settingsMenuItem);
 
-        JMenuItem mntmAudioLevels = new JMenuItem("Audio Levels");
-        mntmAudioLevels.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                AudioLevelsFrame.getInstance().setLocationRelativeTo(SoundboardFrame.this.thisFrameInstance);
+        JMenuItem audioLevelsMenuItem = new JMenuItem(AUDIO_LEVELS_MENU_ITEM);
+        audioLevelsMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                AudioLevelsFrame.getInstance().setLocationRelativeTo(thisFrameInstance);
             }
         });
-        mnEdit.add(mntmAudioLevels);
+        editMenu.add(audioLevelsMenuItem);
 
-        JSeparator separator_2 = new JSeparator();
-        mnEdit.add(separator_2);
+        JSeparator separatorC = new JSeparator();
+        editMenu.add(separatorC);
 
-        JMenuItem mntmAudioConverter = new JMenuItem("Audio Converter");
-        mntmAudioConverter.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        JMenuItem audioConverterMenuItem = new JMenuItem(AUDIO_CONVERTER_MENU_ITEM);
+        audioConverterMenuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
                 if (!System.getProperty("os.name").toLowerCase().contains("mac")) {
                     new ConverterFrame();
                 } else {
-                    JOptionPane.showMessageDialog(null, "Audio Converter currently not supported on Mac OS X",
-                            "Feature not supported", 1);
+                    JOptionPane.showMessageDialog(null, AUDIO_CONVERTER_NOT_SUPPORTED_MESSAGE, "Feature not supported", 1);
                 }
             }
         });
-        mnEdit.add(mntmAudioConverter);
+
+        editMenu.add(audioConverterMenuItem);
 
         setMinimumSize(new Dimension(400, 500));
 
         updateSpeakerComboBoxes();
         pack();
-        this.thisFrameInstance = this;
+        thisFrameInstance = this;
         macroListener = new GlobalKeyMacroListener(this);
-        // GlobalScreen.getInstance().addNativeKeyListener(macroListener);
         GlobalScreen.addNativeKeyListener(macroListener);
         setLocationRelativeTo(null);
         loadPrefs();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] arguments) {
         Utils.initGlobalKeyLibrary();
         Utils.startMp3Decoder();
         new SoundboardFrame().setVisible(true);
@@ -361,69 +394,79 @@ public class SoundboardFrame extends JFrame {
     public void updateSoundboardTable() {
         Object[][] entryArray = soundboard.getEntriesAsObjectArrayForTable();
 
-        this.table.setModel(
-                new DefaultTableModel(entryArray, new String[]{"Sound Clip", "HotKeys", "File Locations", "Index"}) {
+        table.setModel(
+                new DefaultTableModel(entryArray, new String[] { "Sound Clip", "HotKeys", "File Locations", "Index" }) {
                     private static final long serialVersionUID = 1L;
 
-                    Class<?>[] columnTypes = {String.class, String.class, String.class, Integer.TYPE};
+                    Class<?>[] columnTypes = { String.class, String.class, String.class, Integer.TYPE };
                     boolean[] columnEditables = new boolean[4];
 
                     public Class<?> getColumnClass(int columnIndex) {
-                        return this.columnTypes[columnIndex];
+                        return columnTypes[columnIndex];
                     }
 
                     public boolean isCellEditable(int row, int column) {
-                        return this.columnEditables[column];
+                        return columnEditables[column];
                     }
                 });
-        TableColumnModel columnmod = this.table.getColumnModel();
-        columnmod.getColumn(3).setMinWidth(0);
-        columnmod.getColumn(3).setMaxWidth(0);
-        columnmod.getColumn(3).setWidth(0);
-        this.table.removeColumn(columnmod.getColumn(2));
+
+        TableColumnModel columnModel = table.getColumnModel();
+
+        columnModel.getColumn(3).setMinWidth(0);
+        columnModel.getColumn(3).setMaxWidth(0);
+        columnModel.getColumn(3).setWidth(0);
+
+        table.removeColumn(columnModel.getColumn(2));
     }
 
     private void fileNew() {
         Utils.stopAllClips();
         saveReminder();
-        this.currentSoundboardFile = null;
+
+        currentSoundboardFile = null;
         soundboard = new Soundboard();
+
         updateSoundboardTable();
-        setTitle("EXP SoundboardStage vers. 0.6 | ");
+        setTitle(TITLE);
     }
 
     private void fileOpen() {
         Utils.stopAllClips();
         saveReminder();
-        // filechooser.setFileFilter(new JsonFileFilter(null));
+
         filechooser.setFileFilter(new JsonFileFilter());
+
         int session = filechooser.showOpenDialog(null);
+
         if (session == 0) {
-            File jsonfile = filechooser.getSelectedFile();
-            open(jsonfile);
+            File jsonFile = filechooser.getSelectedFile();
+            open(jsonFile);
         }
     }
 
     private void fileSave() {
-        if (this.currentSoundboardFile != null) {
-            soundboard.saveAsJsonFile(this.currentSoundboardFile);
+        if (currentSoundboardFile != null) {
+            soundboard.saveAsJsonFile(currentSoundboardFile);
         } else {
             fileSaveAs();
         }
     }
 
     private void fileSaveAs() {
-        JFileChooser fc = new JFileChooser();
-        // fc.setFileFilter(new JsonFileFilter(null));
-        fc.setFileFilter(new JsonFileFilter());
-        if (this.currentSoundboardFile != null) {
-            fc.setSelectedFile(this.currentSoundboardFile);
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new JsonFileFilter());
+
+        if (currentSoundboardFile != null) {
+            fileChooser.setSelectedFile(currentSoundboardFile);
         }
-        int session = fc.showSaveDialog(null);
+
+        int session = fileChooser.showSaveDialog(null);
+
         if (session == 0) {
-            File file = fc.getSelectedFile();
-            this.currentSoundboardFile = soundboard.saveAsJsonFile(file);
-            setTitle("EXP SoundboardStage vers. 0.6 | " + this.currentSoundboardFile.getName());
+            File file = fileChooser.getSelectedFile();
+            currentSoundboardFile = soundboard.saveAsJsonFile(file);
+
+            setTitle(TITLE + currentSoundboardFile.getName());
         }
     }
 
@@ -433,34 +476,35 @@ public class SoundboardFrame extends JFrame {
 
     private void open(File jsonfile) {
         if (jsonfile.exists()) {
-            Soundboard sb = Soundboard.loadFromJsonFile(jsonfile);
-            if (sb != null) {
-                soundboard = sb;
+            Soundboard loadedSoundboard = Soundboard.loadFromJsonFile(jsonfile);
+
+            if (loadedSoundboard != null) {
+                soundboard = loadedSoundboard;
                 updateSoundboardTable();
-                this.currentSoundboardFile = jsonfile;
-                setTitle("EXP SoundboardStage vers. 0.6 | " + this.currentSoundboardFile.getName());
+
+                currentSoundboardFile = jsonfile;
+                setTitle(TITLE + currentSoundboardFile.getName());
             }
         }
     }
 
     public void updateSpeakerComboBoxes() {
-        String[] outputmixerStringArray = Utils.getMixerNames(this.audioManager.standardDataLineInfo);
-        String[] arrayOfString1;
-        int j = (arrayOfString1 = outputmixerStringArray).length;
-        for (int i = 0; i < j; i++) {
-            String speaker = arrayOfString1[i];
-            this.primarySpeakerComboBox.addItem(speaker);
-            this.secondarySpeakerComboBox.addItem(speaker);
+        String[] outputMixerStringArray = Utils.getMixerNames(audioManager.standardDataLineInfo);
+
+        for (String speaker : outputMixerStringArray) {
+            primarySpeakerComboBox.addItem(speaker);
+            secondarySpeakerComboBox.addItem(speaker);
         }
     }
 
     private int getSelectedEntryIndex() {
-        int selected = this.table.getSelectedRow();
-        return ((Integer) this.table.getValueAt(selected, 2)).intValue();
+        int selected = table.getSelectedRow();
+        return ((Integer) table.getValueAt(selected, 2));
     }
 
     public void updateMicInjector() {
-        this.useMicInjectorCheckBox.setSelected(useMicInjector);
+        useMicInjectorCheckBox.setSelected(useMicInjector);
+
         if (useMicInjector) {
             Utils.startMicInjector(micInjectorInputMixerName, micInjectorOutputMixerName);
         } else {
@@ -469,13 +513,15 @@ public class SoundboardFrame extends JFrame {
     }
 
     private void savePrefs() {
-        Preferences prefs = Utils.prefs;
-        prefs.putBoolean("useSecondSpeaker", this.useSecondaryCheckBox.isSelected());
-        prefs.put("firstSpeaker", (String) this.primarySpeakerComboBox.getSelectedItem());
-        prefs.put("secondSpeaker", (String) this.secondarySpeakerComboBox.getSelectedItem());
-        if (this.currentSoundboardFile != null) {
-            prefs.put("lastSoundboardUsed", this.currentSoundboardFile.getAbsolutePath());
+        Preferences prefs = Utils.PREFERENCES;
+        prefs.putBoolean("useSecondSpeaker", useSecondaryCheckBox.isSelected());
+        prefs.put("firstSpeaker", (String) primarySpeakerComboBox.getSelectedItem());
+        prefs.put("secondSpeaker", (String) secondarySpeakerComboBox.getSelectedItem());
+
+        if (currentSoundboardFile != null) {
+            prefs.put("lastSoundboardUsed", currentSoundboardFile.getAbsolutePath());
         }
+
         prefs.putBoolean("OverlapClipsWhilePlaying", Utils.isOverlapSameClipWhilePlaying());
         prefs.putInt("OverlapClipsKey", Utils.getOverlapSwitchKey());
         prefs.putInt("stopAllKey", Utils.getStopKey());
@@ -489,74 +535,88 @@ public class SoundboardFrame extends JFrame {
         prefs.putBoolean("micInjectorEnabled", useMicInjector);
         prefs.putBoolean("autoPPTenabled", Utils.autoPTThold);
         prefs.put("autoPTTkeys", Utils.getPTTkeys().toString());
-
         prefs.putFloat("primaryOutputGain", AudioManager.getFirstOutputGain());
         prefs.putFloat("secondaryOutputGain", AudioManager.getSecondOutputGain());
         prefs.putFloat("micInjectorOutputGain", Utils.getMicInjectorGain());
     }
 
     private void loadPrefs() {
-        Preferences prefs = Utils.prefs;
-        boolean useSecond = prefs.getBoolean("useSecondSpeaker", false);
-        this.useSecondaryCheckBox.setSelected(useSecond);
-        this.audioManager.setUseSecondary(useSecond);
+        Preferences preferences = Utils.PREFERENCES;
 
-        String firstspeaker = prefs.get("firstSpeaker", null);
-        String secondspeaker = prefs.get("secondSpeaker", null);
+        boolean useSecond = preferences.getBoolean("useSecondSpeaker", false);
+
+        useSecondaryCheckBox.setSelected(useSecond);
+        audioManager.setUseSecondary(useSecond);
+
+        String firstspeaker = preferences.get("firstSpeaker", null);
+        String secondspeaker = preferences.get("secondSpeaker", null);
+
         if (firstspeaker != null) {
-            this.primarySpeakerComboBox.setSelectedItem(firstspeaker);
-            this.audioManager.setPrimaryOutputMixer(firstspeaker);
-        }
-        if (secondspeaker != null) {
-            this.secondarySpeakerComboBox.setSelectedItem(secondspeaker);
-            this.audioManager.setSecondaryOutputMixer(secondspeaker);
+            primarySpeakerComboBox.setSelectedItem(firstspeaker);
+            audioManager.setPrimaryOutputMixer(firstspeaker);
         }
 
-        String lastfile = prefs.get("lastSoundboardUsed", null);
+        if (secondspeaker != null) {
+            secondarySpeakerComboBox.setSelectedItem(secondspeaker);
+            audioManager.setSecondaryOutputMixer(secondspeaker);
+        }
+
+        String lastfile = preferences.get("lastSoundboardUsed", null);
+
         if (lastfile != null) {
             open(new File(lastfile));
         }
 
-        float modSpeed = prefs.getFloat("modplaybackspeed", 0.5F);
+        float modSpeed = preferences.getFloat("modplaybackspeed", 0.5F);
         Utils.setModifiedPlaybackSpeed(modSpeed);
 
-        int slowkey = prefs.getInt("slowSoundKey", 35);
+        int slowkey = preferences.getInt("slowSoundKey", 35);
         Utils.setModifiedSpeedKey(slowkey);
-        int stopkey = prefs.getInt("stopAllKey", 19);
+
+        int stopkey = preferences.getInt("stopAllKey", 19);
         Utils.setStopKey(stopkey);
-        int incKey = prefs.getInt("modSpeedIncKey", 39);
+
+        int incKey = preferences.getInt("modSpeedIncKey", 39);
         Utils.setModspeedupKey(incKey);
-        int decKey = prefs.getInt("modSpeedDecKey", 37);
+
+        int decKey = preferences.getInt("modSpeedDecKey", 37);
         Utils.setModspeeddownKey(decKey);
 
-        updateCheck = prefs.getBoolean("updateCheckOnLaunch", true);
+        updateCheck = preferences.getBoolean("updateCheckOnLaunch", true);
+
         if (updateCheck) {
             new Thread(new UpdateChecker()).start();
         }
 
-        float firstOutputGain = prefs.getFloat("primaryOutputGain", 0.0F);
-        float secondOutputGain = prefs.getFloat("secondaryOutputGain", 0.0F);
-        float micinjectorOutputGain = prefs.getFloat("micInjectorOutputGain", 0.0F);
+        float firstOutputGain = preferences.getFloat("primaryOutputGain", 0.0F);
+        float secondOutputGain = preferences.getFloat("secondaryOutputGain", 0.0F);
+        float micinjectorOutputGain = preferences.getFloat("micInjectorOutputGain", 0.0F);
+
         AudioManager.setFirstOutputGain(firstOutputGain);
         AudioManager.setSecondOutputGain(secondOutputGain);
         Utils.setMicInjectorGain(micinjectorOutputGain);
 
-        micInjectorInputMixerName = prefs.get("micInjectorInput", "");
-        micInjectorOutputMixerName = prefs.get("micInjectorOutput", "");
-        useMicInjector = prefs.getBoolean("micInjectorEnabled", false);
+        micInjectorInputMixerName = preferences.get("micInjectorInput", "");
+        micInjectorOutputMixerName = preferences.get("micInjectorOutput", "");
+        useMicInjector = preferences.getBoolean("micInjectorEnabled", false);
+
         updateMicInjector();
 
-        boolean useautoptt = prefs.getBoolean("autoPPTenabled", false);
-        this.autoPptCheckBox.setSelected(useautoptt);
+        boolean useautoptt = preferences.getBoolean("autoPPTenabled", false);
+        autoPptCheckBox.setSelected(useautoptt);
+
         Utils.setAutoPTThold(useautoptt);
-        String autopttkeys = prefs.get("autoPTTkeys", null);
-        if (autopttkeys != null) {
-            ArrayList<Integer> keys = Utils.stringToIntArrayList(autopttkeys);
+        String autoPTTKeys = preferences.get("autoPTTkeys", null);
+
+        if (autoPTTKeys != null) {
+            ArrayList<Integer> keys = Utils.stringToIntArrayList(autoPTTKeys);
             Utils.setPTTkeys(keys);
         }
 
-        Utils.setOverlapSameClipWhilePlaying(prefs.getBoolean("OverlapClipsWhilePlaying", true));
-        int overlapKey = prefs.getInt("OverlapClipsKey", 36);
+        Utils.setOverlapSameClipWhilePlaying(preferences.getBoolean("OverlapClipsWhilePlaying", true));
+
+        int overlapKey = preferences.getInt("OverlapClipsKey", 36);
+
         Utils.setOverlapSwitchKey(overlapKey);
     }
 
@@ -570,23 +630,28 @@ public class SoundboardFrame extends JFrame {
     }
 
     private void saveReminder() {
-        if (this.currentSoundboardFile != null) {
-            if (this.currentSoundboardFile.exists()) {
+        if (currentSoundboardFile != null) {
+            if (currentSoundboardFile.exists()) {
                 Gson gson = new Gson();
-                Soundboard savedFile = Soundboard.loadFromJsonFile(this.currentSoundboardFile);
-                String savedjson = gson.toJson(savedFile);
-                String currentjson = gson.toJson(soundboard);
-                if (!savedjson.equals(currentjson)) {
-                    int option = JOptionPane.showConfirmDialog(null, "SoundboardStage has changed. Do you want to save?",
-                            "Save Reminder", 0);
+                Soundboard savedFile = Soundboard.loadFromJsonFile(currentSoundboardFile);
+                String savedJSON = gson.toJson(savedFile);
+                String currentJSON = gson.toJson(soundboard);
+
+                if (!savedJSON.equals(currentJSON)) {
+                    int option = JOptionPane.showConfirmDialog(
+                            null,
+                            "SoundboardStage has changed. Do you want to save?",
+                            "Save Reminder",
+                            0);
+
                     if (option == 0) {
-                        soundboard.saveAsJsonFile(this.currentSoundboardFile);
+                        soundboard.saveAsJsonFile(currentSoundboardFile);
                     }
                 }
             }
         } else if (soundboard.getSoundboardEntries().size() > 0) {
-            int option = JOptionPane.showConfirmDialog(null, "SoundboardStage has not been saved. Do you want to save?",
-                    "Save Reminder", 0);
+            int option = JOptionPane.showConfirmDialog(null, "SoundboardStage has not been saved. Do you want to save?", "Save Reminder", 0);
+
             if (option == 0) {
                 fileSave();
             }
@@ -596,25 +661,30 @@ public class SoundboardFrame extends JFrame {
     private void macInit() {
         if (System.getProperty("os.name").toLowerCase().contains("mac")) {
             Application application = Application.getApplication();
+
             application.setDockIconImage(icon);
+
             System.setProperty("apple.laf.useScreenMenuBar", "true");
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", "EXP SoundboardStage");
         }
     }
 
     private class JsonFileFilter extends FileFilter {
+        private static final String DESCRIPTION = ".json SoundboardStage save file";
+
         private JsonFileFilter() {
         }
 
-        public boolean accept(File f) {
-            if (f.isDirectory()) {
+        public boolean accept(File file) {
+            if (file.isDirectory()) {
                 return true;
             }
-            return f.getName().toLowerCase().endsWith(".json");
+
+            return file.getName().toLowerCase().endsWith(".json");
         }
 
         public String getDescription() {
-            return ".json SoundboardStage save file";
+            return DESCRIPTION;
         }
     }
 }
