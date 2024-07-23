@@ -263,7 +263,7 @@ public class SoundboardEntryEditor extends JFrame {
             }
 
             int key = event.getKeyCode();
-            pressedKeyNums.remove(key);
+            pressedKeyNums.remove((Integer) key);
             pressedKeyNames.remove(NativeKeyEvent.getKeyText(key));
         }
 

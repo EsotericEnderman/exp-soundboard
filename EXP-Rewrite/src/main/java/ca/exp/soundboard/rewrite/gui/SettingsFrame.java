@@ -491,7 +491,7 @@ public class SettingsFrame extends JFrame {
 
         public void keyReleased(KeyEvent event) {
             int key = event.getKeyCode();
-            pressedKeys.remove(key);
+            pressedKeys.remove((Integer) key);
             System.out.println("PPT listener key released: " + KeyEvent.getKeyText(key));
         }
 
