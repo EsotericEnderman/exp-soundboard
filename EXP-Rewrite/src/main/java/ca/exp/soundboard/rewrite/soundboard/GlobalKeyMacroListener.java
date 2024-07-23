@@ -29,9 +29,11 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
                 break;
             }
         }
+
         if (!alreadyPressed) {
             pressedKeys.add(pressed);
         }
+
         if (pressed == Utils.stopKey) {
             Utils.stopAllClips();
         } else if (pressed == Utils.modspeedupKey) {
@@ -42,6 +44,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
             boolean overlap = Utils.isOverlapSameClipWhilePlaying();
             Utils.setOverlapSameClipWhilePlaying(!overlap);
         }
+
         checkMacros();
     }
 
@@ -54,7 +57,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
         }
     }
 
-    public void nativeKeyTyped(NativeKeyEvent arg0) {
+    public void nativeKeyTyped(NativeKeyEvent event) {
     }
 
     public boolean isSpeedModKeyHeld() {
@@ -64,6 +67,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
                 return true;
             }
         }
+
         return false;
     }
 
