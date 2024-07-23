@@ -1,6 +1,6 @@
 package ca.exp.soundboard.rewrite.soundboard;
 
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
 public class KeyEventIntConverter {
