@@ -73,11 +73,7 @@ public class GlobalKeyMacroListener implements NativeKeyListener {
     }
 
     private void checkMacros() {
-        boolean modSpeed = false;
-
-        if (isSpeedModKeyHeld()) {
-            modSpeed = true;
-        }
+        boolean modSpeed = isSpeedModKeyHeld();
 
         ArrayList<SoundboardEntry> potentialCopies = new ArrayList<>();
 
